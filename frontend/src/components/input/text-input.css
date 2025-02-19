@@ -8,7 +8,7 @@
   width: 100%;
   background: none;
   border: none;
-  color: #303036;
+  color: var(--dark);
   font-size: 1rem;
   font-weight: 400;
   padding: 0;
@@ -21,7 +21,6 @@
   left: 0;
   font-size: 1rem;
   transition: 0.2s ease all;
-  color: #303036;
 }
 
 .textbox input:focus + span,
@@ -35,9 +34,13 @@
   width: 100%;
   top: 1.5rem;
   height: 0.126rem;
-  background-color: #303036;
+  background-color: var(--dark);
 }
 
-.error {
-  background-color: #ef6f6c;
+.error-backdrop {
+  background-color: var(--bright);
+}
+
+.error-font {
+  color: var(--bright);
 }

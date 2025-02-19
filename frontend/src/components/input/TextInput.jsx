@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import "./text-input.css";
 
 export const TextBox = ({
@@ -6,11 +5,10 @@ export const TextBox = ({
   type = "text",
   value,
   onChange,
-  errorText = "Error",
-  throwError = true,
+  errorText = "",
 }) => {
   return (
-    <div style={{ height: "42px", padding: "20px" }}>
+    <div style={{ height: "42px", padding: "20px 0" }}>
       <label className="textbox">
         <input
           type={type}
@@ -19,19 +17,13 @@ export const TextBox = ({
           onChange={onChange}
           required
         />
-        <span>{throwError ? errorText : text}</span>
+        <span className={errorText ? "error-font" : ""}>
+          {errorText ? errorText : text}
+        </span>
         <div
-          className={throwError ? "rectangle-24 error" : "rectangle-24"}
+          className={errorText ? "rectangle-24 error-backdrop" : "rectangle-24"}
         ></div>
       </label>
     </div>
   );
-};
-TextBox.propTypes = {
-  text: PropTypes.string,
-  type: PropTypes.string,
-  value: PropTypes.string,
-  onChange: PropTypes.func,
-  errorText: PropTypes.string,
-  throwError: PropTypes.bool,
 };

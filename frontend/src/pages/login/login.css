@@ -1,0 +1,19 @@
+.full-page-container-login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 16px);
+  width: calc(100vw - 16px);
+
+  background-image: url("../../components/backdrops/Landing-page-backdrop.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.centered-content-login {
+  text-align: center;
+  background-color: var(--light);
+  padding: 20px;
+  width: 300px;
+}
