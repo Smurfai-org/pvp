@@ -1,0 +1,237 @@
+:root {
+    --light: #E8E9EB;
+    --dark: #303036;
+    --bright: #EF6F6C;
+    --highlight: #587572;
+    --secondary: #8DB8A5;
+    --premium: #F0C808;
+    --text: #16161A;
+
+    --body: 1rem;
+
+    background-color: var(--light);
+}
+
+* {
+    font-family: 'Inter', sans-serif;
+}
+
+.default-button {
+    background-color: var(--dark);
+    font-size: var(--body);
+    color: var(--light);
+    padding: 1rem;
+    min-width: fit-content;
+    border: none;
+    box-shadow: 2px 4px 4px hsl(0, 0%, 75%);
+    transition: background-color 0.15s ease-in-out;
+}
+
+.large {
+    padding: 1.5rem 2rem;
+}
+
+.small {
+    padding: 0.5rem;
+}
+
+.default-button.bright {
+    background-color: var(--bright);
+    color: var(--text);
+    transition: background-color 0.15s ease-in-out;
+}
+
+.default-button.secondary {
+    background-color: transparent;
+    color: var(--text);
+    border: 3px solid var(--dark);
+    transition: background-color 0.15s ease-in-out;;
+}
+
+.default-button.secondary:hover {
+    background-color: transparent;
+    border-color: var(--highlight);
+}
+
+.default-button.disabled {
+    background-color: var(--dark);
+    color: var(--highlight);
+}
+
+.default-button.disabled:hover {
+    background-color: var(--dark);
+    color: var(--highlight);
+    cursor: not-allowed;
+}
+
+.default-button.bright:hover {
+    background-color: var(--dark);
+    color: var(--light);
+}
+
+.default-button:hover {
+    background-color: var(--highlight);
+    cursor: pointer;
+}
+
+.container {
+    display: block;
+    position: relative;
+    padding-left: 2rem;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-color: var(--light);
+}
+.container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    left: 0;
+    bottom: 0;
+    border: 1px solid var(--dark);
+}
+
+.container input:checked ~ .checkmark {
+    background-color: var(--light);
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.container .checkmark:after {
+    left: 7px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid var(--highlight);
+    border-width: 0 3px 3px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+.tag {
+    padding: 0.2rem 0.3rem;
+    max-width: fit-content;
+    border: none;
+    font-size: var(--body);
+    cursor: pointer;
+    background-color: var(--light);
+    position: relative;
+    box-sizing: border-box;
+}
+
+.tag::before {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--bright);
+    transform: scaleY(0);
+}
+
+.tag:hover::before {
+    transform: scaleY(1);
+}
+
+.tag.checked::before {
+    transform: scaleY(1);
+}
+
+.count {
+    background-color: #EF6F6C;
+    border-radius: 25px;
+    padding: 0.1rem 0.4rem;
+    margin-left: 0.3rem;
+    color: var(--text);
+}
+
+
+.hyperlink {
+    color: var(--text);
+    text-decoration: none;
+    padding: 0.15rem 0.3rem;
+}
+
+.hyperlink:hover {
+    border-bottom: 2px solid var(--bright);
+}
+
+.textInput {
+    max-width: fit-content;
+}
+
+.toggle-container {
+    display: flex;
+    align-items: center;
+    margin: 0.25rem;
+}
+
+.toggle-label {
+    margin-right: 10px;
+    font-size: var(--body);
+}
+
+.toggle-switch {
+    width: 2.25rem;
+    height: 1.25rem;
+    border-radius: 2rem;
+    display: flex;
+    align-items: center;
+    padding: 5px 4px;
+    margin-right: 0.5rem;
+    cursor: pointer;
+    border: 1px solid var(--dark);
+    transition: background-color 0.15s ease;
+}
+
+.toggle-switch.off {
+    background-color: #E8E9EB;
+}
+
+.toggle-switch.on {
+    background-color: #8DB8A5;
+}
+
+.toggle-slider {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background-color: #303036;
+    transition: transform 0.3s ease;
+}
+
+.toggle-switch.on .toggle-slider {
+    transform: translateX(0.75rem);
+}
+
+.toggle-switch.off .toggle-slider {
+    transform: translateX(0);
+} 
+
+@media (max-width: 700px) {
+    :root {
+        --body: 0.875rem;
+        font-size: var(--body);
+    }
+}
