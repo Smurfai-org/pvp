@@ -1,0 +1,46 @@
+.textbox {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+}
+
+.textbox input {
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--dark);
+  font-size: 1rem;
+  font-weight: 400;
+  padding: 0;
+  outline: none;
+}
+
+.textbox span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 1rem;
+  transition: 0.2s ease all;
+}
+
+.textbox input:focus + span,
+.textbox input:not(:placeholder-shown) + span {
+  top: 1.5rem;
+  left: 0;
+  font-size: 0.688rem;
+}
+
+.rectangle-24 {
+  width: 100%;
+  top: 1.5rem;
+  height: 0.126rem;
+  background-color: var(--dark);
+}
+
+.error-backdrop {
+  background-color: var(--bright);
+}
+
+.error-font {
+  color: var(--bright);
+}
