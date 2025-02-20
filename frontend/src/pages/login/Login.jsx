@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { TextBox } from "../../components/input/TextInput";
+import { TextBox } from "../../components/textBox/TextBox";
 import Button from "../../components/Button";
 import "./login.css";
 
@@ -64,14 +64,7 @@ function Login() {
           onChange={handlePasswordChange}
           errorText={passwordError}
         />
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
+        <div className="inline-centered-buttons-login">
           <Button onClick={handleSubmit}>Log in</Button>
           <Button extra="secondary">Sign up</Button>
         </div>
