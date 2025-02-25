@@ -5,6 +5,7 @@
 }
 
 .textbox input {
+  max-width: 300px;
   width: 100%;
   background: none;
   border: none;
@@ -16,6 +17,7 @@
 }
 
 .textbox span {
+  cursor: text;
   position: absolute;
   top: 0;
   left: 0;
@@ -32,6 +34,7 @@
 
 .rectangle-24 {
   width: 100%;
+  max-width: 300px;
   top: 1.5rem;
   height: 0.126rem;
   background-color: var(--dark);

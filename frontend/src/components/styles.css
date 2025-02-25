@@ -44,14 +44,12 @@
 .default-button.secondary {
   background-color: transparent;
   color: var(--text);
-  /* border: 3px solid var(--dark); */
   box-shadow: inset 0 0 0 3px var(--dark);
   transition: background-color 0.15s ease-in-out;
 }
 
 .default-button.secondary:hover {
   background-color: transparent;
-  /* border-color: var(--highlight); */
   box-shadow: inset 0 0 0 3px var(--highlight);
 }
 
@@ -235,4 +233,169 @@
     --body: 0.875rem;
     font-size: var(--body);
   }
+}
+
+.search-bar {
+  position: relative;
+  height: 1.25rem;
+  width: 300px;
+}
+
+.search-bar input {
+  position: absolute;
+  left: 2rem;
+  width: calc(300px - 2rem);
+  border: none;
+  font-size: 1rem;
+  color: var(--text);
+  outline: none;
+  background-color: var(--body);
+}
+
+.search-bar input::placeholder {
+  color: var(--text);
+}
+
+.search-bar img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.search-bar:hover .search-bottom-line,
+.search-bar input:focus ~ .search-bottom-line,
+.search-bar input:not(:placeholder-shown) ~ .search-bottom-line {
+  position: absolute;
+  top: 20px;
+  left: 2rem;
+  height: 2px;
+  width: calc(100% - 2rem);
+  background-color: var(--bright);
+}
+
+.flip-vertically {
+  transform: rotate(180deg);
+}
+
+.dropdown {
+  position: relative;
+  width: 200px;
+}
+
+.dropdown img {
+  position: absolute;
+  top: calc(50% - 0.3rem);
+  right: 0.625rem;
+  height: 0.6rem;
+}
+
+.dropdown-header {
+  padding: 0.625rem;
+  cursor: pointer;
+}
+
+.dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--light);
+  z-index: 1;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdown-item {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.dropdown:hover .dropdown-bottom-line {
+  position: absolute;
+  top: 30px;
+  left: 10px;
+  height: 2px;
+  width: calc(100% - 20px);
+  background-color: var(--bright);
+}
+
+.dropdown-item:hover {
+  background-color: var(--bright);
+}
+
+.course-card {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: var(--light);
+  width: 276px;
+  height: 80px;
+  padding: 0.75rem;
+  background-color: var(--dark);
+  box-shadow: 2px 4px 4px hsl(0, 0%, 75%);
+  transition: 0.15s ease;
+}
+
+.course-card:hover {
+  background-color: var(--highlight);
+}
+
+.course-card img {
+  height: 80px;
+  width: 80px;
+  object-fit: cover;
+}
+
+.course-info {
+  height: 80px;
+  margin-left: 0.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.course-card-paragraph {
+  font-size: 0.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.category-selector {
+  height: 40px;
+  background-color: var(--secondary);
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  padding: 0px 12px;
+  gap: 8px;
+  transition: 0.15s ease;
+  box-shadow: 2px 4px 4px hsl(0, 0%, 75%);
+  cursor: pointer;
+}
+
+.category-selector:hover {
+  background-color: var(--highlight);
+  color: var(--light);
+}
+
+.category-selector img {
+  height: 1.3rem;
+  object-fit: cover;
+  transition: 0.15s ease;
+}
+
+.category-selector:hover img {
+  filter: invert(100%);
+}
+
+.category-selector-selected {
+  background-color: var(--bright);
+  color: var(--text);
+}
+
+.category-selector-selected:hover {
+  background-color: var(--dark);
+  color: var(--light);
 }
