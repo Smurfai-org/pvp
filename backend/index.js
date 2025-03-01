@@ -4,11 +4,15 @@ import { fileURLToPath, pathToFileURL } from 'url';
 import path from 'path';
 import fs from 'fs';
 import 'dotenv/config';
+import bodyParser from 'body-parser'
 
 const app = express();
 const port = 5000;
+
 app.use(cors());
 app.use(express.json());
+app.use(bodyParser.json());
+
 
 const __filename = fileURLToPath(import.meta.url);
 const routesDirectory = path.join(path.dirname(__filename), 'routes');
