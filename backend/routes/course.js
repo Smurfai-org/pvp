@@ -5,19 +5,34 @@ const router = express.Router();
 
 // FRONTE PRIDET HEADER: Content-Type: "application/json"
 
-router.get('/', async (req, res) => {
-    try {
-        const [result] = await pool.execute("SELECT * FROM courses");
+router.get("/", async (req, res) => {
+  const { id } = req.query;
 
-        if(result.length === 0) {
-            return res.status(404).json({ message: 'Kursai nerasti' })
-        }
+  try {
+    let query = "SELECT * FROM courses";
+    let params = [];
 
-        res.status(200).json(result);
-    } catch (error) {
-        return res.status(503).json({ message: 'Nepavyko gauti kursų'});
+    if (id) {
+      query += " WHERE id = ?";
+      params.push(id);
     }
+
+    const [result] = await pool.execute(query, params);
+
+    if (result.length === 0) {
+      if (id) {
+        return res.status(404).json({ message: "Kursas nerastas" });
+      } else {
+        return res.status(200).json([]);
+      }
+    }
+
+    res.status(200).json(result);
+  } catch (error) {
+    return res.status(500).json({ message: "Serverio klaida" });
+  }
 });
+  
 
 router.post('/create', async (req, res) => {
     const { name, description, icon_url } = req.body;
@@ -85,4 +100,5 @@ router.delete('/delete', async (req, res) => {
         return res.status(500).json({ message: 'Serverio klaida' });
     }
 });
+
 export default router;
