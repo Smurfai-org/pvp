@@ -1,36 +1,43 @@
-import express from 'express';
-import cors from 'cors';
-import { fileURLToPath, pathToFileURL } from 'url';
-import path from 'path';
-import fs from 'fs';
-import 'dotenv/config';
-import bodyParser from 'body-parser'
+import express from "express";
+import cors from "cors";
+import { fileURLToPath, pathToFileURL } from "url";
+import path from "path";
+import fs from "fs";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 const port = 5000;
 
 app.use(cors());
 app.use(express.json());
-app.use(bodyParser.json());
-
 
 const __filename = fileURLToPath(import.meta.url);
-const routesDirectory = path.join(path.dirname(__filename), 'routes');
+const __dirname = path.dirname(__filename);
+const routesDirectory = path.join(__dirname, "routes");
 
-const files = fs.readdirSync(routesDirectory);
+async function loadRoutes() {
+  try {
+    const files = fs.readdirSync(routesDirectory);
 
-for (const file of files) {
-    if (!file.endsWith('.js')) continue;
-  
-    const routeFilePath = pathToFileURL(path.join(routesDirectory, file)).href;
-  
-    const route = await import(routeFilePath);
-  
-    const routePath = `/${file.replace('.js', '')}`;
-  
-    app.use(routePath, route.default);
+    for (const file of files) {
+      if (!file.endsWith(".js")) continue;
+
+      const routeFilePath = pathToFileURL(path.join(routesDirectory, file)).href;
+
+      const route = await import(routeFilePath);
+
+      const routePath = `/${file.replace(".js", "")}`;
+      app.use(routePath, route.default);
+    }
+  } catch (error) {
+    console.error("Error loading routes:", error);
   }
+}
 
-app.listen(port, () => {
-    console.log('listening on port', port);
+loadRoutes().then(() => {
+  app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+  });
 });
