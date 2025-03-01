@@ -9,12 +9,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-<<<<<<< Updated upstream
+    "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "epress": "^0.0.1-security",
-=======
->>>>>>> Stashed changes
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "mysql2": "^3.12.0"
   }
 }
