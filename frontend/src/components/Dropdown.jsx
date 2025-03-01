@@ -4,6 +4,7 @@ import chevronIcon from "../assets/Chevron-icon.png";
 const Dropdown = ({
   options = ["Option 1", "Option 2", "Option 3"],
   placeholder = "Dropdown",
+  showArrow = true
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -19,11 +20,13 @@ const Dropdown = ({
 
   return (
     <div className="dropdown">
-      <div className="dropdown-header" onClick={toggleDropdown}>
+      <div className={`dropdown-header ${!showArrow ? 'no-arrow' : ''}`} onClick={toggleDropdown}>
         {selectedOption ? selectedOption : placeholder}
+        {showArrow && (
+          <img src={chevronIcon} className={isOpen ? "flip-vertically" : ""} />
+        )}
       </div>
       <div className="dropdown-bottom-line" />
-      <img src={chevronIcon} className={isOpen ? "flip-vertically" : ""} />
       {isOpen && (
         <ul className="dropdown-list">
           {options.map((option, index) => (
