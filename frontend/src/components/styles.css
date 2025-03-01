@@ -12,6 +12,10 @@
   background-color: var(--light);
 }
 
+body {
+  margin: 0;
+}
+
 * {
   font-family: "Inter", sans-serif;
 }
@@ -142,7 +146,7 @@
 .tag::before {
   content: "";
   position: absolute;
-  bottom: -1px;
+  bottom: 0;
   left: 0;
   width: 100%;
   height: 2px;
@@ -150,10 +154,7 @@
   transform: scaleY(0);
 }
 
-.tag:hover::before {
-  transform: scaleY(1);
-}
-
+.tag:hover::before,
 .tag.checked::before {
   transform: scaleY(1);
 }
@@ -170,11 +171,24 @@
   color: var(--text);
   text-decoration: none;
   padding: 0.15rem 0.3rem;
+  position: relative; /* Needed for positioning the ::after pseudo-element */
 }
 
-.hyperlink:hover {
-  border-bottom: 2px solid var(--bright);
+.hyperlink::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--bright);
+  transform: scaleX(0);
 }
+
+.hyperlink:hover::after {
+  transform: scaleX(1);
+}
+
 
 .textInput {
   max-width: fit-content;
@@ -281,7 +295,7 @@
 
 .dropdown {
   position: relative;
-  width: 200px;
+  display: inline-block;
 }
 
 .dropdown img {
@@ -293,23 +307,42 @@
 
 .dropdown-header {
   padding: 0.625rem;
+  padding-right: 2.5rem;
   cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dropdown-header.no-arrow {
+  padding-right: 0.675rem;
 }
 
 .dropdown-list {
   position: absolute;
   top: 100%;
-  left: 0;
   right: 0;
+  left: 0;
+  min-width: fit-content;
+  max-width: 300px;
   background-color: var(--light);
   z-index: 1;
   list-style-type: none;
   padding: 0;
   margin: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
+.dropdown-list {
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
 }
 
 .dropdown-item {
-  padding: 10px;
+  padding: 10px 20px;
   cursor: pointer;
 }
 
@@ -324,6 +357,16 @@
 
 .dropdown-item:hover {
   background-color: var(--bright);
+}
+
+.dropdown-item a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.dropdown-item a:hover {
+  text-decoration: underline;
+  text-decoration: none;
 }
 
 .course-card {
@@ -398,4 +441,21 @@
 .category-selector-selected:hover {
   background-color: var(--dark);
   color: var(--light);
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 2px 4px 4px hsl(0, 0%, 80%);
+  margin-bottom: 1rem;
+  height: 3.5rem;
+  padding: 0 0.5rem;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 1rem;
 }
