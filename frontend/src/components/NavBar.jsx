@@ -6,7 +6,7 @@ import HyperlinkDropdown from "./HyperlinkDropdown";
 const Navbar = () => {
   return (
     <nav className="navbar">
-      <div className="text-xl font-bold">Logo</div>
+      <Hyperlink href="/">Logo</Hyperlink>
 
       <div className="nav-search">
         <div className="w-full max-w-md">
