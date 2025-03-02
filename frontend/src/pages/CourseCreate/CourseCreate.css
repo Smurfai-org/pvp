@@ -1,0 +1,15 @@
+.create {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    padding: 2rem;
+    background-color: var(--body);
+    z-index: 2;
+}
+
+.create button {
+    width: 10rem;
+}
+
+.create-card {
+    margin-top: 2rem;
+}
