@@ -32,7 +32,7 @@ function CourseCreate() {
             }
 
             const res = await req.json();
-            navigate(-1);
+            navigate(`/view_course/${res.id}`);
         } catch (error) {
             console.error("Update failed:", error);
         }

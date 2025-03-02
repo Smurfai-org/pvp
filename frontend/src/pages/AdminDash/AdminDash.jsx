@@ -35,6 +35,12 @@ function AdminDash() {
         navigate('/create_course')
     };
 
+    const handleCardClick = (id) => {
+        navigate(`/view_course/${id}`)
+    }
+
+    courses.sort((a, b) => a.creation_date.localeCompare(b.creation_date));
+
     return (
         <div className='dashboard'>
             <Button onClick={handleCreate}>Create course</Button>
@@ -46,6 +52,7 @@ function AdminDash() {
                             key={course.id} 
                             title={course.name} 
                             paragraph={course.description}
+                            onClick={() => handleCardClick(course.id)}
                         />
                     );
                 })}
