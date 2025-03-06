@@ -54,7 +54,7 @@ function ViewCourse() {
 
     fetchCourse();
     fetchProblems();
-  }, [params.id]);
+  }, [id]);
 
   // Handle editing course
   const handleEdit = () => setEditActive(true);
@@ -135,7 +135,7 @@ function ViewCourse() {
                       : 1,
                 }}
               />
-              <img srd={exitButton} onClick={exitEdit} />
+              <img src={exitButton} onClick={exitEdit} />
             </div>
           </>
         ) : (
