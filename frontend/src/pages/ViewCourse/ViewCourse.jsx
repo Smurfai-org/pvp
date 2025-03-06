@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import Button from '../../components/Button';
 
 function ViewCourse() {
     const params = useParams();
@@ -7,6 +8,9 @@ function ViewCourse() {
 
     const [course, setCourse] = useState(""); 
     const [problems, setProblems] = useState([]);
+    const [noProblems, setNoProblems] = useState(true);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchCourse = async () => {
@@ -23,7 +27,7 @@ function ViewCourse() {
                 const res = await req.json();
                 setCourse(res[0]);
             } catch (error) {
-                console.error(error.message);
+                setCourse([]);
             }
         };
 
@@ -39,10 +43,14 @@ function ViewCourse() {
                 }
 
                 const res = await req.json();
-                setProblems(res);
-                console.log(res);
+                if(res.length === 0) {
+                    setNoProblems(true);
+                } else {
+                    setProblems(res);
+                    setNoProblems(false);
+                }
             } catch (error) {
-                console.error(error.message);
+                setProblems([]);
             }
         };
 
@@ -50,11 +58,32 @@ function ViewCourse() {
         fetchProblems();
     }, [id]);
 
+    const handleAddProblem = async () => {
+        // try {
+        //     const req = await fetch(`http://localhost:5000/problems`,
+        //         {
+        //             method: 'POST',
+        //             headers: {'Content-Type': 'application/json'},
+        //             body: {}
+        //         }
+        //     )
+        // } catch (error) {
+        //     console.error(error.message);
+        // }
+        navigate('/add_problem')
+    }
+
   return (
     <div>
         <h2>Kursas: {course.name}</h2>
         <h4>Aprašymas: {course.description}</h4>
-        {problems.map((problem) => (
+        {noProblems ? 
+        <>
+            <p>Problemų šis kursas neturi</p> 
+            <Button onClick={handleAddProblem}>Pritėti problemą</Button>
+        </>
+        :
+        problems.map((problem) => (
             <div key={problem.id}>
                 <p>{problem.name}</p>
                 <p>{problem.description}</p>

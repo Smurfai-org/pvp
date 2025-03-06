@@ -6,6 +6,7 @@ import Navbar from "./components/NavBar";
 import AdminDash from "./pages/adminDash/adminDash";
 import CourseCreate from "./pages/CourseCreate/CourseCreate";
 import ViewCourse from "./pages/ViewCourse/ViewCourse";
+import AddProblem from "./pages/AddProblem/AddProblem";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/admin_dash" element={<AdminDash/>}/>
           <Route path="/create_course" element={<CourseCreate />}/>
           <Route path="/view_course/:id" element={<ViewCourse />}/>
+          <Route path="/add_problem" element={<AddProblem />} />
         </Routes>
       </Router>
   );
