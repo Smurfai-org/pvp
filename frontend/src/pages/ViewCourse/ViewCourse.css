@@ -1,0 +1,51 @@
+.table-container {
+    width: 100%;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+thead {
+    background-color: var(--dark);
+    color: var(--light)
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid var(--dark);
+    text-align: left;
+}
+
+tbody tr:hover {
+    background-color: #ddd;
+    cursor: pointer;
+}
+
+.add-button {
+    text-align: center;
+    border: none;
+    font-weight: 900;
+}
+
+.add-button:hover {
+    background-color: var(--secondary);
+    cursor: pointer;
+}
+
+.course-data {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 20px;
+    align-items: baseline;
+    justify-items: start;
+    overflow: visible;
+    margin-bottom: 1rem;
+}
+
+.course-data img {
+    width: 1.75rem;
+    cursor: pointer;
+}
