@@ -120,9 +120,10 @@ const Problem = () => {
     }
   };
 
-  const handleButtonClick = () => {
+  const handleRunButtonClick = () => {
     if (outputRef.current) {
       outputRef.current.runCode();
+      setIsOutputWindowMaximised(true);
     }
   };
 
@@ -252,7 +253,7 @@ const Problem = () => {
       >
         {/* Program settings */}
         <div style={{ display: "flex", gap: "1rem" }}>
-          <Button extra="small" onClick={handleButtonClick}>
+          <Button extra="small" onClick={handleRunButtonClick}>
             Run code
           </Button>
           <Button
@@ -276,7 +277,11 @@ const Problem = () => {
           style={{
             width: "100%",
             flexGrow: 1,
+            display: "flex",
+            flexDirection: "column",
+            minHeight: 0,
             backgroundColor: "white",
+            transition: "0.4s",
           }}
         >
           <CodeEditor
@@ -298,11 +303,14 @@ const Problem = () => {
         {/* Program result */}
         <div
           style={{
+            position: "relative",
             height: isOutputWindowMaximised ? "50%" : "15%",
             backgroundColor: "white",
-            padding: "1rem",
             boxSizing: "border-box",
-            overflowY: "auto",
+            overflow: "hidden",
+            transition: "0.4s",
+            display: "flex",
+            flexDirection: "column",
           }}
         >
           <OutputSection
@@ -311,6 +319,8 @@ const Problem = () => {
               selectedLanguageValue === "cpp" ? cppInputCode : pythonInputCode
             }
             language={selectedLanguageValue}
+            isOutputWindowMaximised={isOutputWindowMaximised}
+            setIsOutputWindowMaximised={setIsOutputWindowMaximised}
           />
         </div>
       </div>

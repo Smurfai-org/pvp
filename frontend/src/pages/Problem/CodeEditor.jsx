@@ -13,22 +13,51 @@ const CodeEditor = ({ language = "cpp", value = "", setValue = () => {} }) => {
       style={{
         display: "flex",
         flexDirection: "column",
-        height: "100%",
+        flexGrow: 1,
+        minHeight: 0,
         width: "100%",
       }}
     >
-      <Editor
-        defaultLanguage={language}
-        options={{
-          minimap: { enabled: false },
-          scrollBeyondLastLine: false,
+      {/* Sticky Header */}
+      <div
+        style={{
+          position: "sticky",
+          top: 0,
+          backgroundColor: "#dddddd",
+          minHeight: "2rem",
+          width: "100%",
+          padding: "0 1rem",
+          boxSizing: "border-box",
+          display: "flex",
+          alignItems: "center",
         }}
-        onMount={onMount}
-        value={value}
-        onChange={(value) => {
-          setValue(value);
+      >
+        <strong>Your code</strong>
+      </div>
+
+      {/* Editor Container */}
+      <div
+        style={{
+          flexGrow: 1,
+          minHeight: 0,
+          display: "flex",
         }}
-      />
+      >
+        <Editor
+          defaultLanguage={language}
+          options={{
+            minimap: { enabled: false },
+            fontFamily: "Consolas",
+            scrollBeyondLastLine: false,
+          }}
+          onMount={onMount}
+          value={value}
+          onChange={(value) => {
+            setValue(value);
+          }}
+          style={{ width: "100%", height: "100%" }} // Ensures it stretches properly
+        />
+      </div>
     </div>
   );
 };

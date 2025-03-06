@@ -304,6 +304,22 @@ body {
   height: 0.6rem;
 }
 
+.chevron-close-open {
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 2rem;
+  width: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chevron-close-open img {
+  height: 0.6rem;
+}
+
 .dropdown-header {
   padding: 0.5rem;
   padding-right: 2.5rem;
