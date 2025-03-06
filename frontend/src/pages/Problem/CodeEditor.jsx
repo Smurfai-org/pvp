@@ -9,40 +9,12 @@ const CodeEditor = ({ language = "cpp", value = "", setValue = () => {} }) => {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        flexGrow: 1,
-        minHeight: 0,
-        width: "100%",
-      }}
-    >
-      {/* Sticky Header */}
-      <div
-        style={{
-          position: "sticky",
-          top: 0,
-          backgroundColor: "#dddddd",
-          minHeight: "2rem",
-          width: "100%",
-          padding: "0 1rem",
-          boxSizing: "border-box",
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
+    <div className="code-editor-container">
+      <div className="problem-sticky-header">
         <strong>Your code</strong>
       </div>
 
-      {/* Editor Container */}
-      <div
-        style={{
-          flexGrow: 1,
-          minHeight: 0,
-          display: "flex",
-        }}
-      >
+      <div className="code-editor">
         <Editor
           defaultLanguage={language}
           options={{
@@ -55,7 +27,6 @@ const CodeEditor = ({ language = "cpp", value = "", setValue = () => {} }) => {
           onChange={(value) => {
             setValue(value);
           }}
-          style={{ width: "100%", height: "100%" }} // Ensures it stretches properly
         />
       </div>
     </div>

@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Button from "../../components/Button";
 import Hyperlink from "../../components/Hyperlink";
-
 import CodeEditor from "./CodeEditor";
 import Dropdown from "../../components/Dropdown";
 import OutputSection from "./Output";
+import "./problem.css";
 
 const languages = [
   { label: "C++", value: "cpp" },
@@ -156,102 +156,48 @@ const Problem = () => {
   }, [params.id]);
 
   return (
-    // Full screen box without navbar
-    <div
-      style={{
-        height: "100vh",
-        width: "100vw",
-        backgroundColor: "gray",
-        padding: "1rem",
-        boxSizing: "border-box",
-        display: "flex",
-        gap: "1rem",
-      }}
-    >
-      {/* Left side of the screen */}
-      <div
-        style={{
-          height: "100%",
-          width: "40%",
-          display: "flex",
-          flexDirection: "column",
-          gap: "1rem",
-        }}
-      >
-        {/* Navigation buttons */}
+    <div className="full-screen-container">
+      <div className="problem-page-left">
         <div>
-          <Button
-            extra="small"
-            onClick={() => {
-              navigate("/");
-            }}
-          >
+          <Button extra="small" onClick={() => navigate("/")}>
             Back to list
           </Button>
         </div>
-        {/* Box for the provided problem info */}
-        <div
-          style={{
-            width: "100%",
-            flexGrow: 1,
-            backgroundColor: "white",
-            padding: "1rem",
-            boxSizing: "border-box",
-            overflowY: "auto",
-          }}
-        >
-          <h2>{problem?.name}</h2>
-          <p>{problem?.difficulty}</p>
-          {/* Tags of related courses */}
-          <div>
+
+        <div className="problem-info-screen">
+          <h2 style={{ fontSize: "1.25rem", fontWeight: "600" }}>
+            {problem?.name}
+          </h2>
+          <p className={problem?.difficulty}>{problem?.difficulty}</p>
+
+          <div className="problem-related-courses">
             {problem?.courses?.map((course) => (
               <Hyperlink key={course?.id} href={`/course/${course.id}`}>
                 {course?.name}
               </Hyperlink>
             ))}
           </div>
-          {/* Problem description */}
+
           <div>
             <p>{problem?.description}</p>
           </div>
-          {/* Expected input and output */}
-          <div>
+
+          <div className="IO-examples-list">
             {problem?.inputsAndOutputs?.map((item, index) => (
-              <div
-                key={index}
-                style={{
-                  marginBottom: "20px",
-                  border: "1px solid #ccc",
-                  padding: "10px",
-                  borderRadius: "5px",
-                }}
-              >
+              <div key={index} className="IO-example">
+                <p style={{ fontWeight: "600" }}>Example {index + 1}</p>
                 <p>
-                  <strong>Example {index + 1}</strong>
+                  <strong>Input:</strong> {item?.input}
                 </p>
                 <p>
-                  <strong>Input: </strong> {item?.input}
-                </p>
-                <p>
-                  <strong>Output: </strong>
-                  {item?.expectedOutput}
+                  <strong>Result:</strong> {item?.expectedOutput}
                 </p>
               </div>
             ))}
           </div>
         </div>
       </div>
-      {/* Right side of the screen */}
-      <div
-        style={{
-          height: "100%",
-          width: "60%",
-          display: "flex",
-          flexDirection: "column",
-          gap: "1rem",
-        }}
-      >
-        {/* Program settings */}
+      <div className="problem-page-right">
         <div style={{ display: "flex", gap: "1rem" }}>
           <Button extra="small" onClick={handleRunButtonClick}>
             Run code
@@ -272,16 +218,10 @@ const Problem = () => {
             }}
           />
         </div>
-        {/* Code editor box */}
         <div
-          style={{
-            width: "100%",
-            flexGrow: 1,
-            display: "flex",
-            flexDirection: "column",
-            minHeight: 0,
-            backgroundColor: "white",
-            transition: "0.4s",
+          className="code-editor-area"
+          onClick={() => {
+            setIsOutputWindowMaximised(false);
           }}
         >
           <CodeEditor
@@ -300,18 +240,11 @@ const Problem = () => {
             }
           />
         </div>
-        {/* Program result */}
         <div
           style={{
-            position: "relative",
             height: isOutputWindowMaximised ? "50%" : "15%",
-            backgroundColor: "white",
-            boxSizing: "border-box",
-            overflow: "hidden",
-            transition: "0.4s",
-            display: "flex",
-            flexDirection: "column",
           }}
+          className="output-window"
         >
           <OutputSection
             ref={outputRef}

@@ -23,6 +23,8 @@ const OutputSection = forwardRef(
         result.stderr ? setIsError(true) : setIsError(false);
       } catch (err) {
         console.error("Execution error:", err);
+        setOutputText(err?.message);
+        setIsError(true);
       }
     };
 
@@ -35,29 +37,8 @@ const OutputSection = forwardRef(
     }));
 
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          height: "100%",
-          overflow: "hidden",
-        }}
-      >
-        {/* Sticky Header */}
-        <div
-          style={{
-            position: "sticky",
-            top: "0",
-            backgroundColor: "#dddddd",
-            height: "2rem",
-            width: "100%",
-            padding: "0 1rem",
-            boxSizing: "border-box",
-            display: "flex",
-            alignItems: "center",
-            flexShrink: 0,
-          }}
-        >
+      <div className="output-wrapper">
+        <div className="problem-sticky-header">
           <strong>Results</strong>
           <div className="chevron-close-open" onClick={onChevronClick}>
             <img
@@ -67,24 +48,13 @@ const OutputSection = forwardRef(
           </div>
         </div>
 
-        {/* Scrollable Text Container */}
-        <div
-          style={{
-            flexGrow: 1,
-            overflowY: "auto",
-            marginLeft: "1rem",
-            minHeight: 0,
-          }}
-        >
+        <div className="output-text-container">
           <br />
           <p
             style={{
-              margin: "0",
               color: isError ? "red" : "black",
-              fontFamily: "Consolas",
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-word",
             }}
+            className="output-text"
           >
             {outputText
               ? outputText.split("\n").map((line) => (
