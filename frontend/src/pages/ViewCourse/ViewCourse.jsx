@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import Button from "../../components/Button";
-import TextBox from "../../components/textBox/TextBox";
-import "./ViewCourse.css";
-import editButton from "../../assets/edit-icon.svg";
-import exitButton from "../../assets/exit-icon.svg";
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import Button from '../../components/Button';
+import TextBox from '../../components/textBox/TextBox';
+import './ViewCourse.css';
+import editButton from '../../assets/edit-icon.svg';
+import exitButton from '../../assets/exit-icon.svg';
+import checkButton from '../../assets/check-icon.svg';
 
 function ViewCourse() {
   const { id } = useParams();
@@ -99,6 +100,48 @@ function ViewCourse() {
 
   const handleAddProblem = () => navigate("/add_problem");
 
+  // Handle editing course
+  const handleEdit = () => setEditActive(true);
+  const exitEdit = () => setEditActive(false);
+
+  const handleEditConfirm = async () => {
+    if (
+      courseTitle === course?.name &&
+      courseDescription === course?.description
+    ) {
+      setEditActive(false);
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:5000/course/update`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          name: courseTitle,
+          description: courseDescription,
+          icon_url: "",
+        }),
+      });
+
+      if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+
+      const updatedCourse = {
+        ...course,
+        name: courseTitle,
+        description: courseDescription,
+        icon_url: courseIcon,
+      };
+      setCourse(updatedCourse);
+    } catch (error) {
+      console.error("Error updating course:", error);
+    }
+
+    setEditActive(false);
+  };
+
+  const handleAddProblem = () => navigate("/add_problem");
   return (
     <div style={{ margin: "2rem" }}>
       <div className="course-data">
