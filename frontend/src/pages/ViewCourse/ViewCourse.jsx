@@ -99,49 +99,6 @@ function ViewCourse() {
   };
 
   const handleAddProblem = () => navigate("/add_problem");
-
-  // Handle editing course
-  const handleEdit = () => setEditActive(true);
-  const exitEdit = () => setEditActive(false);
-
-  const handleEditConfirm = async () => {
-    if (
-      courseTitle === course?.name &&
-      courseDescription === course?.description
-    ) {
-      setEditActive(false);
-      return;
-    }
-
-    try {
-      const res = await fetch(`http://localhost:5000/course/update`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id,
-          name: courseTitle,
-          description: courseDescription,
-          icon_url: "",
-        }),
-      });
-
-      if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
-
-      const updatedCourse = {
-        ...course,
-        name: courseTitle,
-        description: courseDescription,
-        icon_url: courseIcon,
-      };
-      setCourse(updatedCourse);
-    } catch (error) {
-      console.error("Error updating course:", error);
-    }
-
-    setEditActive(false);
-  };
-
-  const handleAddProblem = () => navigate("/add_problem");
   return (
     <div style={{ margin: "2rem" }}>
       <div className="course-data">
@@ -163,7 +120,7 @@ function ViewCourse() {
             </div>
             <div>
               <img
-                src={editButton}
+                src={checkButton}
                 onClick={handleEditConfirm}
                 style={{
                   cursor:
