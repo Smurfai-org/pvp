@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import Button from "../../components/Button";
-import TextBox from "../../components/textBox/TextBox";
-import "./ViewCourse.css";
-import editButton from "../../assets/edit-icon.svg";
-import exitButton from "../../assets/exit-icon.svg";
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import Button from '../../components/Button';
+import TextBox from '../../components/textBox/TextBox';
+import './ViewCourse.css';
+import editButton from '../../assets/edit-icon.svg';
+import exitButton from '../../assets/exit-icon.svg';
+import checkButton from '../../assets/check-icon.svg';
 
 function ViewCourse() {
   const { id } = useParams();
@@ -98,7 +99,6 @@ function ViewCourse() {
   };
 
   const handleAddProblem = () => navigate("/add_problem");
-
   return (
     <div style={{ margin: "2rem" }}>
       <div className="course-data">
@@ -120,7 +120,7 @@ function ViewCourse() {
             </div>
             <div>
               <img
-                src={editButton}
+                src={checkButton}
                 onClick={handleEditConfirm}
                 style={{
                   cursor:
