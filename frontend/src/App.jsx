@@ -32,7 +32,10 @@ function AppRoutes() {
         <Route path="/admin_dash" element={<AdminDash />} />
         <Route path="/create_course" element={<CourseCreate />} />
         <Route path="/view_course/:id" element={<ViewCourse />} />
-        <Route path="/problem/:id" element={<Problem />} />
+        <Route
+          path="/problem/:id"
+          element={<Problem previousProblemId={0} nextProblemId={2} />}
+        />
         <Route path="/add_problem" element={<AddProblem />} />
       </Routes>
     </>
