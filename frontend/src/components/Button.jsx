@@ -1,11 +1,10 @@
-import "./styles.css";
+import React from 'react'
+import './styles.css'
 
-function Button({ children = "ASDASDASD", extra, onClick }) {
+function Button({children, extra, onClick}) {
   return (
-    <button className={`default-button ${extra || ""}`} onClick={onClick}>
-      {children}
-    </button>
-  );
+        <button onClick={onClick}className={`default-button ${extra || ''}`}>{children}</button>
+  )
 }
 
-export default Button;
+export default Button

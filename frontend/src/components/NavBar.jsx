@@ -1,4 +1,3 @@
-import React from "react";
 import Hyperlink from "./Hyperlink";
 import { SearchBar } from "./SearchBar";
 import HyperlinkDropdown from "./HyperlinkDropdown";
@@ -18,12 +17,10 @@ const Navbar = () => {
         <Hyperlink href="/courses">Courses</Hyperlink>
         <Hyperlink href="/problems">Problems</Hyperlink>
         <Hyperlink href="/discussion">Discussion</Hyperlink>
-        <HyperlinkDropdown 
-        placeholder="Account" 
-        showArrow={false} 
-        links={[
-            { text: "Dashboard", url: '/admin_dash' }
-        ]} 
+        <HyperlinkDropdown
+          placeholder="Account"
+          showArrow={false}
+          links={[{ text: "Dashboard", url: "/admin_dash" }]}
         />
       </div>
     </nav>
