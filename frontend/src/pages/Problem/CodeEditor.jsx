@@ -11,7 +11,7 @@ const CodeEditor = ({ language = "cpp", value = "", setValue = () => {} }) => {
   return (
     <div className="code-editor-container">
       <div className="problem-sticky-header">
-        <strong>Your code</strong>
+        <strong>Jūsų kodas</strong>
       </div>
 
       <div className="code-editor">
