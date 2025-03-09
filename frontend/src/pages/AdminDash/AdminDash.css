@@ -9,3 +9,24 @@
 .dashboard {
     padding: 0 2rem;
 }
+  
+.course-card-container {
+    position: relative;
+
+}
+
+.trash-can {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.course-card-container:hover .trash-can {
+    opacity: 1;
+}
+  

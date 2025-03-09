@@ -3,11 +3,10 @@ import Card from '../../components/Card';
 import "./AdminDash.css";
 import Button from '../../components/Button';
 import { useNavigate } from 'react-router-dom';
-import CourseCreate from '../CourseCreate/CourseCreate';
+import trashCan from '../../assets/trash-can.svg';
 
 function AdminDash() {
     const [courses, setCourses] = useState([]);
-
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -32,30 +31,73 @@ function AdminDash() {
     }, []);
 
     const handleCreate = () => {
-        navigate('/create_course')
+        navigate('/create_course');
     };
 
     const handleCardClick = (id) => {
-        navigate(`/view_course/${id}`)
-    }
+        navigate(`/view_course/${id}`);
+    };
 
-    courses.sort((a, b) => a.creation_date.localeCompare(b.creation_date));
+    const handleDelete = async (id) => {
+        if (!window.confirm("Ar tikrai norite ištrinti šį kursą?")) return;
+      
+        try {
+          const response = await fetch(`http://localhost:5000/course/delete?id=${id}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ id })
+          });
+      
+          const data = await response.json();
+      
+          if (!response.ok) {
+            throw new Error(data.message || 'Klaida šalinant kursą');
+          }
+      
+          alert("Kursas sėkmingai ištrinta!");
+          window.location.reload();
+        } catch (error) {
+          alert(`Klaida: ${error.message}`);
+        }
+      };
+
+    const sortedCourses = courses.sort((a, b) => a.creation_date.localeCompare(b.creation_date))
+    const nonDeletedCourses = sortedCourses.filter(course => !course.deleted);
+    const deletedCourses = sortedCourses.filter(course => course.deleted);
 
     return (
         <div className='dashboard'>
-            <Button onClick={handleCreate}>Create course</Button>
+            <h2>Administratoriaus skydelis</h2>
+            <Button onClick={handleCreate}>Sukurti kursą</Button>
 
+            <h2>Kursai</h2>
             <div className="admin-dashboard">
-                {courses.map((course) => {
-                    return (
-                        <Card 
-                            key={course.id} 
-                            title={course.name} 
+                {nonDeletedCourses.map((course) => (
+                    <div className="course-card-container" key={course.id}>
+                        <Card
+                            title={course.name}
                             paragraph={course.description}
                             onClick={() => handleCardClick(course.id)}
                         />
-                    );
-                })}
+                        <img
+                            className="trash-can"
+                            src={trashCan}
+                            alt="Delete"
+                            onClick={() => handleDelete(course.id)}
+                        />
+                    </div>
+                ))}
+            </div>
+
+            <h2>Ištrinti kursai</h2>
+            <div className="admin-dashboard">
+                {deletedCourses.map((course) => (
+                    <Card
+                        title={course.name}
+                        paragraph={course.description}
+                        onClick={() => handleCardClick(course.id)}
+                    />
+                ))}
             </div>
         </div>
     );
