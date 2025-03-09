@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import chevronIcon from "../assets/Chevron-icon.png";
 
 const Dropdown = ({
@@ -6,9 +6,16 @@ const Dropdown = ({
   placeholder = "Dropdown",
   showArrow = true,
   onSelect = () => {},
+  initialValue = null, // optional initial value
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(null);
+  const [selectedOption, setSelectedOption] = useState(initialValue);
+
+  useEffect(() => {
+    if (initialValue) {
+      setSelectedOption(initialValue);
+    }
+  }, [initialValue]);
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);

@@ -104,7 +104,8 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  background-color: var(--light);
+  background-color: transparent;
+  max-width: fit-content;
 }
 .container input {
   position: absolute;
@@ -124,7 +125,7 @@ body {
 }
 
 .container input:checked ~ .checkmark {
-  background-color: var(--light);
+  background-color: transparent;
 }
 
 .checkmark:after {
@@ -188,7 +189,7 @@ body {
   color: var(--text);
   text-decoration: none;
   padding: 0.15rem 0.3rem;
-  position: relative; /* Needed for positioning the ::after pseudo-element */
+  position: relative;
 }
 
 .hyperlink::after {
@@ -312,6 +313,7 @@ body {
 .dropdown {
   position: relative;
   display: inline-block;
+  margin-bottom: 1rem;
 }
 
 .dropdown img {
@@ -338,7 +340,6 @@ body {
 }
 
 .dropdown-header {
-  padding: 0.5rem;
   padding-right: 2.5rem;
   cursor: pointer;
   white-space: nowrap;
@@ -380,10 +381,9 @@ body {
 
 .dropdown:hover .dropdown-bottom-line {
   position: absolute;
-  top: 30px;
-  left: 10px;
+  top: 20px;
   height: 2px;
-  width: calc(100% - 20px);
+  width: calc(100% - 10px);
   background-color: var(--bright);
 }
 
