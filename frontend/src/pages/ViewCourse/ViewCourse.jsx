@@ -169,7 +169,7 @@ function ViewCourse() {
           <tbody>
             {problems.length === 0 ? (
               <tr>
-                <td colSpan="4">
+                <td colSpan="5">
                   <p>Šis kursas neturi sukurtų problemų</p>
                 </td>
               </tr>
