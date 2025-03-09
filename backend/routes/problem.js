@@ -3,6 +3,7 @@ import pool from '../utils/db.js'
 
 const router = express.Router();
 
+// imti visas problemas arba viena pridejus ?id={id} prie api call
 router.get("/", async (req, res) => {
     const { id } = req.query;
 
@@ -34,13 +35,22 @@ router.post('/create', async (req, res) => {
         return res.status(400).json({ message: 'Nepakanka duomenų' });
     }
 
+    const values = [
+        name, 
+        description, 
+        generated ? 1 : 0,
+        hints || '',
+        solution || '',
+        difficulty, 
+        fk_COURSEid || null, 
+        fk_AI_RESPONSEid || null
+      ];
+
     try {
         const query = `INSERT INTO problems 
             (name, description, \`generated\`, hints, solution, difficulty, fk_COURSEid, fk_AI_RESPONSEid) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
         
-        const values = [name, description, generated ? 1 : 0, hints, solution, difficulty, fk_COURSEid, fk_AI_RESPONSEid];
-
         const [result] = await pool.execute(query, values);
 
         if (result && result.insertId) {
@@ -78,7 +88,7 @@ router.post('/update', async (req, res) => {
     }
 });
 
-router.delete('/delete', async (req, res) =>{
+router.post('/delete', async (req, res) =>{
     const {id} = req.body;
 
     if(!id) {
@@ -86,7 +96,7 @@ router.delete('/delete', async (req, res) =>{
     }
 
     try {
-        const [result] = await pool.execute("DELETE FROM problems WHERE id = ?", [id]);
+        const [result] = await pool.execute("UPDATE problems SET deleted = 1 WHERE id = ?", [id]);
 
         if(result.affectedRows === 0) {
             return res.status(404).json({ message: 'Nepavyko ištrinti problemos'});
@@ -95,33 +105,6 @@ router.delete('/delete', async (req, res) =>{
         return res.status(200).json({ message: 'Problema sėkmingai ištrinta'});
     } catch (error) {
         return res.status(500).json({ message: "Serverio klaida", error });
-    }
-});
-
-router.get('/:id/problem_code', async (req, res) => {
-    const id = req.params.id;
-    try {
-        const [rows] = await pool.execute('SELECT id, code, fk_USERid FROM problem_codes WHERE fk_PROBLEMid = ?', [id]);
-        res.status (200).json(rows);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Serverio klaida' });
-    }
-});
-
-router.get('/:id/problem_code/:id2', async (req, res) => {
-    const id = req.params.id;
-    const id2 = req.params.id2;
-    try {
-        const [rows] = await pool.execute('SELECT id, code, fk_USERid FROM problem_codes WHERE fk_PROBLEMid = ? AND id = ?', [id, id2]);
-        if (rows.length === 0) {
-            res.status(404).json({ message: 'Sprendimo kodas nerastas' });
-        } else {
-            res.status(200).json(rows);
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Serverio klaida' });
     }
 });
 

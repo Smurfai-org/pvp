@@ -11,7 +11,6 @@ function ViewCourse() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // State variables
   const [course, setCourse] = useState(null);
   const [problems, setProblems] = useState([]);
   const [editActive, setEditActive] = useState(false);
@@ -19,7 +18,6 @@ function ViewCourse() {
   const [courseDescription, setCourseDescription] = useState("");
   const [courseIcon, setcourseIcon] = useState("");
 
-  // Fetch course and problems
   useEffect(() => {
     const fetchCourse = async () => {
       try {
@@ -57,7 +55,6 @@ function ViewCourse() {
     fetchProblems();
   }, [id]);
 
-  // Handle editing course
   const handleEdit = () => setEditActive(true);
   const exitEdit = () => setEditActive(false);
 
@@ -98,7 +95,11 @@ function ViewCourse() {
     setEditActive(false);
   };
 
-  const handleAddProblem = () => navigate("/add_problem");
+  const handleAddProblem = () => navigate(`/add_problem/${id}`);
+  const handleGenProblem = () => navigate(`/generate_problem/${id}`);
+
+  problems.sort((a, b) => (a.deleted ? 1 : 0) - (b.deleted ? 1 : 0));
+
   return (
     <div style={{ margin: "2rem" }}>
       <div className="course-data">
@@ -149,6 +150,11 @@ function ViewCourse() {
         )}
       </div>
 
+      <div>
+       <Button onClick={handleAddProblem}>Kurti problemą</Button>
+       <Button onClick={handleGenProblem}>Generuoti problemą</Button>
+      </div>
+
       <div className="table-container">
         <table>
           <thead>
@@ -157,6 +163,7 @@ function ViewCourse() {
               <th>Aprašymas</th>
               <th>Sugeneruota</th>
               <th>Sudėtingumas</th>
+              <th>Ištrinta</th>
             </tr>
           </thead>
           <tbody>
@@ -170,20 +177,16 @@ function ViewCourse() {
               problems.map((problem) => (
                 <tr
                   key={problem.id}
-                  onClick={() => navigate(`/problems/${problem.id}`)}
+                  onClick={() => navigate(`/view_problem/${problem.id}`)}
                 >
                   <td>{problem.name}</td>
                   <td>{problem.description}</td>
                   <td>{problem.generated ? "Taip" : "NE"}</td>
                   <td>{problem.difficulty}</td>
+                  <td>{problem.deleted ? "Taip" : "NE"}</td>
                 </tr>
               ))
             )}
-            <tr>
-              <td colSpan="4" className="add-button" onClick={handleAddProblem}>
-                +
-              </td>
-            </tr>
           </tbody>
         </table>
       </div>
