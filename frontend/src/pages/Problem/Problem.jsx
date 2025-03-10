@@ -107,6 +107,8 @@ const Problem = () => {
   const [isOutputWindowMaximised, setIsOutputWindowMaximised] = useState(false);
 
   const [problem, setProblem] = useState("");
+  const [previousProblemId, setPreviousProblemId] = useState(null);
+  const [nextProblemId, setNextProblemId] = useState(null);
   const [selectedLanguageValue, setSelectedLanguageValue] = useState(
     languages[0]?.value
   );
@@ -118,6 +120,10 @@ const Problem = () => {
     if (selectedLang) {
       setSelectedLanguageValue(selectedLang.value);
     }
+  };
+
+  const handleArrowNavigationButtonClick = (id) => {
+    navigate(`/problem/${id}`);
   };
 
   const handleRunButtonClick = () => {
@@ -153,15 +159,38 @@ const Problem = () => {
     setProblem(mockProblem);
     setCppInputCode(mockProblem?.codeTemplates?.cpp?.startingCode);
     setPythonInputCode(mockProblem?.codeTemplates?.python?.startingCode);
+    setPreviousProblemId(Number(id) - 1);
+    setNextProblemId(Number(id) + 1);
+    setIsOutputWindowMaximised(false);
   }, [params.id]);
 
   return (
     <div className="full-screen-container">
       <div className="problem-page-left">
-        <div>
+        <div style={{ display: "flex", gap: "1rem" }}>
           <Button extra="small" onClick={() => navigate("/")}>
-            Back to list
+            Atgal į sąrašą
           </Button>
+          <div style={{ display: "flex", gap: "1px" }}>
+            {previousProblemId !== null && (
+              <Button
+                extra="small"
+                onClick={() =>
+                  handleArrowNavigationButtonClick(previousProblemId)
+                }
+              >
+                {"< praeita"}
+              </Button>
+            )}
+            {nextProblemId !== null && (
+              <Button
+                extra="small"
+                onClick={() => handleArrowNavigationButtonClick(nextProblemId)}
+              >
+                {"kita >"}
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="problem-info-screen">
@@ -185,12 +214,12 @@ const Problem = () => {
           <div className="IO-examples-list">
             {problem?.inputsAndOutputs?.map((item, index) => (
               <div key={index} className="IO-example">
-                <p style={{ fontWeight: "600" }}>Example {index + 1}</p>
+                <p style={{ fontWeight: "600" }}>Pavyzdys {index + 1}</p>
                 <p>
-                  <strong>Input:</strong> {item?.input}
+                  <strong>Įvestis:</strong> {item?.input}
                 </p>
                 <p>
-                  <strong>Result:</strong> {item?.expectedOutput}
+                  <strong>Rezultatas:</strong> {item?.expectedOutput}
                 </p>
               </div>
             ))}
@@ -200,7 +229,7 @@ const Problem = () => {
       <div className="problem-page-right">
         <div style={{ display: "flex", gap: "1rem" }}>
           <Button extra="small" onClick={handleRunButtonClick}>
-            Run code
+            Leisti programą
           </Button>
           <Button
             extra="small bright"
@@ -208,7 +237,7 @@ const Problem = () => {
               console.log("AI Suggestions");
             }}
           >
-            AI Suggestions
+            AI pasiūlymai
           </Button>
           <Dropdown
             options={languages?.map((language) => language?.label)}
