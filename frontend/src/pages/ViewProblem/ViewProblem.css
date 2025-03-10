@@ -1,0 +1,8 @@
+.problem-container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    background: #f9f9f9;
+  }
+  

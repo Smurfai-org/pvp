@@ -1,0 +1,123 @@
+.full-screen-container {
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--light);
+  padding: 1rem;
+  box-sizing: border-box;
+  display: flex;
+  gap: 1rem;
+}
+
+.problem-page-left {
+  height: 100%;
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.problem-info-screen {
+  flex-grow: 1;
+  background-color: var(--white);
+  padding: 1rem;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.problem-related-courses {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.IO-examples-list {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.IO-example {
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: var(--light);
+}
+
+.problem-page-right {
+  height: 100%;
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.code-editor-area {
+  width: 100%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background-color: var(--white);
+  transition: 0.4s;
+}
+
+.output-window {
+  position: relative;
+  background-color: var(--white);
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: 0.4s;
+  display: flex;
+  flex-direction: column;
+}
+
+.output-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.problem-sticky-header {
+  position: sticky;
+  top: 0;
+  background-color: var(--secondary);
+  height: 2rem;
+  width: 100%;
+  padding: 0 1rem;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.output-text-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  margin-left: 1rem;
+  min-height: 0;
+}
+
+.output-text {
+  margin: 0;
+  font-family: "Consolas";
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.code-editor-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.code-editor {
+  flex-grow: 1;
+  min-height: 0;
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
