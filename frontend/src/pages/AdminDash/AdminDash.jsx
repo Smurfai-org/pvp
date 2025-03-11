@@ -61,7 +61,7 @@ function AdminDash() {
         }
       };
 
-    const sortedCourses = courses.sort((a, b) => a.creation_date.localeCompare(b.creation_date))
+    const sortedCourses = courses.sort((a, b) => a.created_at.localeCompare(b.created_at))
     const nonDeletedCourses = sortedCourses.filter(course => !course.deleted);
     const deletedCourses = sortedCourses.filter(course => course.deleted);
 

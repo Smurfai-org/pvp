@@ -18,8 +18,6 @@ const ProblemDetails = () => {
     name: '',
     description: '',
     generated: 0,
-    hints: '',
-    solution: '',
     difficulty: '',
     fk_COURSEid: '',
     fk_AI_RESPONSEid: ''
@@ -45,6 +43,8 @@ const ProblemDetails = () => {
   }, [id]);
 
   const handleSave = async () => {
+    console.log("Sending data:", editedProblem);
+
     try {
       const response = await fetch('http://localhost:5000/problem/update', {
         method: 'POST',
@@ -122,10 +122,11 @@ const ProblemDetails = () => {
     }));
   };
 
-  const handleCheckboxChange = (checked) => {
+  const handleCheckboxChange = (event) => {
+    const isChecked = event.target.checked;
     setEditedProblem(prevProblem => ({
       ...prevProblem,
-      generated: checked ? 1 : 0
+      generated: isChecked ? 1 : 0
     }));
   };
 
@@ -156,22 +157,6 @@ const ProblemDetails = () => {
             />
           </div>
           <div className="form-group">
-            <TextBox
-              text="Sprendimai"
-              value={editedProblem.solution}
-              onChange={(e) => setEditedProblem(prev => ({ ...prev, solution: e.target.value }))}
-              name="solution"
-            />
-          </div>
-          <div className="form-group">
-            <TextBox
-              text="Užuominos"
-              value={editedProblem.hints}
-              onChange={(e) => setEditedProblem(prev => ({ ...prev, hints: e.target.value }))}
-              name="hints"
-            />
-          </div>
-          <div className="form-group">
             <Dropdown
               options={['Lengvas', 'Sudėtingas', 'Sunkus']}
               placeholder="Sudėtingumas"
@@ -182,12 +167,12 @@ const ProblemDetails = () => {
             />
           </div>
           <div className="form-group">
-            <Checkbox
-              checked={editedProblem.generated === 1}
-              onChange={handleCheckboxChange}
-            >
-              Generuota
-            </Checkbox>
+          <Checkbox
+            checked={Boolean(editedProblem.generated)}
+            onChange={handleCheckboxChange}
+          >
+            Generuota
+          </Checkbox>
           </div>
           <br />
           <Button onClick={handleSave}>Išsaugoti</Button>
