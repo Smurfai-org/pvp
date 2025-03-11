@@ -11,4 +11,18 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME,
 });
 
+<<<<<<< Updated upstream
 export default pool;
+=======
+(async () => {
+  try {
+    const connection = await pool.getConnection();
+    console.log('Successfully connected to database');
+    connection.release();
+  } catch (error) {
+    console.error('Database connection failed:', error.message);
+  }
+})();
+
+export default pool;
+>>>>>>> Stashed changes

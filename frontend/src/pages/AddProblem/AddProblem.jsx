@@ -12,8 +12,6 @@ function AddProblem() {
     name: '',
     description: '',
     generated: 0,
-    hints: '',
-    solution: '',
     difficulty: '',
     fk_COURSEid: param.id,
     fk_AI_RESPONSEid: null
@@ -55,8 +53,6 @@ function AddProblem() {
       
       <TextBox text='Problemos pavadinimas' onChange={(e) => setProblem(prev => ({ ...prev, name: e.target.value }))} />
       <TextBox text='Problemos aprašymas' onChange={(e) => setProblem(prev => ({ ...prev, description: e.target.value }))} />
-      <TextBox text='Problemos užuominos' onChange={(e) => setProblem(prev => ({ ...prev, hints: e.target.value }))} />
-      <TextBox text='Problemos sprendimas' onChange={(e) => setProblem(prev => ({ ...prev, solution: e.target.value }))} />
       
       <Dropdown 
         options={['Lengvas', 'Sudėtingas', 'Sunkus']} 
