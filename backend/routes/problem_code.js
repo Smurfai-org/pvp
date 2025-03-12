@@ -33,7 +33,7 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
     const { userId, problemId, code } = req.body;
-    if (!userId || !problemId || !code) {
+    if (!userId || !problemId) {
         return res.status(400).json({ message: 'Nepakanka duomenų' });
     } else {
         try {
@@ -53,21 +53,16 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     const id = req.params.id;
     const { code } = req.body;
-
-    if (!code) {
-        return res.status(400).json({ message: 'Nepakanka duomenų' });
-    } else {
-        try {
-            const [result] = await pool.execute('UPDATE problem_codes SET code = ? WHERE id = ?', [code, id]);
-            if (result.affectedRows > 0) {
-                res.status(200).json({ message: 'Sprendimo kodas atnaujintas' });
-            } else {
-                res.status(404).json({ message: 'Sprendimo kodas nerastas' });
-            }
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Serverio klaida' });
+    try {
+        const [result] = await pool.execute('UPDATE problem_codes SET code = ? WHERE id = ?', [code, id]);
+        if (result.affectedRows > 0) {
+            res.status(200).json({ message: 'Sprendimo kodas atnaujintas' });
+        } else {
+            res.status(404).json({ message: 'Sprendimo kodas nerastas' });
         }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Serverio klaida' });
     }
 });
 

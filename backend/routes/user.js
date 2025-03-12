@@ -162,21 +162,17 @@ router.post('/:id/problem_code', async (req, res) => {
 router.put('/:id/problem_code/:id2', async (req, res) => {
     const id = req.params.id;
     const id2 = req.params.id2;
-    if (!req.body.code) {
-        res.status(400).json({ message: 'Nėra ką atnaujinti' });
-    } else {
-        try {
-            const [result] = await pool.execute('UPDATE problem_codes SET code = ? WHERE fk_USERid = ? AND id = ?', [req.body.code, id, id2]);
-            if (result.affectedRows > 0) {
-                res.status(200).json({ message: 'Sprendimo kodas atnaujintas' });
-            } else {
-                res.status(404).json({ message: 'Sprendimo kodas nerastas' });
-            }
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Serverio klaida' });
-        } 
-    }
+    try {
+        const [result] = await pool.execute('UPDATE problem_codes SET code = ? WHERE fk_USERid = ? AND id = ?', [req.body.code, id, id2]);
+        if (result.affectedRows > 0) {
+            res.status(200).json({ message: 'Sprendimo kodas atnaujintas' });
+        } else {
+            res.status(404).json({ message: 'Sprendimo kodas nerastas' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Serverio klaida' });
+    } 
 });
 
 export default router;
