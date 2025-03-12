@@ -7,7 +7,7 @@ const router = express.Router();
 // visi
 router.get('/', async (req, res) => {
     try {
-        const [result] = await pool.execute('SELECT id, username, creation_date, role FROM users');
+        const [result] = await pool.execute('SELECT id, username, creation_date, role FROM users WHERE deleted = 0');
         if (result.length === 0) {
             return res.status(404).json({ message: 'Vartotojų nerasta' });
         }
@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
 // vienas
 router.get('/:id', async (req, res) => {
     try {
-        const [result] = await pool.execute('SELECT id, username, creation_date, role FROM users WHERE id = ?', [req.params.id]);
+        const [result] = await pool.execute('SELECT id, username, creation_date, role FROM users WHERE deleted = 0 AND id = ?', [req.params.id]);
         if (result.length === 0) {
             return res.status(404).json({ message: 'Vartotojas nerastas' });
         }
@@ -104,7 +104,7 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
     try {
-        const [result] = await pool.execute('DELETE FROM users WHERE id = ?', [req.params.id]);
+        const [result] = await pool.execute('UPDATE users SET deleted = 1 WHERE id = ?', [req.params.id]);
         if (result.affectedRows > 0) {
             return res.status(204).end();
         } else {
