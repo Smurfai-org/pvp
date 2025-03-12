@@ -29,7 +29,8 @@ router.get("/", async (req, res) => {
 
     res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({ message: "Serverio klaida" });
+    console.log(error.message);
+    return res.status(500).json({ message: "Serverio klaida"});
   }
 });
 
