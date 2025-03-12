@@ -39,7 +39,7 @@ const OutputSection = forwardRef(
     return (
       <div className="output-wrapper">
         <div className="problem-sticky-header">
-          <strong>Results</strong>
+          <strong>Rezultatai</strong>
           <div className="chevron-close-open" onClick={onChevronClick}>
             <img
               src={chevronIcon}
@@ -63,7 +63,7 @@ const OutputSection = forwardRef(
                     <br />
                   </>
                 ))
-              : 'Click button "Run code" to see your program\'s result.'}
+              : 'Spauskite mygtuką "Leisti programą" ir pamatykite programos rezultatą.'}
           </p>
         </div>
       </div>

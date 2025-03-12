@@ -34,21 +34,26 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
     const { username, password } = req.body;
+    if (!username || !password) {
+        res.status(400).json({ message: 'Ne visi laukai užpildyti' });
+    }
     const [existingUser] = await pool.execute('SELECT * FROM users WHERE username = ?', [username]);
     if (existingUser.length > 0) {
-        return res.status(409).json({ message: 'Vartotojas su tokiu vardu jau egzistuoja' });
-    }
-    try {
-        const hashedPassword = await hashPassword(password);
-        await pool.execute('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword]);
-        res.status(201).json({ message: 'Vartotojas sukurtas' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Serverio klaida' });
+        res.status(409).json({ message: 'Vartotojas su tokiu vardu jau egzistuoja' });
+    } else {
+        try {
+            const hashedPassword = await hashPassword(password);
+            await pool.execute('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword]);
+            res.status(201).json({ message: 'Vartotojas sukurtas' });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Serverio klaida' });
+        }
     }
 });
 
 router.put('/:id', async (req, res) => {
+    // pridėti roles kai bus autorizacija
     const userId = req.params.id;
     const { username, password } = req.body;
     
@@ -101,7 +106,7 @@ router.delete('/:id', async (req, res) => {
     try {
         const [result] = await pool.execute('DELETE FROM users WHERE id = ?', [req.params.id]);
         if (result.affectedRows > 0) {
-            return res.status(200).json({ message: 'Vartotojas ištrintas' });
+            return res.status(204).end();
         } else {
             return res.status(404).json({ message: 'Vartotojas nerastas' });
         }
@@ -111,5 +116,67 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-export default router;
+router.get('/:id/problem_code', async (req, res) => {
+    const id = req.params.id;
+    try {
+        const [rows] = await pool.execute('SELECT id, code FROM problem_codes WHERE fk_USERid = ?', [id]);
+        if (rows.length === 0) {
+             res.status(404).json({ message: 'Vartotojas neturi sprendimo kodų' });
+        } else {
+            res.status(200).json(rows);
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Serverio klaida' });
+    }
+});
 
+router.get('/:id/problem_code/:id2', async (req, res) => {
+    const id = req.params.id;
+    const id2 = req.params.id2;
+    try {
+        const [rows] = await pool.execute('SELECT id, code FROM problem_codes WHERE fk_USERid = ? AND id = ?', [id, id2]);
+        if (rows.length === 0) {
+             res.status(404).json({ message: 'Sprendimo kodas nerastas' });
+        } else {
+            res.status(200).json(rows);
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Serverio klaida' });
+    }
+});
+
+router.post('/:id/problem_code', async (req, res) => {
+    const id = req.params.id;
+    const { code, problemId } = req.body;
+    try {
+        await pool.execute('INSERT INTO problem_codes (code, fk_USERid, fk_PROBLEMid) VALUES (?, ?, ?)', [code, id, problemId]);
+        res.status(201).json({ message: 'Sprendimo kodas sukurtas' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Serverio klaida' });
+    }
+});
+
+router.put('/:id/problem_code/:id2', async (req, res) => {
+    const id = req.params.id;
+    const id2 = req.params.id2;
+    if (!req.body.code) {
+        res.status(400).json({ message: 'Nėra ką atnaujinti' });
+    } else {
+        try {
+            const [result] = await pool.execute('UPDATE problem_codes SET code = ? WHERE fk_USERid = ? AND id = ?', [req.body.code, id, id2]);
+            if (result.affectedRows > 0) {
+                res.status(200).json({ message: 'Sprendimo kodas atnaujintas' });
+            } else {
+                res.status(404).json({ message: 'Sprendimo kodas nerastas' });
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Serverio klaida' });
+        } 
+    }
+});
+
+export default router;

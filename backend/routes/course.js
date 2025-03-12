@@ -97,15 +97,15 @@ router.post('/update', async (req, res) => {
     }
 });
 
-router.delete('/delete', async (req, res) => {
-    const [id] = req.body;
+router.post('/delete', async (req, res) => {
+    const {id} = req.body;
 
     if(!id) {
         return res.status(400).json({ message: 'Nepakankami duomenys' });
     }
 
     try {
-        const [result] = await pool.execute("DELETE FROM courses WHERE id = ?", [id]);
+        const [result] = await pool.execute("UPDATE courses SET deleted = 1 WHERE id = ?", [id]);
 
         if(result.affectedRows === 0) {
             return res.status(500).json({ message: 'Nepavyko ištrinti kurso' });

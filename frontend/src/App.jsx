@@ -13,6 +13,8 @@ import CourseCreate from "./pages/CourseCreate/CourseCreate";
 import ViewCourse from "./pages/ViewCourse/ViewCourse";
 import AddProblem from "./pages/AddProblem/AddProblem";
 import Problem from "./pages/Problem/Problem";
+import ViewProblem from "./pages/ViewProblem/ViewProblem";
+import GenerateProblem from "./pages/GenerateProblem/GenerateProblem";
 
 function AppRoutes() {
   const location = useLocation();
@@ -33,7 +35,9 @@ function AppRoutes() {
         <Route path="/create_course" element={<CourseCreate />} />
         <Route path="/view_course/:id" element={<ViewCourse />} />
         <Route path="/problem/:id" element={<Problem />} />
-        <Route path="/add_problem" element={<AddProblem />} />
+        <Route path="/add_problem/:id" element={<AddProblem />} />
+        <Route path="/view_problem/:id" element={<ViewProblem />} />
+        <Route path="/generate_problem/:id" element={<GenerateProblem />} />
       </Routes>
     </>
   );
