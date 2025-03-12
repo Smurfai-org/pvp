@@ -9,7 +9,7 @@ import Dropdown from "../components/Dropdown";
 import Card from "../components/Card";
 import CategorySelector from "../components/CategorySelector";
 
-function Main() {
+function Examples() {
   return (
     <>
       <Button extra="small">Primary button</Button>
@@ -44,4 +44,4 @@ function Main() {
   );
 }
 
-export default Main;
+export default Examples;
