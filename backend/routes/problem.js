@@ -27,20 +27,35 @@ router.get("/", async (req, res) => {
     }
 });
 
-router.post('/create', async (req, res) => {
-    const { name, description, generated, hints, solution, difficulty, fk_COURSEid, fk_AI_RESPONSEid } = req.body;
+
+router.post("/create", async (req, res) => {
+  const {
+    name,
+    description,
+    generated,
+    difficulty,
+    fk_COURSEid,
+    fk_AI_RESPONSEid,
+  } = req.body;
 
     if (!name || !description || generated === undefined || !difficulty) {
         return res.status(400).json({ message: 'Nepakanka duomenų' });
     }
 
+    const values = [
+        name, 
+        description, 
+        generated ? 1 : 0,
+        difficulty, 
+        fk_COURSEid || null, 
+        fk_AI_RESPONSEid || null
+      ];
+
     try {
         const query = `INSERT INTO problems 
-            (name, description, \`generated\`, hints, solution, difficulty, fk_COURSEid, fk_AI_RESPONSEid) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+            (name, description, \`generated\`, difficulty, fk_COURSEid, fk_AI_RESPONSEid) 
+            VALUES (?, ?, ?, ?, ?, ?)`;
         
-        const values = [name, description, generated ? 1 : 0, hints, solution, difficulty, fk_COURSEid, fk_AI_RESPONSEid];
-
         const [result] = await pool.execute(query, values);
 
         if (result && result.insertId) {
@@ -55,30 +70,43 @@ router.post('/create', async (req, res) => {
 });
 
 router.post('/update', async (req, res) => {
-    const { id, name, description, generated, hints, solution, difficulty, fk_COURSEid, fk_AI_RESPONSEid } = req.body;
+    const { id, name, description, generated, difficulty, fk_COURSEid, fk_AI_RESPONSEid } = req.body;
 
     if (!id || !name || !description || generated === undefined || !difficulty) {
         return res.status(400).json({ message: 'Nepakanka duomenų' });
     }
 
     try {
-        const query = `UPDATE problems SET name = ?, description = ?, \`generated\` = ? , hints = ? , solution = ?, difficulty = ?, fk_COURSEid = ?, fk_AI_RESPONSEid = ? WHERE id = ?`;
-        
-        const values = [name, description, generated ? 1 : 0, hints, solution, difficulty, fk_COURSEid, fk_AI_RESPONSEid, id];
+        const query = `UPDATE problems 
+        SET name = ?, description = ?, \`generated\` = ?, difficulty = ?, fk_COURSEid = ?, fk_AI_RESPONSEid = ? 
+        WHERE id = ?`;
+
+        const values = [
+            name, 
+            description, 
+            generated ? 1 : 0,
+            hints, 
+            solution, 
+            difficulty, 
+            fk_COURSEid, 
+            fk_AI_RESPONSEid || null,
+            id
+        ];
 
         const [result] = await pool.execute(query, values);
 
         if (result.affectedRows == 0) {
             return res.status(500).json({ message: 'Nepavyko rasti problemos' });
         }
-        return res.status(201).json({ message: 'Problema atnaujinta sėkmingai' });
-
-    } catch (error) {
-        return res.status(500).json({ message: "Serverio klaida", error });
-    }
+        
+        return res.status(200).json({ message: 'Problema atnaujinta sėkmingai' });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Serverio klaida", error });
+  }
 });
 
-router.delete('/delete', async (req, res) =>{
+router.post('/delete', async (req, res) =>{
     const {id} = req.body;
 
     if(!id) {
