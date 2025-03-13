@@ -20,7 +20,27 @@
 
 .inline-centered-buttons-login {
   display: flex;
-  gap: 10px;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.google-button {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  margin: 1rem;
+  width: 7rem;
+}
+
+.google-img {
+  width: 1.5rem;
+  filter: invert(100%);
+}
+
+.google-cnt {
+  display: flex;
   justify-content: center;
   align-items: center;
 }

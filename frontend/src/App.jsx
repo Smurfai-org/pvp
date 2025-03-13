@@ -16,6 +16,7 @@ import AddProblem from "./pages/AddProblem/AddProblem";
 import Problem from "./pages/Problem/Problem";
 import ViewProblem from "./pages/ViewProblem/ViewProblem";
 import GenerateProblem from "./pages/GenerateProblem/GenerateProblem";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 function AppRoutes() {
   const location = useLocation();
@@ -27,20 +28,22 @@ function AppRoutes() {
 
   return (
     <>
-      {shouldShowNavbar && <Navbar />}
-      <Routes>
-        <Route path="/" element={<Main />} />
-        <Route path="/exam" element={<Examples />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/admin_dash" element={<AdminDash />} />
-        <Route path="/create_course" element={<CourseCreate />} />
-        <Route path="/view_course/:id" element={<ViewCourse />} />
-        <Route path="/problem/:id" element={<Problem />} />
-        <Route path="/add_problem/:id" element={<AddProblem />} />
-        <Route path="/view_problem/:id" element={<ViewProblem />} />
-        <Route path="/generate_problem/:id" element={<GenerateProblem />} />
-      </Routes>
+      <GoogleOAuthProvider clientId="280766696047-1u5pgobckg0qgi6crngv11gsqur7p25p.apps.googleusercontent.com">
+        {shouldShowNavbar && <Navbar />}
+        <Routes>
+          <Route path="/" element={<Main />} />
+          <Route path="/exam" element={<Examples />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/admin_dash" element={<AdminDash />} />
+          <Route path="/create_course" element={<CourseCreate />} />
+          <Route path="/view_course/:id" element={<ViewCourse />} />
+          <Route path="/problem/:id" element={<Problem />} />
+          <Route path="/add_problem/:id" element={<AddProblem />} />
+          <Route path="/view_problem/:id" element={<ViewProblem />} />
+          <Route path="/generate_problem/:id" element={<GenerateProblem />} />
+        </Routes>
+      </GoogleOAuthProvider>
     </>
   );
 }

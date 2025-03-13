@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { TextBox } from "../../components/textBox/TextBox";
 import Button from "../../components/Button";
 import "./login.css";
+import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
+import googleIcon from '../../assets/google_icon.svg';
 
 function Login() {
   const navigate = useNavigate();
@@ -47,6 +49,28 @@ function Login() {
     navigate("/");
   };
 
+  const googleLoginButton = useGoogleLogin({
+    onSuccess: async (gresponse) => {
+      const response = await fetch('http://localhost:5000/googleAuth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gresponse }),
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        window.location.href = '/';
+      } else {
+        const data = await response.json();
+        console.log(data.message || 'Login failed');
+      }
+    },
+    onError: () => {
+      console.log('Google login failed.');
+    },
+    flow: 'auth-code',
+  });
+
   return (
     <div className="full-page-container-login">
       <div className="centered-content-login">
@@ -67,6 +91,11 @@ function Login() {
         <div className="inline-centered-buttons-login">
           <Button onClick={handleSubmit}>Log in</Button>
           <Button extra="secondary">Sign up</Button>
+        </div> 
+        <div className="google-cnt">
+          <Button extra='google-button' onClick={googleLoginButton}>
+            <img src={googleIcon} className="google-img"/>Prisijungti su Google
+          </Button>
         </div>
       </div>
     </div>
