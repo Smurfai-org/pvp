@@ -372,6 +372,7 @@ body {
 }
 
 .dropdown-list {
+  z-index: 100;
   max-height: calc(100vh - 200px);
   overflow-y: auto;
 }
