@@ -1,32 +1,34 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import Card from '../../components/Card';
 import "./AdminDash.css";
 import Button from '../../components/Button';
 import { useNavigate } from 'react-router-dom';
 import trashCan from '../../assets/trash-can.svg';
+import { MessageContext } from '../../utils/MessageProvider';
 
 function AdminDash() {
     const [courses, setCourses] = useState([]);
     const navigate = useNavigate();
+    const { showSuccessMessage, showErrorMessage, showWarningMessage } = useContext(MessageContext);
+
+    const fetchData = async () => {
+        try {
+            const req = await fetch(`http://localhost:5000/course/`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            if (!req.ok) {
+                throw new Error(res.status);
+            }
+            const res = await req.json();
+
+            setCourses(res);
+        } catch (error) {
+            showErrorMessage('Nepavyko rasti kursų');
+        }
+    };
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const req = await fetch(`http://localhost:5000/course/`, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                if (!req.ok) {
-                    throw new Error(`HTTP error: ${req.status}`);
-                }
-                const res = await req.json();
-
-                setCourses(res);
-            } catch (error) {
-                console.error(error.message);
-            }
-        };
-
         fetchData();
     }, []);
 
@@ -40,26 +42,27 @@ function AdminDash() {
 
     const handleDelete = async (id) => {
         if (!window.confirm("Ar tikrai norite ištrinti šį kursą?")) return;
-      
+    
         try {
-          const response = await fetch(`http://localhost:5000/course/delete?id=${id}`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ id })
-          });
-      
-          const data = await response.json();
-      
-          if (!response.ok) {
-            throw new Error(data.message || 'Klaida šalinant kursą');
-          }
-      
-          alert("Kursas sėkmingai ištrinta!");
-          window.location.reload();
+            const response = await fetch(`http://localhost:5000/course/delete?id=${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+    
+            if (!response.ok) {
+                throw new Error('Nepavyko ištrinti kurso');
+            }
+    
+            showSuccessMessage("Kursas sėkmingai ištrintas!");
+    
+            fetchData();
+    
         } catch (error) {
-          alert(`Klaida: ${error.message}`);
+            console.error("Klaida:", error);
+            showErrorMessage(error.message || 'Nepavyko ištrinti kurso');
         }
-      };
+    };    
 
     const sortedCourses = courses.sort((a, b) => a.created_at.localeCompare(b.created_at))
     const nonDeletedCourses = sortedCourses.filter(course => !course.deleted);

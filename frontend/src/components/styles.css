@@ -499,3 +499,32 @@ body {
   gap: 1rem;
   margin: 0 1rem;
 }
+
+.alert-wrapper {
+  width: fit-content;
+  display: flex;
+  gap: 2rem;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--light);
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  padding: 0 1rem;
+}
+
+.alert-exit {
+  width: 2.5rem;
+}
+
+.success {
+  border: 2px solid var(--secondary);
+}
+
+.warning {
+  border: 2px solid var(--premium);
+}
+
+.error {
+  border: 2px solid var(--bright);
+}

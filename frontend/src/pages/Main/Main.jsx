@@ -2,6 +2,7 @@ import "./main.css";
 import SideImage from "../../assets/Smurfai-landing-page-image.png";
 import Button from "../../components/Button";
 import { useNavigate } from "react-router-dom";
+import Alert from "../../components/Alert";
 
 const specialSpaces = (num) => {
   let spacesArray = [];

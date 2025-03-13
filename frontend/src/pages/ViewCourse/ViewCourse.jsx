@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Button from '../../components/Button';
 import TextBox from '../../components/textBox/TextBox';
@@ -6,11 +6,12 @@ import './ViewCourse.css';
 import editButton from '../../assets/edit-icon.svg';
 import exitButton from '../../assets/exit-icon.svg';
 import checkButton from '../../assets/check-icon.svg';
+import { MessageContext } from '../../utils/MessageProvider';
 
 function ViewCourse() {
   const { id } = useParams();
   const navigate = useNavigate();
-
+  const { showSuccessMessage, showErrorMessage, showWarningMessage } = useContext(MessageContext);
   const [course, setCourse] = useState(null);
   const [problems, setProblems] = useState([]);
   const [editActive, setEditActive] = useState(false);
@@ -32,24 +33,36 @@ function ViewCourse() {
         }
       } catch (error) {
         console.error("Error fetching course:", error);
+        showErrorMessage('Nepavyko gauti kurso');
         setCourse(null);
       }
     };
 
     const fetchProblems = async () => {
       try {
-        const res = await fetch(
-          `http://localhost:5000/course/problems?id=${id}`
-        );
-        if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
-
+        const res = await fetch(`http://localhost:5000/course/problems?id=${id}`);
+    
+        if (!res.ok) {
+          if (res.status === 404) {
+            console.warn("No problems found, skipping error message.");
+            return;
+          }
+          throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+    
         const data = await res.json();
-        setProblems(data);
+        if (data.length === 0) {
+          console.warn("No problems available for the given ID.");
+          return;
+        }
+
+        console.log("Fetched problems:", data);
       } catch (error) {
         console.error("Error fetching problems:", error);
-        setProblems([]);
+        showErrorMessage('Nepavyko gauti užduočių');
       }
     };
+    
 
     fetchCourse();
     fetchProblems();
@@ -88,8 +101,10 @@ function ViewCourse() {
         icon_url: courseIcon,
       };
       setCourse(updatedCourse);
+      showSuccessMessage('Kurso informacija sėkmingai atnaujinta');
     } catch (error) {
       console.error("Error updating course:", error);
+      showErrorMessage('Klaida atnaujinant kursą');
     }
 
     setEditActive(false);
