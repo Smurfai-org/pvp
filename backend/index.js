@@ -10,7 +10,13 @@ dotenv.config();
 const app = express();
 const port = 5000;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    methods: "GET,POST,PUT,DELETE",
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 const __filename = fileURLToPath(import.meta.url);

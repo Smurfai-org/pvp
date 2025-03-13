@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './ViewProblem.css';
 import Button from '../../components/Button';
 import TextBox from '../../components/textBox/TextBox';
 import Checkbox from '../../components/Checkbox';
 import Dropdown from '../../components/Dropdown';
+import { MessageContext } from '../../utils/MessageProvider';
 
 const ProblemDetails = () => {
   const { id } = useParams();
@@ -22,6 +23,8 @@ const ProblemDetails = () => {
     fk_COURSEid: '',
     fk_AI_RESPONSEid: ''
   });
+  const { showSuccessMessage, showErrorMessage, showWarningMessage } = useContext(MessageContext);
+  
 
   useEffect(() => {
     const fetchProblem = async () => {
@@ -35,6 +38,7 @@ const ProblemDetails = () => {
         setEditedProblem(data[0]);
       } catch (err) {
         setError(err.message);
+        showErrorMessage('Nepavyko gauti užduoties')
       } finally {
         setLoading(false);
       }
@@ -61,8 +65,10 @@ const ProblemDetails = () => {
       alert('Problema sėkmingai atnaujinta!');
       setIsEditMode(false);
       window.location.reload();
+      showSuccessMessage('Užduotis sėkmingai atnaujinta');
     } catch (error) {
       alert(`Klaida: ${error.message}`);
+      showErrorMessage('Nepavyko išsaugoti pakeitimų')
     }
   };
 
@@ -82,10 +88,10 @@ const ProblemDetails = () => {
         throw new Error(data.message || 'Klaida šalinant problemą');
       }
 
-      alert("Problema sėkmingai ištrinta!");
+      showSuccessMessage('Užduotis sėkmingai ištrinta');
       window.location.reload();
     } catch (error) {
-      alert(`Klaida: ${error.message}`);
+      showErrorMessage('Nepavyko ištrinti užduoties')
     }
   };
 
@@ -131,8 +137,6 @@ const ProblemDetails = () => {
   };
 
   if (loading) return <p>Kraunama...</p>;
-  if (error) return <p style={{ color: 'red' }}>Klaida: {error}</p>;
-  if (!problem) return <p>Problema nerasta.</p>;
 
   return (
     <div className="problem-container">
@@ -188,12 +192,12 @@ const ProblemDetails = () => {
           <p><strong>AI Atsakymo ID:</strong> {problem.fk_AI_RESPONSEid || '-'}</p>
           <p><strong>Ištrinta:</strong> {problem.deleted ? 'Taip' : 'Ne'}</p>
 
-          <Button onClick={() => setIsEditMode(true)}>Redaguoti problemą</Button>
+          <Button onClick={() => setIsEditMode(true)}>Redaguoti</Button>
           
           {problem.deleted ? (
-            <Button onClick={() => handleRecover(id)}>Grąžinti problemą</Button>
+            <Button onClick={() => handleRecover(id)}>Grąžinti</Button>
           ) : (
-            <Button onClick={() => handleDelete(id)}>Ištrinti problemą</Button>
+            <Button onClick={() => handleDelete(id)}>Ištrinti</Button>
           )}
         </>
       )}

@@ -85,8 +85,6 @@ router.post('/update', async (req, res) => {
             name, 
             description, 
             generated ? 1 : 0,
-            hints, 
-            solution, 
             difficulty, 
             fk_COURSEid, 
             fk_AI_RESPONSEid || null,
@@ -114,7 +112,7 @@ router.post('/delete', async (req, res) =>{
     }
 
     try {
-        const [result] = await pool.execute("DELETE FROM problems WHERE id = ?", [id]);
+        const [result] = await pool.execute("UPDATE problems SET deleted = 1 WHERE id = ?", [id]);
 
         if(result.affectedRows === 0) {
             return res.status(404).json({ message: 'Nepavyko ištrinti problemos'});
