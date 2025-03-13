@@ -123,7 +123,7 @@ const Problem = () => {
   };
 
   const handleArrowNavigationButtonClick = (id) => {
-    navigate(`/problem/${id}`);
+    navigate(`/problems/${id}`);
   };
 
   const handleRunButtonClick = () => {
@@ -168,13 +168,13 @@ const Problem = () => {
     <div className="full-screen-container">
       <div className="problem-page-left">
         <div style={{ display: "flex", gap: "1rem" }}>
-          <Button extra="small" onClick={() => navigate("/")}>
+          <Button extra="small secondary" onClick={() => navigate("/")}>
             Atgal į sąrašą
           </Button>
-          <div style={{ display: "flex", gap: "1px" }}>
+          <div style={{ display: "flex", gap: "3px" }}>
             {previousProblemId !== null && (
               <Button
-                extra="small"
+                extra="small secondary"
                 onClick={() =>
                   handleArrowNavigationButtonClick(previousProblemId)
                 }
@@ -184,7 +184,7 @@ const Problem = () => {
             )}
             {nextProblemId !== null && (
               <Button
-                extra="small"
+                extra="small secondary"
                 onClick={() => handleArrowNavigationButtonClick(nextProblemId)}
               >
                 {"kita >"}
