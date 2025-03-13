@@ -2,29 +2,63 @@ import { useNavigate, useParams } from "react-router-dom";
 import "./course.css";
 import ProgressBar from "./ProgressBar";
 import Button from "../../components/Button";
+import { useEffect, useState } from "react";
 
 const Course = () => {
-  const params = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
+  const [courseInfo, setCourseInfo] = useState(null);
+  const [courseProblems, setCourseProblems] = useState([]);
+
+  useEffect(() => {
+    const fetchCourse = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/course/?id=${id}`);
+        if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+
+        const data = await res.json();
+        if (data.length > 0) {
+          setCourseInfo(data[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching course:", error);
+        setCourseInfo(null);
+      }
+    };
+
+    const fetchProblems = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:5000/course/problems?id=${id}`
+        );
+        if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+
+        const data = await res.json();
+        setCourseProblems(data);
+      } catch (error) {
+        console.error("Error fetching problems:", error);
+        setCourseProblems([]);
+      }
+    };
+
+    fetchCourse();
+    fetchProblems();
+  }, [id]);
+
+  console.log(courseInfo);
+  console.log(courseProblems);
 
   return (
     <div className="course-container">
-      <div className="course-info">
+      <div className="course-info-container">
         <div className="course-info-top-row">
-          <h2>Pavadinimas</h2>
+          <h2>{courseInfo?.name}</h2>
           <div className="inline-elements">
             <strong>2/10</strong>
             <ProgressBar progress={20} />
           </div>
         </div>
-        <p className="course-info-description">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur.
-        </p>
+        <p className="course-info-description">{courseInfo?.description}</p>
         <br />
         <div className="inline-elements">
           <Button extra="small secondary" onClick={() => navigate("/")}>
@@ -33,9 +67,21 @@ const Course = () => {
           <Button extra="small">Tęsti</Button>
         </div>
       </div>
-      <div className="course-info">
+      <div className="course-info-container">
         <div className="course-info-top-row">
           <h2>Kurso problemos</h2>
+        </div>
+        <div className="problems-container">
+          {courseProblems && courseProblems?.length > 0 ? (
+            courseProblems?.map((problem, index) => (
+              <div key={index} className="course-problem-item">
+                {problem?.name}
+                {problem?.difficulty}
+              </div>
+            ))
+          ) : (
+            <p>No problems available</p>
+          )}
         </div>
       </div>
     </div>

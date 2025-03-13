@@ -12,7 +12,7 @@ h2 {
   gap: 1rem;
 }
 
-.course-info {
+.course-info-container {
   padding: 1rem;
   margin: 0;
   width: 100%;
@@ -56,4 +56,8 @@ h2 {
   height: 100%;
   background-color: var(--difficulty-easy);
   transition: 0.3s;
+}
+
+.course-problem-item {
+  display: flex;
 }
