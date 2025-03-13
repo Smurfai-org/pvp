@@ -89,8 +89,8 @@ function Login() {
           errorText={passwordError}
         />
         <div className="inline-centered-buttons-login">
-          <Button onClick={handleSubmit}>Log in</Button>
-          <Button extra="secondary">Sign up</Button>
+          <Button extra='login-btn' onClick={handleSubmit}>Log in</Button>
+          <Button extra="secondary login-btn">Sign up</Button>
         </div> 
         <div className="google-cnt">
           <Button extra='google-button' onClick={googleLoginButton}>
