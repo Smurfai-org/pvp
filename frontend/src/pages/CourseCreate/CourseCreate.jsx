@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { TextBox } from '../../components/textBox/TextBox';
 import Button from '../../components/Button';
 import "./CourseCreate.css";
 import Card from '../../components/Card';
 import { useNavigate } from 'react-router-dom';
+import { MessageContext } from '../../utils/MessageProvider';
 
 function CourseCreate() {
 
@@ -11,6 +12,8 @@ function CourseCreate() {
     const [courseTitle, setCourseTitle] = useState("");
     const [courseDescription, setCourseDescription] = useState("");
     const [courseIcon, setCourseIcon] = useState("");
+    const { showSuccessMessage, showErrorMessage, showWarningMessage } = useContext(MessageContext);
+    
 
     const handleSubmit = async () => {
         const data = {
@@ -32,9 +35,11 @@ function CourseCreate() {
             }
 
             const res = await req.json();
+            showSuccessMessage('Kursas sėkmingai sukurtas');
             navigate(`/view_course/${res.id}`);
         } catch (error) {
             console.error("Update failed:", error);
+            showErrorMessage('Nepavyko sukurti kurso');
         }
     };
 
