@@ -4,7 +4,7 @@ h2 {
 }
 
 .course-container {
-  width: 100vw;
+  width: 100%;
   padding: 1rem;
   box-sizing: border-box;
   display: flex;
@@ -62,14 +62,19 @@ h2 {
   cursor: pointer;
   display: flex;
   justify-content: space-between;
-  background-color: var(--light);
+  box-sizing: border-box;
   padding: 1rem;
-  border-radius: 1rem;
   transition: 0.1s;
 }
 
+.course-problem-status {
+  width: 30%;
+  justify-content: space-between;
+  display: flex;
+}
+
 .course-problem-item:hover {
-  background-color: var(--secondary);
+  background-color: var(--light);
 }
 
 .course-not-started {
@@ -82,4 +87,11 @@ h2 {
 
 .course-finished {
   color: var(--highligth);
+}
+
+.problems-container hr {
+  margin: 0.5rem 0;
+  border: none;
+  height: 2px;
+  background-color: var(--light);
 }

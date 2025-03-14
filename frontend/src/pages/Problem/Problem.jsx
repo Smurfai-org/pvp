@@ -1,108 +1,24 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Button from "../../components/Button";
 import Hyperlink from "../../components/Hyperlink";
 import CodeEditor from "./CodeEditor";
 import Dropdown from "../../components/Dropdown";
 import OutputSection from "./Output";
 import "./problem.css";
+import { difficulty_dictionary } from "../../constants";
 
 const languages = [
   { label: "C++", value: "cpp" },
   { label: "Python", value: "python" },
 ];
 
-const mockProblem = {
-  name: "Sum of Two Numbers",
-  description:
-    "Write a C++ program that takes two integers as input and returns their sum.",
-  hints: [
-    "Use the `+` operator to add two numbers.",
-    "Make sure to handle input using `cin`.",
-    "Output the result using `cout`.",
-  ],
-  difficulty: "Easy",
-  inputsAndOutputs: [
-    {
-      input: "num1 = 5, num2 = 10",
-      expectedOutput: "15",
-    },
-    {
-      input: "num1 = -3, num2 = 7",
-      expectedOutput: "4",
-    },
-    {
-      input: "num1 = 0, num2 = 0",
-      expectedOutput: "0",
-    },
-  ],
-  courses: [
-    {
-      id: 1,
-      name: "1. Data types",
-    },
-    {
-      id: 2,
-      name: "2. Arithmetic Operators",
-    },
-  ],
-  codeTemplates: {
-    cpp: {
-      startingCode: `
-#include <iostream>
-using namespace std;
-
-int main() {
-    int num1, num2;
-    num1 = 1;
-    cout << num1 << endl;
-    cout << num1 << endl;
-    cout << num1 << endl;
-    cout << num1 << endl;
-    cout << num1 << endl;
-    cout << num1 << endl;
-    // Your code here
-    return 0;
-}
-`,
-      solutionCode: `
-#include <iostream>
-using namespace std;
-
-int main() {
-    int num1, num2;
-    cout << "Enter two integers: ";
-    cin >> num1 >> num2;
-    int sum = num1 + num2;
-    cout << "The sum is: " << sum << endl;
-    return 0;
-}
-`,
-    },
-    python: {
-      startingCode: `
-# Your code here
-print("aaaa")
-print("aaaa")
-print("aaaa")
-print("aaaa")
-print("aaaa")
-print("aaaa")
-`,
-      solutionCode: `
-num1 = int(input("Enter first number: "))
-num2 = int(input("Enter second number: "))
-sum = num1 + num2
-print("The sum is:", sum)
-`,
-    },
-  },
-};
-
 const Problem = () => {
   const params = useParams();
   const navigate = useNavigate();
   const outputRef = useRef(null);
+  const location = useLocation();
+  const originalCourseId = location.state?.courseId;
 
   const [isOutputWindowMaximised, setIsOutputWindowMaximised] = useState(false);
 
@@ -112,6 +28,7 @@ const Problem = () => {
   const [selectedLanguageValue, setSelectedLanguageValue] = useState(
     languages[0]?.value
   );
+  const [inputsAndOutputs, setInputsAndOutputs] = useState([]);
   const [cppInputCode, setCppInputCode] = useState("");
   const [pythonInputCode, setPythonInputCode] = useState("");
 
@@ -124,6 +41,14 @@ const Problem = () => {
 
   const handleArrowNavigationButtonClick = (id) => {
     navigate(`/problems/${id}`);
+  };
+
+  const handleBackToListButtonClick = () => {
+    if (originalCourseId) {
+      navigate(`/courses/${originalCourseId}`);
+      return;
+    }
+    navigate("/");
   };
 
   const handleRunButtonClick = () => {
@@ -148,19 +73,36 @@ const Problem = () => {
         }
 
         const data = await res.json();
-        setProblem(data);
+        setProblem(data[0]);
+        const parsedCode = JSON.parse(data[0]?.starting_code || "{}");
+        setCppInputCode(parsedCode?.cpp);
+        setPythonInputCode(parsedCode?.python);
+      } catch (error) {
+        console.error(error.message);
+      }
+    };
+
+    const fetchTestCases = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/test_cases?id=${id}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (!res.ok) {
+          throw new Error(`HTTP error: ${res.status}`);
+        }
+
+        const data = await res.json();
+        setInputsAndOutputs(data);
       } catch (error) {
         console.error(error.message);
       }
     };
 
     fetchProblem();
+    fetchTestCases();
 
-    setProblem(mockProblem);
-    setCppInputCode(mockProblem?.codeTemplates?.cpp?.startingCode);
-    setPythonInputCode(mockProblem?.codeTemplates?.python?.startingCode);
-    setPreviousProblemId(Number(id) - 1);
-    setNextProblemId(Number(id) + 1);
     setIsOutputWindowMaximised(false);
   }, [params.id]);
 
@@ -168,7 +110,7 @@ const Problem = () => {
     <div className="full-screen-container">
       <div className="problem-page-left">
         <div style={{ display: "flex", gap: "1rem" }}>
-          <Button extra="small secondary" onClick={() => navigate("/")}>
+          <Button extra="small secondary" onClick={handleBackToListButtonClick}>
             Atgal į sąrašą
           </Button>
           <div style={{ display: "flex", gap: "3px" }}>
@@ -197,7 +139,9 @@ const Problem = () => {
           <h2 style={{ fontSize: "1.25rem", fontWeight: "600" }}>
             {problem?.name}
           </h2>
-          <strong className={problem?.difficulty}>{problem?.difficulty}</strong>
+          <strong className={problem?.difficulty}>
+            {difficulty_dictionary[problem?.difficulty]}
+          </strong>
 
           <div className="problem-related-courses">
             {problem?.courses?.map((course) => (
@@ -212,14 +156,14 @@ const Problem = () => {
           </div>
 
           <div className="IO-examples-list">
-            {problem?.inputsAndOutputs?.map((item, index) => (
+            {inputsAndOutputs?.map((item, index) => (
               <div key={index} className="IO-example">
                 <p style={{ fontWeight: "600" }}>Pavyzdys {index + 1}</p>
                 <p>
                   <strong>Įvestis:</strong> {item?.input}
                 </p>
                 <p>
-                  <strong>Rezultatas:</strong> {item?.expectedOutput}
+                  <strong>Rezultatas:</strong> {item?.expected_output}
                 </p>
               </div>
             ))}

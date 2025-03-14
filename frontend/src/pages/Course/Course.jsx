@@ -3,13 +3,17 @@ import "./course.css";
 import ProgressBar from "./ProgressBar";
 import Button from "../../components/Button";
 import { useEffect, useState } from "react";
+import CourseProblemTile from "./CourseProblemTile";
 
 const Course = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [courseInfo, setCourseInfo] = useState(null);
   const [courseProblems, setCourseProblems] = useState([]);
-  const [problemProgress, setProblemProgress] = useState("Nepradėtaa");
+
+  const onContinueCourseButtonClick = () => {
+    navigate(`/problems/${courseProblems[0]?.id}`, { state: { courseId: id } });
+  };
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -35,7 +39,8 @@ const Course = () => {
         if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
 
         const data = await res.json();
-        setCourseProblems(data);
+        const sortedData = data.sort((a, b) => a.order_index - b.order_index);
+        setCourseProblems(sortedData);
       } catch (error) {
         console.error("Error fetching problems:", error);
         setCourseProblems([]);
@@ -65,7 +70,9 @@ const Course = () => {
           <Button extra="small secondary" onClick={() => navigate("/")}>
             Atgal į sąrašą
           </Button>
-          <Button extra="small">Pradėti</Button>
+          <Button extra="small" onClick={onContinueCourseButtonClick}>
+            Pradėti
+          </Button>
         </div>
       </div>
       <div className="course-info-container">
@@ -73,28 +80,15 @@ const Course = () => {
           <h2>Kurso problemos</h2>
         </div>
         <div className="problems-container">
-          {courseProblems && courseProblems?.length > 0 ? (
-            courseProblems?.map((problem, index) => (
-              <div key={index} className="course-problem-item">
-                <strong>{problem?.name}</strong>
-                <strong className={problem?.difficulty}>
-                  {problem?.difficulty}
-                </strong>
-                <strong
-                  className={
-                    problemProgress === "Nepradėta"
-                      ? "course-not-started"
-                      : problemProgress === "Pradėta"
-                      ? "course-in-progress"
-                      : "course-finished"
-                  }
-                >
-                  {problemProgress}
-                </strong>
+          {courseProblems && courseProblems.length > 0 ? (
+            courseProblems.map((problem, index, array) => (
+              <div key={problem.id || index}>
+                <CourseProblemTile problem={problem} courseId={id} />
+                {index !== array.length - 1 && <hr />}{" "}
               </div>
             ))
           ) : (
-            <p>No problems available</p>
+            <p>Kursas problemų neturi.</p>
           )}
         </div>
       </div>
