@@ -45,6 +45,7 @@ function ViewCourse() {
         if (!res.ok) {
           if (res.status === 404) {
             console.warn("No problems found, skipping error message.");
+            showWarningMessage('Kursas neturi užduočių');
             return;
           }
           throw new Error(`HTTP error! Status: ${res.status}`);
@@ -56,7 +57,7 @@ function ViewCourse() {
           return;
         }
 
-        console.log("Fetched problems:", data);
+        setProblems(data);
       } catch (error) {
         console.error("Error fetching problems:", error);
         showErrorMessage('Nepavyko gauti užduočių');
