@@ -9,6 +9,7 @@ const Course = () => {
   const navigate = useNavigate();
   const [courseInfo, setCourseInfo] = useState(null);
   const [courseProblems, setCourseProblems] = useState([]);
+  const [problemProgress, setProblemProgress] = useState("Nepradėtaa");
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -64,7 +65,7 @@ const Course = () => {
           <Button extra="small secondary" onClick={() => navigate("/")}>
             Atgal į sąrašą
           </Button>
-          <Button extra="small">Tęsti</Button>
+          <Button extra="small">Pradėti</Button>
         </div>
       </div>
       <div className="course-info-container">
@@ -75,8 +76,21 @@ const Course = () => {
           {courseProblems && courseProblems?.length > 0 ? (
             courseProblems?.map((problem, index) => (
               <div key={index} className="course-problem-item">
-                {problem?.name}
-                {problem?.difficulty}
+                <strong>{problem?.name}</strong>
+                <strong className={problem?.difficulty}>
+                  {problem?.difficulty}
+                </strong>
+                <strong
+                  className={
+                    problemProgress === "Nepradėta"
+                      ? "course-not-started"
+                      : problemProgress === "Pradėta"
+                      ? "course-in-progress"
+                      : "course-finished"
+                  }
+                >
+                  {problemProgress}
+                </strong>
               </div>
             ))
           ) : (

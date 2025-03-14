@@ -25,15 +25,15 @@ body {
   font-family: "Inter", sans-serif;
 }
 
-.Easy {
+.easy {
   color: var(--difficulty-easy);
 }
 
-.Medium {
+.medium {
   color: var(--difficulty-medium);
 }
 
-.Hard {
+.hard {
   color: var(--difficulty-hard);
 }
 

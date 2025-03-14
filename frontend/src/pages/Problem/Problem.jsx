@@ -197,7 +197,7 @@ const Problem = () => {
           <h2 style={{ fontSize: "1.25rem", fontWeight: "600" }}>
             {problem?.name}
           </h2>
-          <p className={problem?.difficulty}>{problem?.difficulty}</p>
+          <strong className={problem?.difficulty}>{problem?.difficulty}</strong>
 
           <div className="problem-related-courses">
             {problem?.courses?.map((course) => (

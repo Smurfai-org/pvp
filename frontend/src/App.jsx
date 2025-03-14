@@ -42,7 +42,8 @@ function AppRoutes() {
             <Route path="/admin_dash" element={<AdminDash />} />
             <Route path="/create_course" element={<CourseCreate />} />
             <Route path="/view_course/:id" element={<ViewCourse />} />
-            <Route path="/problem/:id" element={<Problem />} />
+            <Route path="/problems/:id" element={<Problem />} />
+            <Route path="/courses/:id" element={<Course />} />
             <Route path="/add_problem/:id" element={<AddProblem />} />
             <Route path="/view_problem/:id" element={<ViewProblem />} />
             <Route path="/generate_problem/:id" element={<GenerateProblem />} />
