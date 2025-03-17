@@ -30,7 +30,7 @@ function MessageProvider({ children }) {
         <MessageContext.Provider
             value={{ showSuccessMessage, showErrorMessage, showWarningMessage }}
         >
-            {showAlert && <Alert message={message} type={type} />}
+            {showAlert && <Alert message={message} type={type} onClick={() => setShowAlert(false)}/>}
             {children}
         </MessageContext.Provider>
     );
