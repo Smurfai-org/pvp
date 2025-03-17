@@ -4,7 +4,7 @@ import errorIcon from '../assets/error-icon.svg';
 import warningIcon from '../assets/warning-icon.svg';
 import successIcon from '../assets/success-icon.svg';
 
-const Alert = ({ message, type = 'success', onClose }) => {
+const Alert = ({ message, type = 'success', onClick }) => {
   const getIcon = () => {
     switch (type) {
       case 'error':
@@ -25,7 +25,7 @@ const Alert = ({ message, type = 'success', onClose }) => {
         src={exitIcon}
         alt="Close"
         className="alert-exit"
-        onClick={() => console.log('Close alert')}
+        onClick={onClick}
       />
     </div>
   );
