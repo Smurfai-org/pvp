@@ -186,6 +186,7 @@ body {
 }
 
 .hyperlink {
+  cursor: pointer;
   color: var(--text);
   text-decoration: none;
   padding: 0.15rem 0.3rem;

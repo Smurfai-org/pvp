@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Button from "../../components/Button";
 import Hyperlink from "../../components/Hyperlink";
@@ -7,6 +7,7 @@ import Dropdown from "../../components/Dropdown";
 import OutputSection from "./Output";
 import "./problem.css";
 import { difficulty_dictionary } from "../../constants";
+import AuthContext from "../../utils/AuthContext";
 
 const languages = [
   { label: "C++", value: "cpp" },
@@ -14,11 +15,13 @@ const languages = [
 ];
 
 const Problem = () => {
-  const params = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const outputRef = useRef(null);
   const location = useLocation();
   const originalCourseId = location.state?.courseId;
+  const courseProblemsOrder = location.state?.courseProblemsOrder;
+  const { user } = useContext(AuthContext);
 
   const [isOutputWindowMaximised, setIsOutputWindowMaximised] = useState(false);
 
@@ -31,6 +34,7 @@ const Problem = () => {
   const [inputsAndOutputs, setInputsAndOutputs] = useState([]);
   const [cppInputCode, setCppInputCode] = useState("");
   const [pythonInputCode, setPythonInputCode] = useState("");
+  const [courseInfo, setCourseInfo] = useState(null);
 
   const onDropdownSelect = (selectedLabel) => {
     const selectedLang = languages.find((lang) => lang.label === selectedLabel);
@@ -40,7 +44,12 @@ const Problem = () => {
   };
 
   const handleArrowNavigationButtonClick = (id) => {
-    navigate(`/problems/${id}`);
+    navigate(`/problems/${id}`, {
+      state: {
+        courseId: originalCourseId,
+        courseProblemsOrder: courseProblemsOrder,
+      },
+    });
   };
 
   const handleBackToListButtonClick = () => {
@@ -59,9 +68,10 @@ const Problem = () => {
   };
 
   useEffect(() => {
-    const id = params.id;
-
     const fetchProblem = async () => {
+      setProblem("");
+      setCppInputCode("");
+      setPythonInputCode("");
       try {
         const res = await fetch(`http://localhost:5000/problem?id=${id}`, {
           method: "GET",
@@ -83,6 +93,7 @@ const Problem = () => {
     };
 
     const fetchTestCases = async () => {
+      setInputsAndOutputs([]);
       try {
         const res = await fetch(`http://localhost:5000/test_cases?id=${id}`, {
           method: "GET",
@@ -100,11 +111,58 @@ const Problem = () => {
       }
     };
 
+    const updateProblemNavigation = () => {
+      const currentIndex = courseProblemsOrder?.indexOf(Number(id));
+
+      if (currentIndex <= 0) {
+        setPreviousProblemId(null);
+      } else {
+        setPreviousProblemId(
+          courseProblemsOrder?.length > 0 && currentIndex > 0
+            ? courseProblemsOrder[currentIndex - 1]
+            : null
+        );
+      }
+
+      if (currentIndex >= courseProblemsOrder?.length - 1) {
+        setNextProblemId(null);
+      } else {
+        setNextProblemId(
+          courseProblemsOrder?.length > 0 &&
+            currentIndex < courseProblemsOrder.length - 1
+            ? courseProblemsOrder[currentIndex + 1]
+            : null
+        );
+      }
+    };
+
     fetchProblem();
     fetchTestCases();
+    updateProblemNavigation();
 
     setIsOutputWindowMaximised(false);
-  }, [params.id]);
+  }, [id, courseProblemsOrder]);
+
+  useEffect(() => {
+    const fetchCourse = async () => {
+      setCourseInfo(null);
+      try {
+        const res = await fetch(
+          `http://localhost:5000/course/?id=${problem?.fk_COURSEid}`
+        );
+        if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+
+        const data = await res.json();
+        if (data.length > 0) {
+          setCourseInfo(data[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching course:", error);
+      }
+    };
+
+    fetchCourse();
+  }, [problem]);
 
   return (
     <div className="full-screen-container">
@@ -142,6 +200,9 @@ const Problem = () => {
           <strong className={problem?.difficulty}>
             {difficulty_dictionary[problem?.difficulty]}
           </strong>
+          <Hyperlink href={`/courses/${courseInfo?.id}`}>
+            {courseInfo?.name}
+          </Hyperlink>
 
           <div className="problem-related-courses">
             {problem?.courses?.map((course) => (

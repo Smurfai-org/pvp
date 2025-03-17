@@ -17,6 +17,7 @@ const Main = () => {
 
   return (
     <div className="full-container-page">
+      {        console.log(document.cookie)}
       <div className="content-wrapper">
         <div className="headline-button-container">
           <div className="headline">

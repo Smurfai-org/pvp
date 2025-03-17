@@ -2,17 +2,23 @@ import { useNavigate, useParams } from "react-router-dom";
 import "./course.css";
 import ProgressBar from "./ProgressBar";
 import Button from "../../components/Button";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import CourseProblemTile from "./CourseProblemTile";
+import AuthContext from "../../utils/AuthContext";
 
 const Course = () => {
   const { id } = useParams();
+  const { loggedIn, user } = useContext(AuthContext);
   const navigate = useNavigate();
+
   const [courseInfo, setCourseInfo] = useState(null);
   const [courseProblems, setCourseProblems] = useState([]);
+  const [courseProblemsOrder, setCourseProblemsOrder] = useState([]);
 
   const onContinueCourseButtonClick = () => {
-    navigate(`/problems/${courseProblems[0]?.id}`, { state: { courseId: id } });
+    navigate(`/problems/${courseProblems[0]?.id}`, {
+      state: { courseId: id, courseProblemsOrder: courseProblemsOrder },
+    });
   };
 
   useEffect(() => {
@@ -40,6 +46,8 @@ const Course = () => {
 
         const data = await res.json();
         const sortedData = data.sort((a, b) => a.order_index - b.order_index);
+        const problemsOrder = sortedData?.map((item) => item?.id);
+        setCourseProblemsOrder(problemsOrder);
         setCourseProblems(sortedData);
       } catch (error) {
         console.error("Error fetching problems:", error);
@@ -51,18 +59,17 @@ const Course = () => {
     fetchProblems();
   }, [id]);
 
-  console.log(courseInfo);
-  console.log(courseProblems);
-
   return (
     <div className="course-container">
       <div className="course-info-container">
         <div className="course-info-top-row">
           <h2>{courseInfo?.name}</h2>
-          <div className="inline-elements">
-            <strong>2/10</strong>
-            <ProgressBar progress={20} />
-          </div>
+          {loggedIn && (
+            <div className="inline-elements">
+              <strong>2/10</strong>
+              <ProgressBar progress={20} />
+            </div>
+          )}
         </div>
         <p className="course-info-description">{courseInfo?.description}</p>
         <br />
@@ -83,7 +90,11 @@ const Course = () => {
           {courseProblems && courseProblems.length > 0 ? (
             courseProblems.map((problem, index, array) => (
               <div key={problem.id || index}>
-                <CourseProblemTile problem={problem} courseId={id} />
+                <CourseProblemTile
+                  problem={problem}
+                  courseId={id}
+                  courseProblemsOrder={courseProblemsOrder}
+                />
                 {index !== array.length - 1 && <hr />}{" "}
               </div>
             ))
