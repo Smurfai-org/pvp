@@ -144,6 +144,7 @@ const Problem = () => {
   }, [id, courseProblemsOrder]);
 
   useEffect(() => {
+    if (!problem) return;
     const fetchCourse = async () => {
       setCourseInfo(null);
       try {
