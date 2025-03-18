@@ -516,6 +516,7 @@ body {
 
 .alert-exit {
   width: 2.5rem;
+  cursor: pointer;
 }
 
 .success {
