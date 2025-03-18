@@ -3,13 +3,13 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { TextBox } from "../../components/textBox/TextBox";
 import Button from "../../components/Button";
 import "./login.css";
-import { useGoogleLogin } from '@react-oauth/google';
-import googleIcon from '../../assets/google_icon.svg';
+import { useGoogleLogin } from "@react-oauth/google";
+import googleIcon from "../../assets/google_icon.svg";
 
 function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const from = searchParams.get('from') || '/';
+  const from = searchParams.get("from") || "/";
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -51,12 +51,13 @@ function Login() {
 
   const googleLoginButton = useGoogleLogin({
     onSuccess: async (gresponse) => {
-      const response = await fetch('http://localhost:5000/loginGoogle', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("http://localhost:5000/loginGoogle", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ gresponse }),
-        credentials: 'include',
+        credentials: "include",
       });
+      console.log("res", response);
 
       if (response.ok) {
         window.location.href = from;
@@ -64,9 +65,8 @@ function Login() {
         const data = await response.json();
       }
     },
-    onError: () => {
-    },
-    flow: 'auth-code',
+    onError: () => {},
+    flow: "auth-code",
   });
 
   return (
@@ -87,11 +87,16 @@ function Login() {
           errorText={passwordError}
         />
         <div className="inline-centered-buttons-login">
-          <Button extra='login-btn' onClick={handleSubmit}>Log in</Button>
+          <Button extra="login-btn" onClick={handleSubmit}>
+            Log in
+          </Button>
           <Button extra="secondary login-btn">Sign up</Button>
-        </div> 
+        </div>
         <div className="google-cnt">
-          <Button extra='google-button' onClick={googleLoginButton}><img src={googleIcon} className="google-img"/>Prisijungti su Google</Button>
+          <Button extra="google-button" onClick={googleLoginButton}>
+            <img src={googleIcon} className="google-img" />
+            Prisijungti su Google
+          </Button>
         </div>
       </div>
     </div>

@@ -1,108 +1,27 @@
-import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useContext, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Button from "../../components/Button";
 import Hyperlink from "../../components/Hyperlink";
 import CodeEditor from "./CodeEditor";
 import Dropdown from "../../components/Dropdown";
 import OutputSection from "./Output";
 import "./problem.css";
+import { difficulty_dictionary } from "../../constants";
+import AuthContext from "../../utils/AuthContext";
 
 const languages = [
   { label: "C++", value: "cpp" },
   { label: "Python", value: "python" },
 ];
 
-const mockProblem = {
-  name: "Sum of Two Numbers",
-  description:
-    "Write a C++ program that takes two integers as input and returns their sum.",
-  hints: [
-    "Use the `+` operator to add two numbers.",
-    "Make sure to handle input using `cin`.",
-    "Output the result using `cout`.",
-  ],
-  difficulty: "Easy",
-  inputsAndOutputs: [
-    {
-      input: "num1 = 5, num2 = 10",
-      expectedOutput: "15",
-    },
-    {
-      input: "num1 = -3, num2 = 7",
-      expectedOutput: "4",
-    },
-    {
-      input: "num1 = 0, num2 = 0",
-      expectedOutput: "0",
-    },
-  ],
-  courses: [
-    {
-      id: 1,
-      name: "1. Data types",
-    },
-    {
-      id: 2,
-      name: "2. Arithmetic Operators",
-    },
-  ],
-  codeTemplates: {
-    cpp: {
-      startingCode: `
-#include <iostream>
-using namespace std;
-
-int main() {
-    int num1, num2;
-    num1 = 1;
-    cout << num1 << endl;
-    cout << num1 << endl;
-    cout << num1 << endl;
-    cout << num1 << endl;
-    cout << num1 << endl;
-    cout << num1 << endl;
-    // Your code here
-    return 0;
-}
-`,
-      solutionCode: `
-#include <iostream>
-using namespace std;
-
-int main() {
-    int num1, num2;
-    cout << "Enter two integers: ";
-    cin >> num1 >> num2;
-    int sum = num1 + num2;
-    cout << "The sum is: " << sum << endl;
-    return 0;
-}
-`,
-    },
-    python: {
-      startingCode: `
-# Your code here
-print("aaaa")
-print("aaaa")
-print("aaaa")
-print("aaaa")
-print("aaaa")
-print("aaaa")
-`,
-      solutionCode: `
-num1 = int(input("Enter first number: "))
-num2 = int(input("Enter second number: "))
-sum = num1 + num2
-print("The sum is:", sum)
-`,
-    },
-  },
-};
-
 const Problem = () => {
-  const params = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const outputRef = useRef(null);
+  const location = useLocation();
+  const originalCourseId = location.state?.courseId;
+  const courseProblemsOrder = location.state?.courseProblemsOrder;
+  const { loggedIn, user } = useContext(AuthContext);
 
   const [isOutputWindowMaximised, setIsOutputWindowMaximised] = useState(false);
 
@@ -112,8 +31,10 @@ const Problem = () => {
   const [selectedLanguageValue, setSelectedLanguageValue] = useState(
     languages[0]?.value
   );
+  const [inputsAndOutputs, setInputsAndOutputs] = useState([]);
   const [cppInputCode, setCppInputCode] = useState("");
   const [pythonInputCode, setPythonInputCode] = useState("");
+  const [courseInfo, setCourseInfo] = useState(null);
 
   const onDropdownSelect = (selectedLabel) => {
     const selectedLang = languages.find((lang) => lang.label === selectedLabel);
@@ -123,7 +44,20 @@ const Problem = () => {
   };
 
   const handleArrowNavigationButtonClick = (id) => {
-    navigate(`/problem/${id}`);
+    navigate(`/problems/${id}`, {
+      state: {
+        courseId: originalCourseId,
+        courseProblemsOrder: courseProblemsOrder,
+      },
+    });
+  };
+
+  const handleBackToListButtonClick = () => {
+    if (originalCourseId) {
+      navigate(`/courses/${originalCourseId}`);
+      return;
+    }
+    navigate("/");
   };
 
   const handleRunButtonClick = () => {
@@ -134,11 +68,54 @@ const Problem = () => {
   };
 
   useEffect(() => {
-    const id = params.id;
-
     const fetchProblem = async () => {
+      setProblem("");
+
       try {
-        const res = await fetch(`http://localhost:5000/problem?id=${id}`, {
+        const [problemRes, userCodeRes] = await Promise.all([
+          fetch(`http://localhost:5000/problem?id=${id}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          }),
+          loggedIn
+            ? fetch(
+                `http://localhost:5000/user/${user?.id}/problem_code/${id}`,
+                {
+                  method: "GET",
+                  headers: { "Content-Type": "application/json" },
+                }
+              )
+            : null,
+        ]);
+
+        if (!problemRes.ok) throw new Error(`HTTP error: ${problemRes.status}`);
+        const problemData = await problemRes.json();
+        setProblem(problemData[0]);
+
+        let parsedStartingCode = JSON.parse(
+          problemData[0]?.starting_code || "{}"
+        );
+
+        let parsedUserCode = {};
+        if (loggedIn && userCodeRes?.ok) {
+          const userData = await userCodeRes.json();
+          parsedUserCode = JSON.parse(userData[0]?.code || "{}");
+        }
+
+        setCppInputCode(parsedUserCode?.cpp ?? parsedStartingCode?.cpp ?? "");
+        setPythonInputCode(
+          parsedUserCode?.python ?? parsedStartingCode?.python ?? ""
+        );
+        console.log(parsedStartingCode?.python);
+      } catch (error) {
+        console.error(error.message);
+      }
+    };
+
+    const fetchTestCases = async () => {
+      setInputsAndOutputs([]);
+      try {
+        const res = await fetch(`http://localhost:5000/test_cases?id=${id}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -148,33 +125,77 @@ const Problem = () => {
         }
 
         const data = await res.json();
-        setProblem(data);
+        setInputsAndOutputs(data);
       } catch (error) {
         console.error(error.message);
       }
     };
 
-    fetchProblem();
+    const updateProblemNavigation = () => {
+      const currentIndex = courseProblemsOrder?.indexOf(Number(id));
 
-    setProblem(mockProblem);
-    setCppInputCode(mockProblem?.codeTemplates?.cpp?.startingCode);
-    setPythonInputCode(mockProblem?.codeTemplates?.python?.startingCode);
-    setPreviousProblemId(Number(id) - 1);
-    setNextProblemId(Number(id) + 1);
+      if (currentIndex <= 0) {
+        setPreviousProblemId(null);
+      } else {
+        setPreviousProblemId(
+          courseProblemsOrder?.length > 0 && currentIndex > 0
+            ? courseProblemsOrder[currentIndex - 1]
+            : null
+        );
+      }
+
+      if (currentIndex >= courseProblemsOrder?.length - 1) {
+        setNextProblemId(null);
+      } else {
+        setNextProblemId(
+          courseProblemsOrder?.length > 0 &&
+            currentIndex < courseProblemsOrder.length - 1
+            ? courseProblemsOrder[currentIndex + 1]
+            : null
+        );
+      }
+    };
+
+    fetchProblem();
+    fetchTestCases();
+    updateProblemNavigation();
+
     setIsOutputWindowMaximised(false);
-  }, [params.id]);
+  }, [id, courseProblemsOrder]);
+
+  useEffect(() => {
+    if (!problem) return;
+    const fetchCourse = async () => {
+      setCourseInfo(null);
+      try {
+        const res = await fetch(
+          `http://localhost:5000/course/?id=${problem?.fk_COURSEid}`
+        );
+        if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+
+        const data = await res.json();
+        if (data.length > 0) {
+          setCourseInfo(data[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching course:", error);
+      }
+    };
+
+    fetchCourse();
+  }, [problem]);
 
   return (
     <div className="full-screen-container">
       <div className="problem-page-left">
         <div style={{ display: "flex", gap: "1rem" }}>
-          <Button extra="small" onClick={() => navigate("/")}>
+          <Button extra="small secondary" onClick={handleBackToListButtonClick}>
             Atgal į sąrašą
           </Button>
-          <div style={{ display: "flex", gap: "1px" }}>
+          <div style={{ display: "flex", gap: "3px" }}>
             {previousProblemId !== null && (
               <Button
-                extra="small"
+                extra="small secondary"
                 onClick={() =>
                   handleArrowNavigationButtonClick(previousProblemId)
                 }
@@ -184,7 +205,7 @@ const Problem = () => {
             )}
             {nextProblemId !== null && (
               <Button
-                extra="small"
+                extra="small secondary"
                 onClick={() => handleArrowNavigationButtonClick(nextProblemId)}
               >
                 {"kita >"}
@@ -197,7 +218,14 @@ const Problem = () => {
           <h2 style={{ fontSize: "1.25rem", fontWeight: "600" }}>
             {problem?.name}
           </h2>
-          <p className={problem?.difficulty}>{problem?.difficulty}</p>
+          <div className="problem-related-courses">
+            <Hyperlink href={`/courses/${courseInfo?.id}`}>
+              {courseInfo?.name}
+            </Hyperlink>
+            <strong className={problem?.difficulty}>
+              {difficulty_dictionary[problem?.difficulty]}
+            </strong>
+          </div>
 
           <div className="problem-related-courses">
             {problem?.courses?.map((course) => (
@@ -212,14 +240,14 @@ const Problem = () => {
           </div>
 
           <div className="IO-examples-list">
-            {problem?.inputsAndOutputs?.map((item, index) => (
+            {inputsAndOutputs?.map((item, index) => (
               <div key={index} className="IO-example">
                 <p style={{ fontWeight: "600" }}>Pavyzdys {index + 1}</p>
                 <p>
                   <strong>Įvestis:</strong> {item?.input}
                 </p>
                 <p>
-                  <strong>Rezultatas:</strong> {item?.expectedOutput}
+                  <strong>Rezultatas:</strong> {item?.expected_output}
                 </p>
               </div>
             ))}
@@ -237,7 +265,7 @@ const Problem = () => {
               console.log("AI Suggestions");
             }}
           >
-            AI pasiūlymai
+            AI įvertinimas
           </Button>
           <Dropdown
             options={languages?.map((language) => language?.label)}
