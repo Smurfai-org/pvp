@@ -1,13 +1,16 @@
 import { useNavigate } from "react-router-dom";
-import { difficulty_dictionary } from "../../constants";
+import { difficulty_dictionary, progress_dictionary } from "../../constants";
+import AuthContext from "../../utils/AuthContext";
+import { useContext } from "react";
 
 const CourseProblemTile = ({
   problem,
   courseId,
   courseProblemsOrder = null,
-  problemProgress = "",
 }) => {
   const navigate = useNavigate();
+
+  const { loggedIn } = useContext(AuthContext);
 
   const onClick = () => {
     navigate(`/problems/${problem?.id}`, {
@@ -20,7 +23,7 @@ const CourseProblemTile = ({
       <strong>{problem?.name}</strong>
       <div
         className={
-          problemProgress
+          loggedIn
             ? "course-problem-status"
             : "course-problem-status problem-progress-missing"
         }
@@ -28,17 +31,21 @@ const CourseProblemTile = ({
         <strong className={problem?.difficulty}>
           {difficulty_dictionary[problem?.difficulty]}
         </strong>
-        {problemProgress && (
+        {loggedIn && (
           <strong
             className={
-              problemProgress === "Baigta"
+              problem?.progress?.status === "finished"
                 ? "course-finished"
-                : problemProgress === "Pradėta"
+                : problem?.progress?.status === "in progress"
                 ? "course-in-progress"
                 : "course-not-started"
             }
           >
-            {problemProgress}
+            {progress_dictionary[problem?.progress?.status] ||
+              progress_dictionary["not started"]}
+            {problem?.progress?.status === "finished"
+              ? `: ${problem?.progress?.score}/100`
+              : ""}
           </strong>
         )}
       </div>

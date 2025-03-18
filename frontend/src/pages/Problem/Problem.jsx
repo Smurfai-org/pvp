@@ -21,7 +21,7 @@ const Problem = () => {
   const location = useLocation();
   const originalCourseId = location.state?.courseId;
   const courseProblemsOrder = location.state?.courseProblemsOrder;
-  const { user } = useContext(AuthContext);
+  const { loggedIn, user } = useContext(AuthContext);
 
   const [isOutputWindowMaximised, setIsOutputWindowMaximised] = useState(false);
 
@@ -70,23 +70,43 @@ const Problem = () => {
   useEffect(() => {
     const fetchProblem = async () => {
       setProblem("");
-      setCppInputCode("");
-      setPythonInputCode("");
-      try {
-        const res = await fetch(`http://localhost:5000/problem?id=${id}`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
 
-        if (!res.ok) {
-          throw new Error(`HTTP error: ${res.status}`);
+      try {
+        const [problemRes, userCodeRes] = await Promise.all([
+          fetch(`http://localhost:5000/problem?id=${id}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          }),
+          loggedIn
+            ? fetch(
+                `http://localhost:5000/user/${user?.id}/problem_code/${id}`,
+                {
+                  method: "GET",
+                  headers: { "Content-Type": "application/json" },
+                }
+              )
+            : null,
+        ]);
+
+        if (!problemRes.ok) throw new Error(`HTTP error: ${problemRes.status}`);
+        const problemData = await problemRes.json();
+        setProblem(problemData[0]);
+
+        let parsedStartingCode = JSON.parse(
+          problemData[0]?.starting_code || "{}"
+        );
+
+        let parsedUserCode = {};
+        if (loggedIn && userCodeRes?.ok) {
+          const userData = await userCodeRes.json();
+          parsedUserCode = JSON.parse(userData[0]?.code || "{}");
         }
 
-        const data = await res.json();
-        setProblem(data[0]);
-        const parsedCode = JSON.parse(data[0]?.starting_code || "{}");
-        setCppInputCode(parsedCode?.cpp);
-        setPythonInputCode(parsedCode?.python);
+        setCppInputCode(parsedUserCode?.cpp ?? parsedStartingCode?.cpp ?? "");
+        setPythonInputCode(
+          parsedUserCode?.python ?? parsedStartingCode?.python ?? ""
+        );
+        console.log(parsedStartingCode?.python);
       } catch (error) {
         console.error(error.message);
       }
@@ -198,12 +218,14 @@ const Problem = () => {
           <h2 style={{ fontSize: "1.25rem", fontWeight: "600" }}>
             {problem?.name}
           </h2>
-          <strong className={problem?.difficulty}>
-            {difficulty_dictionary[problem?.difficulty]}
-          </strong>
-          <Hyperlink href={`/courses/${courseInfo?.id}`}>
-            {courseInfo?.name}
-          </Hyperlink>
+          <div className="problem-related-courses">
+            <Hyperlink href={`/courses/${courseInfo?.id}`}>
+              {courseInfo?.name}
+            </Hyperlink>
+            <strong className={problem?.difficulty}>
+              {difficulty_dictionary[problem?.difficulty]}
+            </strong>
+          </div>
 
           <div className="problem-related-courses">
             {problem?.courses?.map((course) => (
@@ -243,7 +265,7 @@ const Problem = () => {
               console.log("AI Suggestions");
             }}
           >
-            AI pasiūlymai
+            AI įvertinimas
           </Button>
           <Dropdown
             options={languages?.map((language) => language?.label)}
