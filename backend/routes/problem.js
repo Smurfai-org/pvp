@@ -124,4 +124,80 @@ router.post('/delete', async (req, res) =>{
     }
 });
 
+router.get('/:id/hints', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const [result] = await pool.execute('SELECT * FROM hints WHERE deleted = 0 AND fk_PROBLEMid = ?', [id]);
+        if (result.length === 0) {
+            res.status(404).json({ message: 'Patarimų nerasta' });
+        } else {
+            res.status(200).json(result);
+        }
+        
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Serverio klaida' });
+    }
+});
+
+router.get('/:id/hints/:id2', async (req, res) => {
+    const id = req.params.id;
+    const id2 = req.params.id2;
+    try {
+        const [rows] = await pool.execute('SELECT * FROM hints WHERE deleted = 0 AND fk_PROBLEMid = ? AND id = ?', [id, id2]);
+        if (rows.length === 0) {
+             res.status(404).json({ message: 'Patarimas nerastas' });
+        } else {
+            res.status(200).json(rows);
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Serverio klaida' });
+    }
+});
+
+router.post('/:id/hints', async (req, res) => {
+    const id = req.params.id;
+    const { hint } = req.body;
+    try {
+        const [result] = await pool.execute('INSERT INTO hints (fk_PROBLEMid, hint) VALUES (?, ?)', [id, hint]);
+        if (result.affectedRows > 0) {
+            return res.status(201).json({ message: 'Patarimas pridėtas' });
+        }
+        res.status(500).json({ message: 'Nepavyko pridėti patarimo' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Serverio klaida' });
+    }
+});
+
+router.put('/:id/hints/:id2', async (req, res) => {
+    const { hint } = req.body;
+    try {
+        const [result] = await pool.execute('UPDATE hints SET hint = ? WHERE id = ?', [hint, req.params.id2]);
+        if (result.affectedRows > 0) {
+            return res.status(200).json({ message: 'Patarimas atnaujintas' });
+        }
+        res.status(404).json({ message: 'Patarimas nerastas' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Serverio klaida' });
+    }
+});
+
+router.delete('/:id/hints/:id2', async (req, res) => {
+    try {
+        const [result] = await pool.execute('UPDATE hints SET deleted = 1 WHERE id = ?', [req.params.id2]);
+        if (result.affectedRows > 0) {
+            return res.status(200).json({ message: 'Patarimas ištrintas' });
+        }
+        res.status(404).json({ message: 'Patarimas nerastas' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Serverio klaida' });
+    }
+});
+
+
+
 export default router;
