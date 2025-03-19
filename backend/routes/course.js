@@ -182,3 +182,5 @@ router.post('/restore', async (req, res) => {
         return res.status(500).json({ message: 'Serverio klaida' });
     }
 });
+
+export default router;

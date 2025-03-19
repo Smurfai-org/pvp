@@ -217,3 +217,5 @@ router.delete('/:id/hints/:id2', async (req, res) => {
         res.status(500).json({ message: 'Serverio klaida' });
     }
 });
+
+export default router;
