@@ -163,4 +163,24 @@ router.post("/delete", async (req, res) => {
   }
 });
 
+router.post('/restore', async (req, res) => {
+    const {id} = req.body;
+
+    if(!id) {
+        return res.status(400).json({ message: 'Nepakankami duomenys' });
+    }
+
+    try {
+        const [result] = await pool.execute('UPDATE courses SET deleted = 0 WHERE id = ?', [id]);
+
+        if(result.affectedRows === 0) {
+            return res.status(500).json({ message: 'Nepavyko atkurti kurso' });
+        }
+
+        return res.status(200).json({ message: 'Kursas atkurtas sėkmingai' });
+    } catch (error) {
+        return res.status(500).json({ message: 'Serverio klaida' });
+    }
+});
+
 export default router;
