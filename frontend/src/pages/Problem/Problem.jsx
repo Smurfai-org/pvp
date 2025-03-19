@@ -14,6 +14,46 @@ const languages = [
   { label: "Python", value: "python" },
 ];
 
+const problemCodeFullCpp = (starting_code, cppUserCode) => {
+  const code = `
+#include <iostream>
+using namespace std;
+
+${starting_code?.variables_definition}
+
+int main() {
+    ${starting_code?.solve_function_call}
+    cout << "Rezultatas: " << user_result << endl;
+    if (result == user_result) {
+        cout << "Bandymas įveiktas!" << endl;
+    } else {
+        cout << "Bandymas nepavyko." << endl;
+    }
+    return 0;
+}
+
+${cppUserCode}
+`;
+  return code;
+};
+
+const problemCodeFullPython = (starting_code, pythonUserCode) => {
+  const code = `
+${starting_code?.variables_definition}
+
+${pythonUserCode}
+
+${starting_code?.solve_function_call}
+print("Rezultatas:", user_result)
+
+if result == user_result:
+    print("Bandymas įveiktas!")
+else:
+    print("Bandymas nepavyko.")
+`;
+  return code;
+};
+
 const Problem = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -78,35 +118,45 @@ const Problem = () => {
             headers: { "Content-Type": "application/json" },
           }),
           loggedIn
-            ? fetch(
-                `http://localhost:5000/user/${user?.id}/problem_code/${id}`,
-                {
-                  method: "GET",
-                  headers: { "Content-Type": "application/json" },
-                }
-              )
+            ? fetch(`http://localhost:5000/progress/${user?.id}/${id}`, {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+              })
             : null,
         ]);
 
         if (!problemRes.ok) throw new Error(`HTTP error: ${problemRes.status}`);
         const problemData = await problemRes.json();
-        setProblem(problemData[0]);
 
         let parsedStartingCode = JSON.parse(
           problemData[0]?.starting_code || "{}"
         );
 
+        problemData[0] = {
+          ...problemData[0],
+          starting_code: parsedStartingCode,
+        };
+        setProblem(problemData[0]);
+
         let parsedUserCode = {};
         if (loggedIn && userCodeRes?.ok) {
           const userData = await userCodeRes.json();
+          console.log(userData[0]?.code);
+
           parsedUserCode = JSON.parse(userData[0]?.code || "{}");
         }
 
-        setCppInputCode(parsedUserCode?.cpp ?? parsedStartingCode?.cpp ?? "");
-        setPythonInputCode(
-          parsedUserCode?.python ?? parsedStartingCode?.python ?? ""
+        console.log(parsedUserCode);
+        setCppInputCode(
+          parsedUserCode?.cpp
+            ? parsedUserCode?.cpp
+            : parsedStartingCode?.cpp?.user_starting_code
         );
-        console.log(parsedStartingCode?.python);
+        setPythonInputCode(
+          parsedUserCode?.python
+            ? parsedUserCode?.python
+            : parsedStartingCode?.python?.user_starting_code
+        );
       } catch (error) {
         console.error(error.message);
       }
@@ -306,7 +356,12 @@ const Problem = () => {
           <OutputSection
             ref={outputRef}
             sourceCode={
-              selectedLanguageValue === "cpp" ? cppInputCode : pythonInputCode
+              selectedLanguageValue === "cpp"
+                ? problemCodeFullCpp(problem?.starting_code?.cpp, cppInputCode)
+                : problemCodeFullPython(
+                    problem?.starting_code?.python,
+                    pythonInputCode
+                  )
             }
             language={selectedLanguageValue}
             isOutputWindowMaximised={isOutputWindowMaximised}
