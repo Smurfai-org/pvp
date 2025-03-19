@@ -18,7 +18,7 @@ router.get("/", async (req, res) => {
         const [result] = await pool.execute(query, params);
 
         if (result.length === 0) {
-            return res.status(404).json({ message: "Problemos nerastos" });
+            return res.status(404).json({ message: "Užduotys nerastos" });
         }
 
         res.status(200).json(result);
@@ -59,9 +59,9 @@ router.post("/create", async (req, res) => {
         const [result] = await pool.execute(query, values);
 
         if (result && result.insertId) {
-            return res.status(201).json({ message: 'Problema sukurta sėkmingai' });
+            return res.status(201).json({ message: 'Užduotis sukurta sėkmingai' });
         } else {
-            return res.status(500).json({ message: 'Nepavyko sukurti problemos' });
+            return res.status(500).json({ message: 'Nepavyko sukurti užduoties' });
         }
 
     } catch (error) {
@@ -94,10 +94,10 @@ router.post('/update', async (req, res) => {
         const [result] = await pool.execute(query, values);
 
         if (result.affectedRows == 0) {
-            return res.status(500).json({ message: 'Nepavyko rasti problemos' });
+            return res.status(500).json({ message: 'Nepavyko rasti užduoties' });
         }
         
-        return res.status(200).json({ message: 'Problema atnaujinta sėkmingai' });
+        return res.status(200).json({ message: 'Užduotis atnaujinta sėkmingai' });
   } catch (error) {
     console.log(error.message);
     return res.status(500).json({ message: "Serverio klaida", error });
@@ -115,12 +115,32 @@ router.post('/delete', async (req, res) =>{
         const [result] = await pool.execute("UPDATE problems SET deleted = 1 WHERE id = ?", [id]);
 
         if(result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Nepavyko ištrinti problemos'});
+            return res.status(404).json({ message: 'Nepavyko ištrinti užduoties'});
         }
 
-        return res.status(200).json({ message: 'Problema sėkmingai ištrinta'});
+        return res.status(200).json({ message: 'Užduotis sėkmingai ištrinta'});
     } catch (error) {
         return res.status(500).json({ message: "Serverio klaida", error });
+    }
+});
+
+router.post('/restore', async (req, res) => {
+    const {id} = req.body;
+
+    if(!id) {
+        return res.status(400).json({ message: 'Nepakanka duomenų' });
+    }
+
+    try {
+        const [result] = await pool.execute('UPDAte problems SET deleted = 0 WHERE id = ?', [id]);
+
+        if(result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Nepavyko atkurti užduoties' });
+        }
+
+        return res.status(200).json({ message: 'Užduotis atkurta sėkmingai' });
+    } catch (error) {
+        return res.status(500).json({ message: 'Serverio klaida'});
     }
 });
 
@@ -197,7 +217,3 @@ router.delete('/:id/hints/:id2', async (req, res) => {
         res.status(500).json({ message: 'Serverio klaida' });
     }
 });
-
-
-
-export default router;

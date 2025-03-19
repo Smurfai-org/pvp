@@ -54,6 +54,7 @@ const ProblemDetails = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editedProblem),
+        credentials: 'include'
       });
 
       const data = await response.json();
@@ -96,26 +97,27 @@ const ProblemDetails = () => {
   };
 
   const handleRecover = async (id) => {
-        // if (!window.confirm("Ar tikrai norite atkurti šią problemą?")) return;
+        if (!window.confirm("Ar tikrai norite atkurti šią problemą?")) return;
 
-    // try {
-    //   const response = await fetch(`http://localhost:5000/problem/recover?id=${id}`, {
-    //     method: 'POST',
-    //     headers: {'Content-Type': 'application/json'},
-    //     body: JSON.stringify({ id })
-    //   });
+    try {
+      const response = await fetch(`http://localhost:5000/problem/restore?`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ id }),
+        credentials: 'include',
+      });
 
-    //   const data = await response.json();
+      const data = await response.json();
 
-    //   if (!response.ok) {
-    //     throw new Error(data.message || 'Klaida atkuriant problemą');
-    //   }
+      if (!response.ok) {
+        throw new Error(data.message || 'Klaida atkuriant užduotį');
+      }
 
-    //   alert("Problema sėkmingai atkurta!");
-    //   window.location.reload();
-    // } catch (error) {
-    //   alert(`Klaida: ${error.message}`);
-    // }
+      showSuccessMessage('Užduotis sėkmingai atkurta');
+      window.location.reload();
+    } catch (error) {
+      showErrorMessage('Klaida atkuriant užduotį');
+    }
   };
 
   const handleDropdownChange = (selectedValue) => {
