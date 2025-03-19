@@ -25,15 +25,15 @@ body {
   font-family: "Inter", sans-serif;
 }
 
-.Easy {
+.easy {
   color: var(--difficulty-easy);
 }
 
-.Medium {
+.medium {
   color: var(--difficulty-medium);
 }
 
-.Hard {
+.hard {
   color: var(--difficulty-hard);
 }
 
@@ -186,6 +186,7 @@ body {
 }
 
 .hyperlink {
+  cursor: pointer;
   color: var(--text);
   text-decoration: none;
   padding: 0.15rem 0.3rem;

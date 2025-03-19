@@ -32,7 +32,9 @@ async function loadRoutes() {
     for (const file of files) {
       if (!file.endsWith(".js")) continue;
 
-      const routeFilePath = pathToFileURL(path.join(routesDirectory, file)).href;
+      const routeFilePath = pathToFileURL(
+        path.join(routesDirectory, file)
+      ).href;
 
       const route = await import(routeFilePath);
 

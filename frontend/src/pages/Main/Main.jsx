@@ -17,12 +17,20 @@ const Main = () => {
 
   return (
     <div className="full-container-page">
-      {        console.log(document.cookie)}
+      {console.log(document.cookie)}
       <div className="content-wrapper">
+        <div className="image-container">
+          <img
+            src={SideImage}
+            className="image-box"
+            alt="Smurfai landing page"
+          />
+        </div>
+
         <div className="headline-button-container">
           <div className="headline">
             <h1>
-              Transform Your Skills,{specialSpaces(20)} 
+              Transform Your Skills,{specialSpaces(20)}
               <br />
               {specialSpaces(10)}Transform Your Future
             </h1>
@@ -32,13 +40,6 @@ const Main = () => {
               Create account {">"}
             </Button>
           </div>
-        </div>
-        <div className="image-container">
-          <img
-            src={SideImage}
-            className="image-box"
-            alt="Smurfai landing page"
-          />
         </div>
       </div>
     </div>
