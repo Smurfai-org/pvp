@@ -5,6 +5,7 @@ import Button from '../../components/Button';
 import { useNavigate } from 'react-router-dom';
 import trashCan from '../../assets/trash-can.svg';
 import { MessageContext } from '../../utils/MessageProvider';
+import Restore from '../../assets/restore-icon.svg';
 
 function AdminDash() {
     const [courses, setCourses] = useState([]);
@@ -64,6 +65,30 @@ function AdminDash() {
         }
     };    
 
+    const handleRecover = async (id) => {
+        if (!window.confirm("Ar tikrai norite atkurti šią problemą?")) return;
+
+    try {
+      const response = await fetch(`http://localhost:5000/course/restore?`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ id }),
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Klaida atkuriant užduotį');
+      }
+
+      showSuccessMessage('Užduotis sėkmingai atkurta');
+      window.location.reload();
+    } catch (error) {
+      showErrorMessage('Klaida atkuriant užduotį');
+    }
+  };
+
     const sortedCourses = courses.sort((a, b) => a.created_at.localeCompare(b.created_at))
     const nonDeletedCourses = sortedCourses.filter(course => !course.deleted);
     const deletedCourses = sortedCourses.filter(course => course.deleted);
@@ -95,11 +120,19 @@ function AdminDash() {
             <h2>Ištrinti kursai</h2>
             <div className="admin-dashboard">
                 {deletedCourses.map((course) => (
-                    <Card
-                        title={course.name}
-                        paragraph={course.description}
-                        onClick={() => handleCardClick(course.id)}
-                    />
+                    <div className="course-card-container" key={course.id}>
+                        <Card
+                            title={course.name}
+                            paragraph={course.description}
+                            onClick={() => handleCardClick(course.id)}
+                        />
+                        <img
+                            className="trash-can"
+                            src={Restore}
+                            alt="Restore"
+                            onClick={() => handleRecover(course.id)}
+                        />
+                    </div>
                 ))}
             </div>
         </div>
