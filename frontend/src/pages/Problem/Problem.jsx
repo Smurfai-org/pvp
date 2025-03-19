@@ -19,7 +19,7 @@ const problemCodeFullCpp = (starting_code, cppUserCode) => {
 #include <iostream>
 using namespace std;
 
-${starting_code?.variables_definition?.join("\n")}
+${starting_code?.variables_definition}
 
 int main() {
     ${starting_code?.solve_function_call}
@@ -39,7 +39,7 @@ ${cppUserCode}
 
 const problemCodeFullPython = (starting_code, pythonUserCode) => {
   const code = `
-${starting_code?.variables_definition?.join("\n")}
+${starting_code?.variables_definition}
 
 ${pythonUserCode}
 
@@ -118,13 +118,10 @@ const Problem = () => {
             headers: { "Content-Type": "application/json" },
           }),
           loggedIn
-            ? fetch(
-                `http://localhost:5000/user/${user?.id}/problem_code/${id}`,
-                {
-                  method: "GET",
-                  headers: { "Content-Type": "application/json" },
-                }
-              )
+            ? fetch(`http://localhost:5000/progress/${user?.id}/${id}`, {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+              })
             : null,
         ]);
 
@@ -144,20 +141,21 @@ const Problem = () => {
         let parsedUserCode = {};
         if (loggedIn && userCodeRes?.ok) {
           const userData = await userCodeRes.json();
-          console.log(userData[0]);
+          console.log(userData[0]?.code);
 
           parsedUserCode = JSON.parse(userData[0]?.code || "{}");
         }
 
+        console.log(parsedUserCode);
         setCppInputCode(
           parsedUserCode?.cpp
             ? parsedUserCode?.cpp
-            : parsedStartingCode?.cpp?.user_starting_code?.join("\n")
+            : parsedStartingCode?.cpp?.user_starting_code
         );
         setPythonInputCode(
           parsedUserCode?.python
             ? parsedUserCode?.python
-            : parsedStartingCode?.python?.user_starting_code?.join("\n")
+            : parsedStartingCode?.python?.user_starting_code
         );
       } catch (error) {
         console.error(error.message);
