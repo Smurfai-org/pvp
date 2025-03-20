@@ -1,4 +1,4 @@
-import courseDefaultImage from "../assets/course-default-image.png";
+import courseDefaultImage from "../assets/Course-default-image.png";
 import trashCan from "../assets/trash-can.svg";
 import restoreIcon from "../assets/restore-icon.svg";
 

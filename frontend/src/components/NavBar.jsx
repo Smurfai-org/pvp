@@ -49,6 +49,7 @@ const Navbar = () => {
             placeholder="Account"
             showArrow={false}
             links={[
+              { text: "Profile", url: "/profile" },
               { text: "Dashboard", url: "/admin_dash" },
               { text: "Log out", onClick: logout }
             ]}
