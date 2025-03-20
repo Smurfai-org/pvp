@@ -556,3 +556,8 @@ body {
 .error {
   border: 2px solid var(--bright);
 }
+
+.navbar-login p{
+  font-size: small;
+  display: inline-block;
+}
