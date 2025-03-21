@@ -58,9 +58,6 @@ const Problem = () => {
   // Tas pats kaip inputCodeEmpty, bet yra rodomas useriui ir gali būti keičiamas
   const [inputCode, setInputCode] = useState({});
 
-  // Prisijungusių vartotojų saugomas užduoties kodas, neprisijungusiems liks tuščias. Šitas kodas nesikeičia po užkrovimo, toliau naudojam inputCode
-  const [userSavedCode, setUserSavedCode] = useState({});
-
   // Visa kurso informacija, naudojam tik courseInfo.id ir courseInfo.name, kad pateikti nuorodą į problemos kursą
   const [courseInfo, setCourseInfo] = useState(null);
 
@@ -171,7 +168,7 @@ const Problem = () => {
   };
 
   useEffect(() => {
-    const fetchProblem = async () => {
+    const fetchProblem = async (automaticallyGeneratedInputCode) => {
       setProblem("");
       setPassScore(null);
 
@@ -202,17 +199,27 @@ const Problem = () => {
         };
         setProblem(problemData[0]);
 
-        let parsedUserCode = {};
         if (loggedIn && userCodeRes?.ok) {
           const userData = await userCodeRes.json();
           if (userData[0].score) setPassScore(userData[0].score);
 
-          parsedUserCode = JSON.parse(userData[0]?.code || "{}");
+          const parsedUserCode = JSON.parse(userData[0]?.code || "{}");
+
+          console.log(parsedUserCode);
+          setInputCode({
+            cpp: parsedUserCode.cpp
+              ? parsedUserCode.cpp
+              : automaticallyGeneratedInputCode.cpp,
+            python: parsedUserCode.python
+              ? parsedUserCode.python
+              : automaticallyGeneratedInputCode.python,
+          });
+          return;
         }
 
-        setUserSavedCode({
-          cpp: parsedUserCode?.cpp,
-          python: parsedUserCode?.python,
+        setInputCode({
+          cpp: automaticallyGeneratedInputCode.cpp,
+          python: automaticallyGeneratedInputCode.python,
         });
       } catch (error) {
         console.error(error.message);
@@ -264,10 +271,11 @@ const Problem = () => {
           cpp: starting_code?.cpp,
           python: starting_code?.python,
         });
-        setInputCode({
+
+        return {
           cpp: starting_code?.cpp,
           python: starting_code?.python,
-        });
+        };
       } catch {
         console.error("Problema pavyzdžių neturi");
       }
@@ -300,8 +308,8 @@ const Problem = () => {
 
     const fetchData = async () => {
       try {
-        fetchTestCases();
-        fetchProblem();
+        const automaticallyGeneratedInputCode = await fetchTestCases();
+        fetchProblem(automaticallyGeneratedInputCode);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -333,13 +341,6 @@ const Problem = () => {
 
     fetchCourse();
   }, [problem]);
-
-  useEffect(() => {
-    setInputCode({
-      cpp: userSavedCode.cpp ? userSavedCode.cpp : inputCode.cpp,
-      python: userSavedCode.python ? userSavedCode.python : inputCode.python,
-    });
-  }, [userSavedCode]);
 
   return (
     <div className="full-screen-container">
