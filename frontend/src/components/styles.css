@@ -502,6 +502,7 @@ body {
 }
 
 .alert-wrapper {
+  z-index: 100;
   width: fit-content;
   display: flex;
   gap: 2rem;

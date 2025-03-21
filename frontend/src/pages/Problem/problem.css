@@ -32,17 +32,22 @@
   align-items: center;
 }
 
-.IO-examples-list {
+.test-cases-list {
   margin-top: 1rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.IO-example {
+.test-case {
   padding: 1rem;
-  border-radius: 8px;
   background-color: var(--light);
+}
+
+.test-case-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .problem-page-right {

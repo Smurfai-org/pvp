@@ -44,7 +44,7 @@ const CourseProblemTile = ({
             {progress_dictionary[problem?.progress?.status] ||
               progress_dictionary["not started"]}
             {problem?.progress?.status === "finished"
-              ? `: ${problem?.progress?.score}/100`
+              ? `: ${problem?.progress?.score}%`
               : ""}
           </strong>
         )}
