@@ -14,15 +14,69 @@ const languages = [
   { label: "Python", value: "python" },
 ];
 
-const problemCodeFullCpp = (starting_code, cppUserCode) => {
+// const problemCodeFullCpp = (starting_code, cppUserCode) => {
+//   const code = `
+// #include <iostream>
+// using namespace std;
+
+// ${starting_code?.variables_definition}
+
+// int main() {
+//     ${starting_code?.solve_function_call}
+//     cout << "Rezultatas: " << user_result << endl;
+//     if (result == user_result) {
+//         cout << "Bandymas įveiktas!" << endl;
+//     } else {
+//         cout << "Bandymas nepavyko." << endl;
+//     }
+//     return 0;
+// }
+
+// ${cppUserCode}
+// `;
+//   return code;
+// };
+
+const getTestCaseVariables = (test_case) => {
+  const regex =
+    /\b(?:const\s+)?(int|double|float|long long|long|short|char|bool|string)\s+(\w+)/g;
+
+  const matches = [];
+  let match;
+
+  while ((match = regex.exec(test_case?.input?.cpp)) !== null) {
+    matches.push({ type: match[1], name: match[2] });
+  }
+
+  return matches;
+};
+
+const getStartingCodeFromVariables = (variables, result_type) => {
+  return `${result_type} solve(${variables
+    ?.map((m) => m?.type + " " + m?.name)
+    .join(", ")}) {
+
+}`;
+};
+
+const problemCodeFullCpp = (test_case, userCode) => {
+  const test_case_variables = getTestCaseVariables(test_case);
+  const outputType = determineOutputType(test_case?.expected_output);
+
   const code = `
 #include <iostream>
 using namespace std;
 
-${starting_code?.variables_definition}
+${outputType} solve(${test_case_variables
+    ?.map((m) => m?.type + " " + m?.name)
+    .join(", ")});
 
 int main() {
-    ${starting_code?.solve_function_call}
+    ${test_case?.input?.cpp}
+    ${outputType} result = ${test_case?.expected_output};
+    ${outputType} user_result = solve(${test_case_variables
+    .map((m) => m.name)
+    .join(", ")});
     cout << "Rezultatas: " << user_result << endl;
     if (result == user_result) {
         cout << "Bandymas įveiktas!" << endl;
@@ -32,8 +86,9 @@ int main() {
     return 0;
 }
 
-${cppUserCode}
+${userCode}
 `;
+  console.log(code);
   return code;
 };
 
@@ -54,6 +109,21 @@ else:
   return code;
 };
 
+const determineOutputType = (output) => {
+  console.log(output);
+  // output = "20.2";
+
+  // Try converting to a number
+  const num = Number(output);
+
+  // Check if conversion is successful (not NaN)
+  if (!isNaN(num)) {
+    return Number.isInteger(num) ? "int" : "double";
+  }
+
+  return "string"; // If not a number, treat as string
+};
+
 const Problem = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -71,7 +141,10 @@ const Problem = () => {
   const [selectedLanguageValue, setSelectedLanguageValue] = useState(
     languages[0]?.value
   );
-  const [inputsAndOutputs, setInputsAndOutputs] = useState([]);
+  const [testCases, setTestCases] = useState([]);
+  const [testCaseVariables, setTestCaseVariables] = useState([]);
+  const [cppInputCodeEmpty, setCppInputCodeEmpty] = useState("");
+  const [pythonInputCodeEmpty, setPythonInputCodeEmpty] = useState("");
   const [cppInputCode, setCppInputCode] = useState("");
   const [pythonInputCode, setPythonInputCode] = useState("");
   const [courseInfo, setCourseInfo] = useState(null);
@@ -128,7 +201,7 @@ const Problem = () => {
         if (!problemRes.ok) throw new Error(`HTTP error: ${problemRes.status}`);
         const problemData = await problemRes.json();
 
-        let parsedStartingCode = JSON.parse(
+        const parsedStartingCode = JSON.parse(
           problemData[0]?.starting_code || "{}"
         );
 
@@ -141,17 +214,17 @@ const Problem = () => {
         let parsedUserCode = {};
         if (loggedIn && userCodeRes?.ok) {
           const userData = await userCodeRes.json();
-          console.log(userData[0]?.code);
 
           parsedUserCode = JSON.parse(userData[0]?.code || "{}");
         }
 
-        console.log(parsedUserCode);
-        setCppInputCode(
-          parsedUserCode?.cpp
-            ? parsedUserCode?.cpp
-            : parsedStartingCode?.cpp?.user_starting_code
-        );
+        setCppInputCodeEmpty();
+
+        // setCppInputCode(
+        //   parsedUserCode?.cpp
+        //     ? parsedUserCode?.cpp
+        //     : parsedStartingCode?.cpp?.user_starting_code
+        // );
         setPythonInputCode(
           parsedUserCode?.python
             ? parsedUserCode?.python
@@ -163,7 +236,7 @@ const Problem = () => {
     };
 
     const fetchTestCases = async () => {
-      setInputsAndOutputs([]);
+      setTestCases([]);
       try {
         const res = await fetch(`http://localhost:5000/test_cases?id=${id}`, {
           method: "GET",
@@ -175,7 +248,26 @@ const Problem = () => {
         }
 
         const data = await res.json();
-        setInputsAndOutputs(data);
+
+        const formatedInput = data?.map((element) => {
+          return JSON.parse(element?.input || "{}");
+        });
+        const formatedData = data?.map((element, index) => ({
+          ...element,
+          input: formatedInput[index],
+        }));
+        setTestCases(formatedData);
+        const testCaseVariablesLocal = getTestCaseVariables(formatedData[0]);
+        setTestCaseVariables(testCaseVariablesLocal);
+        const result_type = determineOutputType(
+          formatedData[0]?.expected_output
+        );
+        setCppInputCodeEmpty(
+          getStartingCodeFromVariables(testCaseVariablesLocal, result_type)
+        );
+        setCppInputCode(
+          getStartingCodeFromVariables(testCaseVariablesLocal, result_type)
+        );
       } catch (error) {
         console.error(error.message);
       }
@@ -290,15 +382,18 @@ const Problem = () => {
           </div>
 
           <div className="IO-examples-list">
-            {inputsAndOutputs?.map((item, index) => (
+            {testCases?.map((item, index) => (
               <div key={index} className="IO-example">
                 <p style={{ fontWeight: "600" }}>Pavyzdys {index + 1}</p>
-                <p>
-                  <strong>Įvestis:</strong> {item?.input}
-                </p>
-                <p>
-                  <strong>Rezultatas:</strong> {item?.expected_output}
-                </p>
+                <pre>
+                  {selectedLanguageValue === "cpp"
+                    ? item?.input?.cpp
+                    : item?.input?.python}
+                </pre>
+                <pre>
+                  <strong>Rezultatas:</strong> <br />
+                  {item?.expected_output}
+                </pre>
               </div>
             ))}
           </div>
@@ -357,7 +452,7 @@ const Problem = () => {
             ref={outputRef}
             sourceCode={
               selectedLanguageValue === "cpp"
-                ? problemCodeFullCpp(problem?.starting_code?.cpp, cppInputCode)
+                ? problemCodeFullCpp(testCases[0], cppInputCode)
                 : problemCodeFullPython(
                     problem?.starting_code?.python,
                     pythonInputCode
