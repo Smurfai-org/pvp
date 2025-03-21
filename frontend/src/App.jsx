@@ -8,7 +8,7 @@ import Login from "./pages/login/Login";
 import Register from "./pages/Register";
 import Examples from "./pages/Examples";
 import Navbar from "./components/NavBar";
-import AdminDash from "./pages/adminDash/adminDash";
+import AdminDash from "./pages/AdminDash/AdminDash";
 import CourseCreate from "./pages/CourseCreate/CourseCreate";
 import Main from "./pages/Main/Main";
 import ViewCourse from "./pages/ViewCourse/ViewCourse";
@@ -22,6 +22,7 @@ import MessageProvider from "./utils/MessageProvider";
 import Profile from "./pages/AuthTest";
 import { AuthProvider } from "./utils/AuthContext";
 import Course from "./pages/Course/Course";
+import ViewProfile from "./pages/ViewProfile/ViewProfile";
 
 function AppRoutes() {
   const location = useLocation();
@@ -54,7 +55,7 @@ function AppRoutes() {
                 element={<GenerateProblem />}
               />
               <Route path="/courses/:id" element={<Course />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile" element={<ViewProfile />} />
               <Route path="/*" element={<NotFound />} />
             </Routes>
           </GoogleOAuthProvider>

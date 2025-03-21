@@ -56,8 +56,11 @@ export const AuthProvider = ({ children }) => {
       method: 'POST',
       credentials: 'include',
     });
-
-    window.location.href = '/';
+  
+    setLoggedIn(false);
+    setUser(null);
+  
+    window.location.href = '/login';
   };
 
   if (loading) return null;

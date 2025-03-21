@@ -38,7 +38,7 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, email } = req.body;
   if (!username || !password) {
     res.status(400).json({ message: "Ne visi laukai užpildyti" });
   }
@@ -53,10 +53,17 @@ router.post("/", async (req, res) => {
   } else {
     try {
       const hashedPassword = await hashPassword(password);
-      await pool.execute(
-        "INSERT INTO users (username, password) VALUES (?, ?)",
-        [username, hashedPassword]
-      );
+      if (!email) {
+        await pool.execute(
+          "INSERT INTO users (username, password) VALUES (?, ?)",
+          [username, hashedPassword]
+        );
+      } else {
+        await pool.execute(
+          "INSERT INTO users (username, password, email) VALUES (?, ?, ?)",
+          [username, hashedPassword, email]
+        );
+      }
       res.status(201).json({ message: "Vartotojas sukurtas" });
     } catch (error) {
       console.error(error);

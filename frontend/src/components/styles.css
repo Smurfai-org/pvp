@@ -416,6 +416,7 @@ body {
   background-color: var(--dark);
   box-shadow: 2px 4px 4px hsl(0, 0%, 75%);
   transition: 0.15s ease;
+  position: relative;
 }
 
 .course-card:hover {
@@ -445,6 +446,31 @@ body {
   text-overflow: ellipsis;
   white-space: normal;
   max-height: 2.5em;
+}
+
+.trash-can, .restore-icon {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  filter: invert(100%);
+}
+
+.card-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.course-card-container:hover .trash-can,
+.course-card-container:hover .restore-icon {
+  opacity: 1;
 }
 
 .category-selector {
@@ -530,4 +556,9 @@ body {
 
 .error {
   border: 2px solid var(--bright);
+}
+
+.navbar-login p{
+  font-size: small;
+  display: inline-block;
 }
