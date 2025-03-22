@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { TextBox } from "../../components/textBox/TextBox";
 import Button from "../../components/Button";
 import "./login.css";
 import { useGoogleLogin } from "@react-oauth/google";
 import googleIcon from "../../assets/google_icon.svg";
+import { MessageContext } from "../../utils/MessageProvider";
 
 function Login() {
   const navigate = useNavigate();
@@ -16,6 +17,8 @@ function Login() {
 
   const [usernameError, setUsernameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+
+  const { showSuccessMessage, showErrorMessage} = useContext(MessageContext);
 
   const isLoginValid = () => {
     let isValid = true;
@@ -60,9 +63,10 @@ function Login() {
       console.log("res", response);
 
       if (response.ok) {
-        window.location.href = from;
+        navigate(from, {replace: true});
       } else {
         const data = await response.json();
+        console.log(data);
       }
     },
     onError: () => {},

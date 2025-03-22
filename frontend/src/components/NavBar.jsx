@@ -7,28 +7,20 @@ import { useNavigate } from "react-router-dom";
 import { MessageContext } from "../utils/MessageProvider";
 
 const Navbar = () => {
-  const { loggedIn, logout } = useContext(AuthContext);
+  const { loggedIn, logout, user } = useContext(AuthContext);
   const { showErrorMessage } = useContext(MessageContext);
-  const navigate = useNavigate(); // ✅ Move outside handleLogout
-
-  const handleLogout = async () => {
-    try {
-      const result = await fetch("http://localhost:5000/auth/logout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      });
-
-      if (!result.ok) {
-        showErrorMessage("Klaida atsijungiant");
-        return;
-      }
-
-      navigate("/login"); // ✅ Correctly redirects to /login
-    } catch (error) {
-      showErrorMessage("Klaida atsijungiant");
-    }
-  };
+  const navigate = useNavigate();
+  const list = user.role === 'admin' ? 
+  [ // admino sarasas
+    { text: "Profile", url: "/profile" },
+    { text: "Dashboard", url: "/admin_dash" },
+    { text: "Log out", onClick: logout }
+  ]
+  :
+  [ // userio sarasas
+    { text: "Profile", url: "/profile" },
+    { text: "Log out", onClick: logout }
+  ]
 
   return (
     <nav className="navbar">
@@ -48,11 +40,7 @@ const Navbar = () => {
           <HyperlinkDropdown
             placeholder="Account"
             showArrow={false}
-            links={[
-              { text: "Profile", url: "/profile" },
-              { text: "Dashboard", url: "/admin_dash" },
-              { text: "Log out", onClick: logout }
-            ]}
+            links={list}
           />
         ) : (
           <div className="navbar-login">

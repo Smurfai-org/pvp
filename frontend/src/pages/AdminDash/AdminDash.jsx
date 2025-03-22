@@ -4,11 +4,18 @@ import "./AdminDash.css";
 import Button from '../../components/Button';
 import { useNavigate } from 'react-router-dom';
 import { MessageContext } from '../../utils/MessageProvider';
+import AuthContext from '../../utils/AuthContext';
+import Restore from '../../assets/restore-icon.svg';
 
 function AdminDash() {
     const [courses, setCourses] = useState([]);
     const navigate = useNavigate();
     const { showSuccessMessage, showErrorMessage, showWarningMessage } = useContext(MessageContext);
+    const { user, loggedIn } = useContext(AuthContext);
+
+    if(!loggedIn || user.role != 'admin') {
+        navigate('/login');
+    }
 
     const fetchData = async () => {
         try {
