@@ -360,7 +360,8 @@ body {
   top: 100%;
   right: 0;
   left: 0;
-  min-width: fit-content;
+  min-width: max-content;
+  text-wrap: none;
   max-width: 300px;
   background-color: var(--light);
   z-index: 1;

@@ -28,7 +28,7 @@ const Problem = () => {
   const outputRef = useRef(null);
   const location = useLocation();
   const originalCourseId = location.state?.courseId;
-  const { showSuccessMessage } = useContext(MessageContext);
+  const { showSuccessMessage, showErrorMessage } = useContext(MessageContext);
 
   // Atėjus iš kurso pateikiamas kurso problemų id sąrašas pagal order_index. Pvz: [14, 13, 15, 16, 18]. Skirtas nurodyti previousProblemId ir nextProblemId
   const courseProblemsOrder = location.state?.courseProblemsOrder;
@@ -66,6 +66,11 @@ const Problem = () => {
 
   // Kai praeina bent vienas testas nustatom passScore ir saugom duomazėj "progress" lentelėj, taip pat pakeičiam statusą į "finished"
   const [passScore, setPassScore] = useState(null);
+
+  if(!loggedIn) {
+    navigate('/login');
+    showErrorMessage('Prašome prisijungti');
+  }
 
   const onDropdownSelect = (selectedLabel) => {
     const selectedLang = languages.find((lang) => lang.label === selectedLabel);
@@ -342,6 +347,41 @@ const Problem = () => {
     fetchCourse();
   }, [problem]);
 
+  const handleAIclick = async () => {
+    //Paleisti, kad praeitu testus
+    await handleRunButtonClick();
+
+    //AI CALLAS KAD IVERTINTU BUS CIA
+
+    // Kodo saugojimo dalis
+    const sourceCode =
+    selectedLanguageValue === "cpp"
+      ? inputCode?.cpp
+      : inputCode?.python;
+    console.log({ code: sourceCode, userId: user?.id, probId: id });
+    try {
+      const res = await fetch('http://localhost:5000/problem/solve', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          code: inputCode,
+          userId: user.id,
+          probId: id,
+          score: passScore,
+        }),
+        credentials: 'include'
+      });
+
+      if(!res.ok) {
+        showErrorMessage('Nepavyko įkelti sprendimo');
+      }
+
+      showSuccessMessage('Kodas sėkmingai įvertintas');
+    } catch (error) {
+      showErrorMessage('Klaida įkeliant sprendimą');
+    }
+  }
+
   return (
     <div className="full-screen-container">
       <div className="problem-page-left">
@@ -447,9 +487,7 @@ const Problem = () => {
           </Button>
           <Button
             extra="small bright"
-            onClick={() => {
-              console.log("AI Suggestions");
-            }}
+            onClick={handleAIclick}
           >
             AI įvertinimas
           </Button>

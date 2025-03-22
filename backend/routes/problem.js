@@ -219,7 +219,7 @@ router.delete('/:id/hints/:id2', async (req, res) => {
 });
 
 router.post('/solve', async(req, res) => {
-    const {code, userId, probId} = req.body;
+    const {code, userId, probId, score} = req.body;
 
     try {
         const [exists] = await pool.execute('SELECT * from progress WHERE fk_PROBLEMid = ? AND fk_USERid = ?', [probId, userId]);
@@ -227,11 +227,11 @@ router.post('/solve', async(req, res) => {
 
         let result;
         if(exists.length === 0) {
-            [result] = await pool.execute('INSERT INTO progress (fk_PROBLEMid, fk_USERid, completion_date, status, code) VALUES (?, ?, ?, ?, ?)',
-                [probId, userId, timestamp, "finished", code]);
+            [result] = await pool.execute('INSERT INTO progress (fk_PROBLEMid, fk_USERid, completion_date, score, status, code) VALUES (?, ?, ?, ?, ?, ?)',
+                [probId, userId, timestamp, score, "finished", code]);
         } else {
-            [result] = await pool.execute('UPDATE progress SET code = ?, completion_date = ? WHERE fk_PROBLEMid = ? AND fk_USERid = ?',
-                [code, timestamp, probId, userId]);
+            [result] = await pool.execute('UPDATE progress SET code = ?, completion_date = ?, score = ? WHERE fk_PROBLEMid = ? AND fk_USERid = ?',
+                [code, timestamp, score, probId, userId]);
         }
 
         if(result.affectedRows === 0) {
