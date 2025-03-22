@@ -5,26 +5,25 @@ import chevronIcon from "../../assets/Chevron-icon.png";
 const OutputSection = forwardRef(
   (
     {
-      sourceCode,
+      outputText,
       language,
       isOutputWindowMaximised,
       setIsOutputWindowMaximised = () => {},
     },
     ref
   ) => {
-    const [outputText, setOutputText] = useState("");
     const [isError, setIsError] = useState(false);
 
-    const runCode = async () => {
+    const runCode = async (sourceCode) => {
       if (!sourceCode) return;
       try {
         const { run: result } = await executeCode(language, sourceCode);
-        setOutputText(result.output);
         result.stderr ? setIsError(true) : setIsError(false);
+        return result.output;
       } catch (err) {
         console.error("Execution error:", err);
-        setOutputText(err?.message);
         setIsError(true);
+        return err?.message;
       }
     };
 
@@ -55,16 +54,12 @@ const OutputSection = forwardRef(
               color: isError ? "red" : "black",
             }}
             className="output-text"
-          >
-            {outputText
-              ? outputText.split("\n").map((line) => (
-                  <>
-                    {line}
-                    <br />
-                  </>
-                ))
-              : 'Spauskite mygtuką "Leisti programą" ir pamatykite programos rezultatą.'}
-          </p>
+            dangerouslySetInnerHTML={{
+              __html: outputText
+                ? outputText
+                : 'Spauskite mygtuką "Leisti programą" ir pamatykite programos rezultatą.',
+            }}
+          />
         </div>
       </div>
     );
