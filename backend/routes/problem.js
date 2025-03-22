@@ -218,4 +218,32 @@ router.delete('/:id/hints/:id2', async (req, res) => {
     }
 });
 
+router.post('/solve', async(req, res) => {
+    const {code, userId, probId} = req.body;
+
+    try {
+        const [exists] = await pool.execute('SELECT * from progress WHERE fk_PROBLEMid = ? AND fk_USERid = ?', [probId, userId]);
+        const timestamp = new Date();
+
+        let result;
+        if(exists.length === 0) {
+            [result] = await pool.execute('INSERT INTO progress (fk_PROBLEMid, fk_USERid, completion_date, status, code) VALUES (?, ?, ?, ?, ?)',
+                [probId, userId, timestamp, "finished", code]);
+        } else {
+            [result] = await pool.execute('UPDATE progress SET code = ?, completion_date = ? WHERE fk_PROBLEMid = ? AND fk_USERid = ?',
+                [code, timestamp, probId, userId]);
+        }
+
+        if(result.affectedRows === 0) {
+            return res.status(500).json({ message: 'Nepavyko įkelti užduoties' });
+        }
+
+        return res.status(200).json({ message: "Sprendimas sėkmingai įkeltas" });
+
+    } catch (error) {
+        console.error("Database error:", error);
+        return res.status(500).json({ message: 'Serverio klaida', error: error.message });
+    }
+});
+
 export default router;
