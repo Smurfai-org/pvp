@@ -10,17 +10,19 @@ const Navbar = () => {
   const { loggedIn, logout, user } = useContext(AuthContext);
   const { showErrorMessage } = useContext(MessageContext);
   const navigate = useNavigate();
-  const list = user.role === 'admin' ? 
-  [ // admino sarasas
-    { text: "Profile", url: "/profile" },
-    { text: "Dashboard", url: "/admin_dash" },
-    { text: "Log out", onClick: logout }
-  ]
-  :
-  [ // userio sarasas
-    { text: "Profile", url: "/profile" },
-    { text: "Log out", onClick: logout }
-  ]
+  const list =
+    user?.role === "admin"
+      ? [
+          // admino sarasas
+          { text: "Profile", url: "/profile" },
+          { text: "Dashboard", url: "/admin_dash" },
+          { text: "Log out", onClick: logout },
+        ]
+      : [
+          // userio sarasas
+          { text: "Profile", url: "/profile" },
+          { text: "Log out", onClick: logout },
+        ];
 
   return (
     <nav className="navbar">
