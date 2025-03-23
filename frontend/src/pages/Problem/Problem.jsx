@@ -67,9 +67,9 @@ const Problem = () => {
   // Kai praeina bent vienas testas nustatom passScore ir saugom duomazėj "progress" lentelėj, taip pat pakeičiam statusą į "finished"
   const [passScore, setPassScore] = useState(null);
 
-  if(!loggedIn) {
-    navigate('/login');
-    showErrorMessage('Prašome prisijungti');
+  if (!loggedIn) {
+    navigate("/login");
+    showErrorMessage("Prašome prisijungti");
   }
 
   const onDropdownSelect = (selectedLabel) => {
@@ -165,10 +165,12 @@ const Problem = () => {
       });
     }
 
+    setPassScore(null);
     if (countOfPasses > 0) {
       const score = Math.round((countOfPasses * 100) / testCases.length);
       setPassScore(score);
       showSuccessMessage(`Užduotis išlaikyta ${score}%`);
+      return score;
     }
   };
 
@@ -349,38 +351,36 @@ const Problem = () => {
 
   const handleAIclick = async () => {
     //Paleisti, kad praeitu testus
-    await handleRunButtonClick();
+    const score = await handleRunButtonClick();
 
     //AI CALLAS KAD IVERTINTU BUS CIA
 
     // Kodo saugojimo dalis
     const sourceCode =
-    selectedLanguageValue === "cpp"
-      ? inputCode?.cpp
-      : inputCode?.python;
+      selectedLanguageValue === "cpp" ? inputCode?.cpp : inputCode?.python;
     console.log({ code: sourceCode, userId: user?.id, probId: id });
     try {
-      const res = await fetch('http://localhost:5000/problem/solve', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+      const res = await fetch("http://localhost:5000/problem/solve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           code: inputCode,
-          userId: user.id,
+          userId: user?.id,
           probId: id,
-          score: passScore,
+          score: score ? score : 0,
         }),
-        credentials: 'include'
+        credentials: "include",
       });
 
-      if(!res.ok) {
-        showErrorMessage('Nepavyko įkelti sprendimo');
+      if (!res.ok) {
+        showErrorMessage("Nepavyko įkelti sprendimo");
       }
 
-      showSuccessMessage('Kodas sėkmingai įvertintas');
-    } catch (error) {
-      showErrorMessage('Klaida įkeliant sprendimą');
+      showSuccessMessage("Kodas sėkmingai įvertintas");
+    } catch {
+      showErrorMessage("Klaida įkeliant sprendimą");
     }
-  }
+  };
 
   return (
     <div className="full-screen-container">
@@ -485,10 +485,7 @@ const Problem = () => {
           <Button extra="small" onClick={handleRunButtonClick}>
             Leisti programą
           </Button>
-          <Button
-            extra="small bright"
-            onClick={handleAIclick}
-          >
+          <Button extra="small bright" onClick={handleAIclick}>
             AI įvertinimas
           </Button>
           <Dropdown

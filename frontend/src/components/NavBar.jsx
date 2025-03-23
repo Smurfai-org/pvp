@@ -3,13 +3,9 @@ import { SearchBar } from "./SearchBar";
 import HyperlinkDropdown from "./HyperlinkDropdown";
 import { useContext } from "react";
 import AuthContext from "../utils/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { MessageContext } from "../utils/MessageProvider";
 
 const Navbar = () => {
   const { loggedIn, logout, user } = useContext(AuthContext);
-  const { showErrorMessage } = useContext(MessageContext);
-  const navigate = useNavigate();
   const list =
     user?.role === "admin"
       ? [
