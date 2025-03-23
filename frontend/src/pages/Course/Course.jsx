@@ -70,7 +70,10 @@ const Course = () => {
           {loggedIn && (
             <div className="inline-elements">
               <strong>
-                {courseInfo?.completed_problems}/{courseInfo?.total_problems}
+                {courseInfo?.completed_problems
+                  ? courseInfo?.completed_problems
+                  : 0}
+                /{courseInfo?.total_problems}
               </strong>
               <ProgressBar
                 progress={

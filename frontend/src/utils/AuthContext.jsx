@@ -16,9 +16,10 @@ const getData = async () => {
 
     if (response.ok) {
       const data = await response.json();
+      console.log("Validated user data:", data); // Log to check the response
       return data;
     } else {
-      console.log('No valid data from backend');
+      console.log('No valid data from backend', await response.json());
       return null;
     }
   } catch (error) {
@@ -26,6 +27,7 @@ const getData = async () => {
     return null;
   }
 };
+
 
 
 export const AuthProvider = ({ children }) => {
@@ -56,8 +58,11 @@ export const AuthProvider = ({ children }) => {
       method: 'POST',
       credentials: 'include',
     });
-
-    window.location.href = '/';
+  
+    setLoggedIn(false);
+    setUser(null);
+  
+    window.location.href = '/login';
   };
 
   if (loading) return null;

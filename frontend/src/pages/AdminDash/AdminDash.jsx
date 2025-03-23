@@ -3,14 +3,19 @@ import Card from '../../components/Card';
 import "./AdminDash.css";
 import Button from '../../components/Button';
 import { useNavigate } from 'react-router-dom';
-import trashCan from '../../assets/trash-can.svg';
 import { MessageContext } from '../../utils/MessageProvider';
+import AuthContext from '../../utils/AuthContext';
 import Restore from '../../assets/restore-icon.svg';
 
 function AdminDash() {
     const [courses, setCourses] = useState([]);
     const navigate = useNavigate();
     const { showSuccessMessage, showErrorMessage, showWarningMessage } = useContext(MessageContext);
+    const { user, loggedIn } = useContext(AuthContext);
+
+    if(!loggedIn || user.role != 'admin') {
+        navigate('/login');
+    }
 
     const fetchData = async () => {
         try {
@@ -102,39 +107,33 @@ function AdminDash() {
             <div className="admin-dashboard">
                 {nonDeletedCourses.map((course) => (
                     <div className="course-card-container" key={course.id}>
-                        <Card
-                            title={course.name}
-                            paragraph={course.description}
-                            onClick={() => handleCardClick(course.id)}
-                        />
-                        <img
-                            className="trash-can"
-                            src={trashCan}
-                            alt="Delete"
-                            onClick={() => handleDelete(course.id)}
-                        />
+                    <Card
+                        title={course.name}
+                        paragraph={course.description}
+                        onClick={() => handleCardClick(course.id)}
+                        showActions={true}
+                        onDelete={() => handleDelete(course.id)}
+                        isDeleted={false}
+                    />
                     </div>
                 ))}
-            </div>
+                </div>
 
-            <h2>Ištrinti kursai</h2>
-            <div className="admin-dashboard">
+                <h2>Ištrinti kursai</h2>
+                <div className="admin-dashboard">
                 {deletedCourses.map((course) => (
                     <div className="course-card-container" key={course.id}>
-                        <Card
-                            title={course.name}
-                            paragraph={course.description}
-                            onClick={() => handleCardClick(course.id)}
-                        />
-                        <img
-                            className="trash-can"
-                            src={Restore}
-                            alt="Restore"
-                            onClick={() => handleRecover(course.id)}
-                        />
+                    <Card
+                        title={course.name}
+                        paragraph={course.description}
+                        onClick={() => handleCardClick(course.id)}
+                        showActions={true}
+                        onRestore={() => handleRecover(course.id)}
+                        isDeleted={true}
+                    />
                     </div>
                 ))}
-            </div>
+                </div>
         </div>
     );
 }
