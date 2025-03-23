@@ -1,0 +1,86 @@
+.full-page-container {
+  background-color: rgb(187, 187, 187) !important;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+}
+
+.page-wrapper {
+  width: 92%;
+  margin: 1% auto;
+  background-color: rgb(240, 240, 240);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.wrapper-h1 {
+  margin-left: 20px;
+  font-size: 2rem;
+}
+.course-rows-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.course-row {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 20px;
+}
+
+.course-row > * {
+  max-width: calc(50% - 15px);
+}
+
+.course-list-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.button-left,
+.button-right {
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border: none;
+  background-color: transparent;
+}
+
+.button-left:disabled,
+.button-right:disabled {
+  color: gray;
+  cursor: not-allowed;
+}
+
+.button-left {
+  margin-left: 20px;
+}
+
+.button-right {
+  margin-right: 20px;
+}
+
+.button-left-off,
+.button-right-off {
+  color: gray;
+  cursor: not-allowed;
+  background-color: transparent;
+}
+.progress-container {
+  width: 300px;
+  background-color: var(--light);
+  border-radius: 8px;
+  overflow: hidden;
+  height: 0.5rem;
+}

@@ -22,6 +22,7 @@ import MessageProvider from "./utils/MessageProvider";
 import Profile from "./pages/AuthTest";
 import { AuthProvider } from "./utils/AuthContext";
 import Course from "./pages/Course/Course";
+import CourseList from "./pages/CourseList/CourseList";
 import ViewProfile from "./pages/ViewProfile/ViewProfile";
 
 function AppRoutes() {
@@ -50,6 +51,7 @@ function AppRoutes() {
               <Route path="/courses/:id" element={<Course />} />
               <Route path="/add_problem/:id" element={<AddProblem />} />
               <Route path="/view_problem/:id" element={<ViewProblem />} />
+              <Route path="/courses" element={<CourseList />} />
               <Route
                 path="/generate_problem/:id"
                 element={<GenerateProblem />}
@@ -57,6 +59,7 @@ function AppRoutes() {
               <Route path="/courses/:id" element={<Course />} />
               <Route path="/profile" element={<ViewProfile />} />
               <Route path="/*" element={<NotFound />} />
+ 
             </Routes>
           </GoogleOAuthProvider>
         </MessageProvider>

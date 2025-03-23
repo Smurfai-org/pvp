@@ -88,7 +88,7 @@ const Course = () => {
         <p className="course-info-description">{courseInfo?.description}</p>
         <br />
         <div className="inline-elements">
-          <Button extra="small secondary" onClick={() => navigate("/")}>
+          <Button extra="small secondary" onClick={() => navigate("/courses")}>
             Atgal į sąrašą
           </Button>
           <Button extra="small" onClick={onContinueCourseButtonClick}>
