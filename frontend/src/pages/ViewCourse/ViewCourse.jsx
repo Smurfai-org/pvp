@@ -1,17 +1,22 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import Button from '../../components/Button';
-import TextBox from '../../components/textBox/TextBox';
-import './ViewCourse.css';
-import editButton from '../../assets/edit-icon.svg';
-import exitButton from '../../assets/exit-icon.svg';
-import checkButton from '../../assets/check-icon.svg';
-import { MessageContext } from '../../utils/MessageProvider';
+import React, { useEffect, useState, useContext } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import Button from "../../components/Button";
+import TextBox from "../../components/textBox/TextBox";
+import "./ViewCourse.css";
+import editButton from "../../assets/edit-icon.svg";
+import exitButton from "../../assets/exit-icon.svg";
+import checkButton from "../../assets/check-icon.svg";
+import { MessageContext } from "../../utils/MessageProvider";
+import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 
 function ViewCourse() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { showSuccessMessage, showErrorMessage, showWarningMessage } = useContext(MessageContext);
+  const [isLoaded, setIsLoaded] = useState({
+    course: false,
+    problems: false,
+  });
+  const { showSuccessMessage, showErrorMessage } = useContext(MessageContext);
   const [course, setCourse] = useState(null);
   const [problems, setProblems] = useState([]);
   const [editActive, setEditActive] = useState(false);
@@ -33,15 +38,19 @@ function ViewCourse() {
         }
       } catch (error) {
         console.error("Error fetching course:", error);
-        showErrorMessage('Nepavyko gauti kurso');
+        showErrorMessage("Nepavyko gauti kurso");
         setCourse(null);
+      } finally {
+        setIsLoaded((prev) => ({ ...prev, course: true }));
       }
     };
 
     const fetchProblems = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/course/problems?id=${id}`);
-    
+        const res = await fetch(
+          `http://localhost:5000/course/problems?id=${id}`
+        );
+
         if (!res.ok) {
           if (res.status === 404) {
             console.warn("No problems found, skipping error message.");
@@ -49,7 +58,7 @@ function ViewCourse() {
           }
           throw new Error(`HTTP error! Status: ${res.status}`);
         }
-    
+
         const data = await res.json();
         if (data.length === 0) {
           console.warn("No problems available for the given ID.");
@@ -59,10 +68,11 @@ function ViewCourse() {
         setProblems(data);
       } catch (error) {
         console.error("Error fetching problems:", error);
-        showErrorMessage('Nepavyko gauti užduočių');
+        showErrorMessage("Nepavyko gauti užduočių");
+      } finally {
+        setIsLoaded((prev) => ({ ...prev, problems: true }));
       }
     };
-    
 
     fetchCourse();
     fetchProblems();
@@ -101,10 +111,10 @@ function ViewCourse() {
         icon_url: courseIcon,
       };
       setCourse(updatedCourse);
-      showSuccessMessage('Kurso informacija sėkmingai atnaujinta');
+      showSuccessMessage("Kurso informacija sėkmingai atnaujinta");
     } catch (error) {
       console.error("Error updating course:", error);
-      showErrorMessage('Klaida atnaujinant kursą');
+      showErrorMessage("Klaida atnaujinant kursą");
     }
 
     setEditActive(false);
@@ -118,56 +128,60 @@ function ViewCourse() {
   return (
     <div style={{ margin: "2rem" }}>
       <div className="course-data">
-        {editActive ? (
-          <>
-            <div>
-              <TextBox
-                text="Kurso pavadinimas"
-                value={courseTitle}
-                id="name"
-                onChange={(e) => setCourseTitle(e.target.value)}
-              />
-              <TextBox
-                text="Kurso aprašymas"
-                value={courseDescription}
-                id="description"
-                onChange={(e) => setCourseDescription(e.target.value)}
-              />
-            </div>
-            <div>
-              <img
-                src={checkButton}
-                onClick={handleEditConfirm}
-                style={{
-                  cursor:
-                    courseTitle === course?.name &&
-                    courseDescription === course?.description
-                      ? "not-allowed"
-                      : "pointer",
-                  opacity:
-                    courseTitle === course?.name &&
-                    courseDescription === course?.description
-                      ? 0.5
-                      : 1,
-                }}
-              />
-              <img src={exitButton} onClick={exitEdit} />
-            </div>
-          </>
+        {isLoaded.course ? (
+          editActive ? (
+            <>
+              <div>
+                <TextBox
+                  text="Kurso pavadinimas"
+                  value={courseTitle}
+                  id="name"
+                  onChange={(e) => setCourseTitle(e.target.value)}
+                />
+                <TextBox
+                  text="Kurso aprašymas"
+                  value={courseDescription}
+                  id="description"
+                  onChange={(e) => setCourseDescription(e.target.value)}
+                />
+              </div>
+              <div>
+                <img
+                  src={checkButton}
+                  onClick={handleEditConfirm}
+                  style={{
+                    cursor:
+                      courseTitle === course?.name &&
+                      courseDescription === course?.description
+                        ? "not-allowed"
+                        : "pointer",
+                    opacity:
+                      courseTitle === course?.name &&
+                      courseDescription === course?.description
+                        ? 0.5
+                        : 1,
+                  }}
+                />
+                <img src={exitButton} onClick={exitEdit} />
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <h2>Kursas: {course?.name}</h2>
+                <h4>Aprašymas: {course?.description}</h4>
+              </div>
+              <img src={editButton} onClick={handleEdit} />
+            </>
+          )
         ) : (
-          <>
-            <div>
-              <h2>Kursas: {course?.name || "Įkeliama..."} </h2>
-              <h4>Aprašymas: {course?.description || "Įkeliama..."}</h4>
-            </div>
-            <img src={editButton} onClick={handleEdit} />
-          </>
+          <AnimatedLoadingText />
         )}
       </div>
 
       <div>
-       <Button onClick={handleAddProblem}>Kurti problemą</Button>
-       <Button onClick={handleGenProblem}>Generuoti problemą</Button>
+        <Button onClick={handleAddProblem}>Kurti problemą</Button>
+        <Button onClick={handleGenProblem}>Generuoti problemą</Button>
       </div>
 
       <div className="table-container">
@@ -182,25 +196,33 @@ function ViewCourse() {
             </tr>
           </thead>
           <tbody>
-            {problems.length === 0 ? (
+            {isLoaded.problems ? (
+              problems.length === 0 ? (
+                <tr>
+                  <td colSpan="5">
+                    <p>Šis kursas neturi sukurtų problemų</p>
+                  </td>
+                </tr>
+              ) : (
+                problems.map((problem) => (
+                  <tr
+                    key={problem.id}
+                    onClick={() => navigate(`/view_problem/${problem.id}`)}
+                  >
+                    <td>{problem.name}</td>
+                    <td>{problem.description}</td>
+                    <td>{problem.generated ? "Taip" : "NE"}</td>
+                    <td>{problem.difficulty}</td>
+                    <td>{problem.deleted ? "Taip" : "NE"}</td>
+                  </tr>
+                ))
+              )
+            ) : (
               <tr>
                 <td colSpan="5">
-                  <p>Šis kursas neturi sukurtų problemų</p>
+                  <AnimatedLoadingText />
                 </td>
               </tr>
-            ) : (
-              problems.map((problem) => (
-                <tr
-                  key={problem.id}
-                  onClick={() => navigate(`/view_problem/${problem.id}`)}
-                >
-                  <td>{problem.name}</td>
-                  <td>{problem.description}</td>
-                  <td>{problem.generated ? "Taip" : "NE"}</td>
-                  <td>{problem.difficulty}</td>
-                  <td>{problem.deleted ? "Taip" : "NE"}</td>
-                </tr>
-              ))
             )}
           </tbody>
         </table>

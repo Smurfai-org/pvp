@@ -10,14 +10,14 @@ const Navbar = () => {
     user?.role === "admin"
       ? [
           // admino sarasas
-          { text: "Profile", url: "/profile" },
-          { text: "Dashboard", url: "/admin_dash" },
-          { text: "Log out", onClick: logout },
+          { text: "Profilis", url: "/profile" },
+          { text: "Administratoriaus langas", url: "/admin_dash" },
+          { text: "Atsijungti", onClick: logout },
         ]
       : [
           // userio sarasas
-          { text: "Profile", url: "/profile" },
-          { text: "Log out", onClick: logout },
+          { text: "Profilis", url: "/profile" },
+          { text: "Atsijungti", onClick: logout },
         ];
 
   return (
@@ -31,22 +31,17 @@ const Navbar = () => {
       </div>
 
       <div className="nav-links">
-        <Hyperlink href="/courses">Courses</Hyperlink>
-        <Hyperlink href="/problems">Problems</Hyperlink>
-        <Hyperlink href="/discussion">Discussion</Hyperlink>
-        {loggedIn ? (
+        <Hyperlink href="/courses">Kursai</Hyperlink>
+        <Hyperlink href="/discussion">Diskusija</Hyperlink>
+        {loggedIn && (
           <HyperlinkDropdown
-            placeholder="Account"
+            placeholder="Paskyra"
             showArrow={false}
             links={list}
           />
-        ) : (
-          <div className="navbar-login">
-            <Hyperlink href="/login">Login</Hyperlink>
-            <p>or</p>
-            <Hyperlink href="/register">Register</Hyperlink>
-          </div>
         )}
+        {!loggedIn && <Hyperlink href="/login">Prisijungimas</Hyperlink>}
+        {!loggedIn && <Hyperlink href="/register">Registracija</Hyperlink>}
       </div>
     </nav>
   );
