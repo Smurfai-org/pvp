@@ -107,7 +107,7 @@
 
 .output-text {
   margin: 0;
-  font-family: "Consolas";
+  font-family: "Consolas", "Courier New", monospace;
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -126,4 +126,13 @@
   display: flex;
   width: 100%;
   height: 100%;
+}
+
+.monaco-editor, 
+.monaco-editor .inputarea.ime-input {
+  font-family: 'Consolas', 'Courier New', monospace !important;
+}
+
+.monaco-editor .view-line * {
+  font-family: 'Consolas', 'Courier New', monospace !important;
 }
