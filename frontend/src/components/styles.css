@@ -25,6 +25,11 @@ body {
   font-family: "Inter", sans-serif;
 }
 
+h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
 .easy {
   color: var(--difficulty-easy);
 }
@@ -449,7 +454,8 @@ body {
   max-height: 2.5em;
 }
 
-.trash-can, .restore-icon {
+.trash-can,
+.restore-icon {
   width: 1.5rem !important;
   height: 1.5rem !important;
   cursor: pointer;
@@ -559,7 +565,8 @@ body {
   border: 2px solid var(--bright);
 }
 
-.navbar-login p{
+.navbar-login p {
   font-size: small;
   display: inline-block;
+  align-items: center;
 }

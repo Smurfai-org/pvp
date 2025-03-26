@@ -1,7 +1,7 @@
 import { useState } from "react";
 import searchIcon from "../assets/Search-icon.png";
 
-export const SearchBar = ({ text = "Search..." }) => {
+export const SearchBar = ({ text = "Ieškoti..." }) => {
   const [inputValue, setInputValue] = useState("");
 
   const handleChangeInputValue = (e) => {

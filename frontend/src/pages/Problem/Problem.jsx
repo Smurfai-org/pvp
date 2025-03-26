@@ -16,6 +16,7 @@ import {
   problemCodeFullPython,
 } from "./problemCodeUtilities";
 import { MessageContext } from "../../utils/MessageProvider";
+import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 
 const languages = [
   { label: "C++", value: "cpp" },
@@ -30,6 +31,8 @@ const Problem = () => {
   const originalCourseId = location.state?.courseId;
   const { showSuccessMessage, showErrorMessage } = useContext(MessageContext);
 
+  const [isLoaded, setIsLoaded] = useState(false);
+  const loadingText = "Įkeliama...";
   // Atėjus iš kurso pateikiamas kurso problemų id sąrašas pagal order_index. Pvz: [14, 13, 15, 16, 18]. Skirtas nurodyti previousProblemId ir nextProblemId
   const courseProblemsOrder = location.state?.courseProblemsOrder;
   const { loggedIn, user } = useContext(AuthContext);
@@ -67,11 +70,6 @@ const Problem = () => {
   // Kai praeina bent vienas testas nustatom passScore ir saugom duomazėj "progress" lentelėj, taip pat pakeičiam statusą į "finished"
   const [passScore, setPassScore] = useState(null);
 
-  if (!loggedIn) {
-    navigate("/login");
-    showErrorMessage("Prašome prisijungti");
-  }
-
   const onDropdownSelect = (selectedLabel) => {
     const selectedLang = languages.find((lang) => lang.label === selectedLabel);
     if (selectedLang) {
@@ -93,7 +91,7 @@ const Problem = () => {
       navigate(`/courses/${originalCourseId}`);
       return;
     }
-    navigate("/");
+    navigate("/courses");
   };
 
   const handleResetCodeButtonClick = () => {
@@ -104,6 +102,11 @@ const Problem = () => {
   };
 
   const handleTestButtonClick = async (index = null, dontPrint = false) => {
+    if (!loggedIn) {
+      navigate("/login");
+      showErrorMessage("Prašome prisijungti");
+      return;
+    }
     const sourceCode =
       selectedLanguageValue === "cpp"
         ? problemCodeFullCpp(
@@ -147,6 +150,11 @@ const Problem = () => {
   };
 
   const handleRunButtonClick = async () => {
+    if (!loggedIn) {
+      navigate("/login");
+      showErrorMessage("Prašome prisijungti");
+      return;
+    }
     if (testCases.length < 1) {
       await handleTestButtonClick();
       return;
@@ -171,6 +179,92 @@ const Problem = () => {
       setPassScore(score);
       showSuccessMessage(`Užduotis išlaikyta ${score}%`);
       return score;
+    }
+  };
+
+  const handleAIclick = async () => {
+    if (!loggedIn) {
+      navigate("/login");
+      showErrorMessage("Prašome prisijungti");
+      return;
+    }
+    //Paleisti, kad praeitu testus
+    const score = await handleRunButtonClick();
+
+    //AI CALLAS KAD IVERTINTU BUS CIA
+
+    // Kodo saugojimo dalis
+    const sourceCode =
+      selectedLanguageValue === "cpp" ? inputCode?.cpp : inputCode?.python;
+    console.log({ code: sourceCode, userId: user?.id, probId: id });
+    try {
+      const res = await fetch("http://localhost:5000/problem/solve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: inputCode,
+          userId: user?.id,
+          probId: id,
+          score: score ? score : 0,
+        }),
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        showErrorMessage("Nepavyko įkelti sprendimo");
+      }
+
+      showSuccessMessage("Kodas sėkmingai įvertintas");
+    } catch {
+      showErrorMessage("Klaida įkeliant sprendimą");
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/enrolled/${user?.id}/${courseInfo?.id}`
+      );
+      if (!response.ok) throw new Error(response.status);
+      const data = await response.json();
+
+      try {
+        const completed_problems =
+          passScore === null && score > 0
+            ? Number((data[0]?.completed_problems ?? 0) + 1)
+            : passScore > 0 && score === undefined
+            ? Number((data[0]?.completed_problems ?? 0) - 1)
+            : data[0]?.completed_problems ?? 0;
+
+        await fetch(
+          `http://localhost:5000/enrolled/${user?.id}/${courseInfo?.id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              completed_problems: completed_problems,
+              language: selectedLanguageValue,
+            }),
+            credentials: "include",
+          }
+        );
+      } catch {
+        console.error("Nepavyko pakeisti kurso progreso");
+      }
+    } catch {
+      try {
+        await fetch(`http://localhost:5000/enrolled`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            courseId: courseInfo?.id,
+            userId: user?.id,
+            completed_problems: score ? 1 : 0,
+            language: selectedLanguageValue,
+          }),
+          credentials: "include",
+        });
+      } catch {
+        console.error("Nepavyko pradėti kurso");
+      }
     }
   };
 
@@ -212,21 +306,20 @@ const Problem = () => {
 
           const parsedUserCode = JSON.parse(userData[0]?.code || "{}");
 
-          console.log(parsedUserCode);
           setInputCode({
-            cpp: parsedUserCode.cpp
-              ? parsedUserCode.cpp
-              : automaticallyGeneratedInputCode.cpp,
-            python: parsedUserCode.python
-              ? parsedUserCode.python
-              : automaticallyGeneratedInputCode.python,
+            cpp: parsedUserCode?.cpp
+              ? parsedUserCode?.cpp
+              : automaticallyGeneratedInputCode?.cpp,
+            python: parsedUserCode?.python
+              ? parsedUserCode?.python
+              : automaticallyGeneratedInputCode?.python,
           });
           return;
         }
 
         setInputCode({
-          cpp: automaticallyGeneratedInputCode.cpp,
-          python: automaticallyGeneratedInputCode.python,
+          cpp: automaticallyGeneratedInputCode?.cpp,
+          python: automaticallyGeneratedInputCode?.python,
         });
       } catch (error) {
         console.error(error.message);
@@ -237,11 +330,8 @@ const Problem = () => {
       const starting_code_empty = getStartingCodeFromVariables();
       setTestCases([]);
       setTestCaseVariables([]);
+
       setInputCodeEmpty({
-        cpp: starting_code_empty?.cpp,
-        python: starting_code_empty?.python,
-      });
-      setInputCode({
         cpp: starting_code_empty?.cpp,
         python: starting_code_empty?.python,
       });
@@ -252,7 +342,10 @@ const Problem = () => {
         });
 
         if (!res.ok) {
-          throw new Error(`HTTP error: ${res.status}`);
+          return {
+            cpp: starting_code_empty?.cpp,
+            python: starting_code_empty?.python,
+          };
         }
 
         const data = await res.json();
@@ -274,6 +367,7 @@ const Problem = () => {
           testCaseVariablesLocal,
           result_type
         );
+
         setInputCodeEmpty({
           cpp: starting_code?.cpp,
           python: starting_code?.python,
@@ -344,43 +438,11 @@ const Problem = () => {
       } catch (error) {
         console.error("Error fetching course:", error);
       }
+      setIsLoaded(true);
     };
 
     fetchCourse();
   }, [problem]);
-
-  const handleAIclick = async () => {
-    //Paleisti, kad praeitu testus
-    const score = await handleRunButtonClick();
-
-    //AI CALLAS KAD IVERTINTU BUS CIA
-
-    // Kodo saugojimo dalis
-    const sourceCode =
-      selectedLanguageValue === "cpp" ? inputCode?.cpp : inputCode?.python;
-    console.log({ code: sourceCode, userId: user?.id, probId: id });
-    try {
-      const res = await fetch("http://localhost:5000/problem/solve", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          code: inputCode,
-          userId: user?.id,
-          probId: id,
-          score: score ? score : 0,
-        }),
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        showErrorMessage("Nepavyko įkelti sprendimo");
-      }
-
-      showSuccessMessage("Kodas sėkmingai įvertintas");
-    } catch {
-      showErrorMessage("Klaida įkeliant sprendimą");
-    }
-  };
 
   return (
     <div className="full-screen-container">
@@ -418,7 +480,7 @@ const Problem = () => {
               </Button>
             )}
           </div>
-          {passScore && (
+          {isLoaded && passScore && (
             <div>
               Jūsų sprendimas įvertintas <strong>{passScore}%</strong>
             </div>
@@ -426,58 +488,64 @@ const Problem = () => {
         </div>
 
         <div className="problem-info-screen">
-          <h2 style={{ fontSize: "1.25rem", fontWeight: "600" }}>
-            {problem?.name}
-          </h2>
-          <div className="problem-related-courses">
-            <Hyperlink href={`/courses/${courseInfo?.id}`}>
-              {courseInfo?.name}
-            </Hyperlink>
-            <strong className={problem?.difficulty}>
-              {difficulty_dictionary[problem?.difficulty]}
-            </strong>
-          </div>
-
-          <div className="problem-related-courses">
-            {problem?.courses?.map((course) => (
-              <Hyperlink key={course?.id} href={`/course/${course.id}`}>
-                {course?.name}
+          <h2>{isLoaded ? problem?.name : <AnimatedLoadingText />}</h2>
+          {isLoaded && (
+            <div className="problem-related-courses">
+              <Hyperlink href={`/courses/${courseInfo?.id}`}>
+                {courseInfo?.name}
               </Hyperlink>
-            ))}
-          </div>
+              <strong className={problem?.difficulty}>
+                {difficulty_dictionary[problem?.difficulty]}
+              </strong>
+            </div>
+          )}
 
-          <div>
-            <p>{problem?.description}</p>
-          </div>
+          {isLoaded && (
+            <div className="problem-related-courses">
+              {problem?.courses?.map((course) => (
+                <Hyperlink key={course?.id} href={`/course/${course.id}`}>
+                  {course?.name}
+                </Hyperlink>
+              ))}
+            </div>
+          )}
 
-          <div className="test-cases-list">
-            {testCases?.map((item, index) => (
-              <div key={index} className="test-case">
-                <div className="test-case-header">
-                  <p style={{ fontWeight: "600", margin: 0 }}>
-                    Testas {index + 1}
-                  </p>
-                  <Button
-                    extra="small"
-                    onClick={() => {
-                      handleTestButtonClick(index);
-                    }}
-                  >
-                    Testuoti
-                  </Button>
+          {isLoaded && (
+            <div>
+              <p>{problem?.description}</p>
+            </div>
+          )}
+
+          {isLoaded && (
+            <div className="test-cases-list">
+              {testCases?.map((item, index) => (
+                <div key={index} className="test-case">
+                  <div className="test-case-header">
+                    <p style={{ fontWeight: "600", margin: 0 }}>
+                      Testas {index + 1}
+                    </p>
+                    <Button
+                      extra="small"
+                      onClick={() => {
+                        handleTestButtonClick(index);
+                      }}
+                    >
+                      Testuoti
+                    </Button>
+                  </div>
+                  <pre>
+                    {selectedLanguageValue === "cpp"
+                      ? item?.input?.cpp
+                      : item?.input?.python}
+                  </pre>
+                  <pre>
+                    <strong>Rezultatas:</strong> <br />
+                    {item?.expected_output}
+                  </pre>
                 </div>
-                <pre>
-                  {selectedLanguageValue === "cpp"
-                    ? item?.input?.cpp
-                    : item?.input?.python}
-                </pre>
-                <pre>
-                  <strong>Rezultatas:</strong> <br />
-                  {item?.expected_output}
-                </pre>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       <div className="problem-page-right">
@@ -505,9 +573,11 @@ const Problem = () => {
           <CodeEditor
             language={selectedLanguageValue}
             value={
-              selectedLanguageValue === "cpp"
-                ? inputCode?.cpp
-                : inputCode?.python
+              isLoaded
+                ? selectedLanguageValue === "cpp"
+                  ? inputCode?.cpp
+                  : inputCode?.python
+                : loadingText
             }
             setValue={(value) => {
               setInputCode({
@@ -523,6 +593,7 @@ const Problem = () => {
             height: isOutputWindowMaximised ? "50%" : "15%",
           }}
           className="output-window"
+          onClick={() => setIsOutputWindowMaximised(true)}
         >
           <OutputSection
             ref={outputRef}

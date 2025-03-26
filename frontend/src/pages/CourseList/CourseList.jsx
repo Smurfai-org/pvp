@@ -1,12 +1,19 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Card from "../../components/Card";
 import { useNavigate } from "react-router-dom";
 import "./CourseList.css";
 import CourseProblemTile from "../Course/CourseProblemTile";
+import AnimatedLoadingText from "../../components/AnimatedLoadingText";
+import AuthContext from "../../utils/AuthContext";
 
 const CourseList = () => {
+  const [isLoaded, setIsLoaded] = useState({
+    course: false,
+    problems: false,
+  });
+  const { loggedIn, user } = useContext(AuthContext);
   const [courses, setCourses] = useState([]);
-  const [niceBlueCourses, setNiceBlueCourses] = useState([]);
+  const [userStartedCourses, setUserStartedCourses] = useState([]);
   const [topRowCourses, setTopRowCourses] = useState([]);
   const [bottomRowCourses, setBottomRowCourses] = useState([]);
   const [startIndex, setStartIndex] = useState(0);
@@ -16,17 +23,67 @@ const CourseList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchCourses = async () => {
       try {
         const response = await fetch("http://localhost:5000/course/");
         if (!response.ok) throw new Error(response.status);
         const data = await response.json();
         setCourses(data);
+        return data;
       } catch (error) {
         console.error("Failed to fetch courses", error);
+      } finally {
+        setIsLoaded((prev) => ({ ...prev, course: true }));
       }
     };
+
+    const fetchStartedCourses = async (coursesLocal) => {
+      if (!loggedIn) return;
+      try {
+        const response = await fetch(
+          `http://localhost:5000/enrolled/${user?.id}/`
+        );
+        if (!response.ok) throw new Error(response.status);
+        const data = await response.json();
+        const startedCourses = data
+          ?.map((item) => {
+            return coursesLocal?.find(
+              (course) => course.id === item.fk_COURSEid
+            );
+          })
+          .filter(Boolean);
+        setUserStartedCourses(startedCourses);
+      } catch (error) {
+        console.error("Failed to fetch courses", error);
+      } finally {
+        setIsLoaded((prev) => ({ ...prev, course: true }));
+      }
+    };
+
+    const fetchProblems = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/problem/`);
+        if (!response.ok) throw new Error(response.status);
+        const data = await response.json();
+        setProblems(data);
+      } catch (error) {
+        console.error("Failed to fetch problems", error);
+      } finally {
+        setIsLoaded((prev) => ({ ...prev, problems: true }));
+      }
+    };
+
+    const fetchData = async () => {
+      try {
+        const coursesLocal = await fetchCourses();
+        fetchStartedCourses(coursesLocal);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
     fetchData();
+    fetchProblems();
   }, []);
 
   useEffect(() => {
@@ -37,7 +94,9 @@ const CourseList = () => {
       setCoursesPerRow(newCoursesPerRow);
 
       if (startIndex + newCoursesPerRow > Math.ceil(courses.length / 2)) {
-        setStartIndex(Math.max(0, Math.ceil(courses.length / 2) - newCoursesPerRow));
+        setStartIndex(
+          Math.max(0, Math.ceil(courses.length / 2) - newCoursesPerRow)
+        );
       }
       if (yourCoursesIndex + newCoursesPerRow > courses.length) {
         setYourCoursesIndex(Math.max(0, courses.length - newCoursesPerRow));
@@ -63,7 +122,12 @@ const CourseList = () => {
     );
     setTopRowCourses(topRowItems);
     setBottomRowCourses(bottomRowItems);
-    setNiceBlueCourses(courses.slice(yourCoursesIndex, yourCoursesIndex + coursesPerRow));
+    setUserStartedCourses(
+      userStartedCourses.slice(
+        yourCoursesIndex,
+        yourCoursesIndex + coursesPerRow
+      )
+    );
   };
 
   const handleCardClick = (course) => {
@@ -103,112 +167,112 @@ const CourseList = () => {
   const isRightDisabled =
     startIndex + coursesPerRow >= Math.ceil(courses.length / 2);
 
-  const isNiceBlueLeftDisabled = yourCoursesIndex === 0;
-  const isNiceBlueRightDisabled = yourCoursesIndex + coursesPerRow >= courses.length;
-
-  useEffect(() => {
-    const fetchProblems = async () => {
-      try {
-        const response = await fetch(`http://localhost:5000/problem/`);
-        if (!response.ok) throw new Error(response.status);
-        const data = await response.json();
-        setProblems(data);
-      } catch (error) {
-        console.error("Failed to fetch problems", error);
-      }
-    };
-    fetchProblems();
-  }, []);
+  const isUserStartedCoursesLeftDisabled = yourCoursesIndex === 0;
+  const isUserStartedCoursesRightDisabled =
+    yourCoursesIndex + coursesPerRow >= userStartedCourses.length;
 
   return (
     <div className="full-page-container">
+      {loggedIn && (
+        <div className="page-wrapper">
+          <h2>Pradėti kursai</h2>
+          {isLoaded.course ? (
+            <div className="course-list-container">
+              <button
+                className="button-left"
+                onClick={scrollNiceBlueLeft}
+                disabled={isUserStartedCoursesLeftDisabled}
+              >
+                {"<"}
+              </button>
+              <div className="course-row">
+                {userStartedCourses?.map((course) => (
+                  <Card
+                    key={course.id}
+                    title={course.name}
+                    paragraph={course.description}
+                    onClick={() => handleCardClick(course)}
+                  />
+                ))}
+              </div>
+              <button
+                className="button-right"
+                onClick={scrollNiceBlueRight}
+                disabled={isUserStartedCoursesRightDisabled}
+              >
+                {">"}
+              </button>
+            </div>
+          ) : (
+            <AnimatedLoadingText />
+          )}
+        </div>
+      )}
       <div className="page-wrapper">
-        <h1 className="wrapper-h1">Jūsų kursai</h1>
-        <div className="course-list-container">
-          <button
-            className="button-left"
-            onClick={scrollNiceBlueLeft}
-            disabled={isNiceBlueLeftDisabled}
-          >
-            {"<"}
-          </button>
-          <div className="course-row">
-            {niceBlueCourses.map((course) => (
-              <Card
-                key={course.id}
-                title={course.name}
-                paragraph={course.description}
-                onClick={() => handleCardClick(course)}
-              />
+        <h2>Paruošti kursai</h2>
+        {isLoaded.course ? (
+          <div className="course-list-container">
+            <button
+              className="button-left"
+              onClick={scrollLeft}
+              disabled={isLeftDisabled}
+            >
+              {"<"}
+            </button>
+            <div className="course-rows-container">
+              {courses.length > 0 ? (
+                <>
+                  <div className="course-row">
+                    {topRowCourses.map((course) => (
+                      <Card
+                        key={course.id}
+                        title={course.name}
+                        paragraph={course.description}
+                        onClick={() => handleCardClick(course)}
+                      />
+                    ))}
+                  </div>
+                  <div className="course-row">
+                    {bottomRowCourses.map((course) => (
+                      <Card
+                        key={course.id}
+                        title={course.name}
+                        paragraph={course.description}
+                        onClick={() => handleCardClick(course)}
+                      />
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p>Nėra prieinamų kursų</p>
+              )}
+            </div>
+            <button
+              className="button-right"
+              onClick={scrollRight}
+              disabled={isRightDisabled}
+            >
+              {">"}
+            </button>
+          </div>
+        ) : (
+          <AnimatedLoadingText />
+        )}
+      </div>
+      <div className="page-wrapper">
+        <h2>Individualios pamokos</h2>
+        {isLoaded.problems ? (
+          <div className="problems-container">
+            {problems.map((problem, index, array) => (
+              <div key={problem.id || index}>
+                <CourseProblemTile problem={problem} />
+                {index !== array.length - 1 && <hr />}{" "}
+              </div>
             ))}
           </div>
-          <button
-            className="button-right"
-            onClick={scrollNiceBlueRight}
-            disabled={isNiceBlueRightDisabled}
-          >
-            {">"}
-          </button>
-        </div>
-      </div>
-      <div className="page-wrapper">
-        <h1 className="wrapper-h1">Mūsų kursai</h1>
-        <div className="course-list-container">
-          <button
-            className="button-left"
-            onClick={scrollLeft}
-            disabled={isLeftDisabled}
-          >
-            {"<"}
-          </button>
-          <div className="course-rows-container">
-            {courses.length > 0 ? (
-              <>
-                <div className="course-row">
-                  {topRowCourses.map((course) => (
-                    <Card
-                      key={course.id}
-                      title={course.name}
-                      paragraph={course.description}
-                      onClick={() => handleCardClick(course)}
-                    />
-                  ))}
-                </div>
-                <div className="course-row">
-                  {bottomRowCourses.map((course) => (
-                    <Card
-                      key={course.id}
-                      title={course.name}
-                      paragraph={course.description}
-                      onClick={() => handleCardClick(course)}
-                    />
-                  ))}
-                </div>
-              </>
-            ) : (
-              <p>Nėra prieinamų kursų</p>
-            )}
-          </div>
-          <button
-            className="button-right"
-            onClick={scrollRight}
-            disabled={isRightDisabled}
-          >
-            {">"}
-          </button>
-        </div>
-      </div>
-      <div className="page-wrapper">
-        <h1 className="wrapper-h1">Individualios pamokos</h1>
-        <div className="problems-container">
-          {problems.slice(0, 3).map((problem, index) => (
-            <CourseProblemTile
-              key={problem.id || index}
-              problem={problem}
-              courseProblemsOrder={[]}
-            />
-          ))}
-        </div>
+        ) : (
+          <AnimatedLoadingText />
+        )}
       </div>
     </div>
   );
