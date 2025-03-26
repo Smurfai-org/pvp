@@ -176,7 +176,7 @@ const CourseList = () => {
       {loggedIn && (
         <div className="page-wrapper">
           <h2>Pradėti kursai</h2>
-          {isLoaded.course ? (
+          {isLoaded.course && userStartedCourses?.length > 0 ? (
             <div className="course-list-container">
               <button
                 className="button-left"
