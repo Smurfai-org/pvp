@@ -28,7 +28,6 @@ const CodeEditor = ({
           defaultLanguage={language}
           options={{
             minimap: { enabled: false },
-            fontFamily: "Consolas",
             scrollBeyondLastLine: false,
           }}
           onMount={onMount}
