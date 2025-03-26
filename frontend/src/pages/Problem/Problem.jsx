@@ -512,7 +512,7 @@ const Problem = () => {
 
           {isLoaded && (
             <div>
-              <p>{problem?.description}</p>
+              <p dangerouslySetInnerHTML={{ __html: problem?.description }}></p>
             </div>
           )}
 

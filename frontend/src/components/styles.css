@@ -30,6 +30,15 @@ h2 {
   font-weight: 600;
 }
 
+code {
+  font-family: "Courier New", Courier, monospace;
+  font-weight: 600;
+  background-color: var(--light);
+  padding: 2px 5px;
+  border-radius: 4px;
+  white-space: pre-wrap;
+}
+
 .easy {
   color: var(--difficulty-easy);
 }
