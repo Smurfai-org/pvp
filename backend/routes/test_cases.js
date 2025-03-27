@@ -33,6 +33,10 @@ router.post("/", async (req, res) => {
     if (!problemId || !input || !output) {
       return res.status(400).json({ message: "Trūksta duomenų" });
     }
+    const [problem] = await pool.execute("SELECT * FROM problems WHERE id = ?", [problemId]);
+    if (problem.length === 0) {
+      return res.status(404).json({ message: "Užduotis nerasta" });
+    }
     const [result] = await pool.execute(
       "INSERT INTO test_cases (fk_PROBLEMid, input, expected_output) VALUES (?, ?, ?)",
       [problemId, input, output]
