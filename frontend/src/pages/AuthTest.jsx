@@ -9,7 +9,7 @@ const Profile = () => {
   }
 
   if (!loggedIn) {
-    return <div>You are not logged in.</div>;
+    return;
   }
 
   if (!user) {

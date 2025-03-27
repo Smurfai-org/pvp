@@ -136,3 +136,9 @@
 .monaco-editor .view-line * {
   font-family: 'Consolas', 'Courier New', monospace !important;
 }
+
+.blur-effect {
+  filter: blur(8px);
+  pointer-events: none;
+  transition: filter 0.3s ease-in-out;
+}

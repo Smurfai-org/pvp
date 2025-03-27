@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import "./ViewProfile.css";
 import defaultProfilePic from "../../assets/profile-default.svg";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
+import LoginPrompt from "../../components/loginPrompt";
 
 function ViewProfile() {
   const { loggedIn, user } = useContext(AuthContext);
@@ -12,12 +13,11 @@ function ViewProfile() {
   const [userDetails, setUserDetails] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!loggedIn) {
-      navigate("/login");
-      return;
-    }
+  if (!loggedIn) {
+    return (<LoginPrompt />);
+  }
 
+  useEffect(() => {
     const fetchUserDetails = async () => {
       try {
         const response = await fetch(`http://localhost:5000/user/${user.id}`, {
