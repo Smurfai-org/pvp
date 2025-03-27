@@ -30,6 +30,9 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   const { problemId, input, output } = req.body;
   try {
+    if (!problemId || !input || !output) {
+      return res.status(400).json({ message: "Trūksta duomenų" });
+    }
     const [result] = await pool.execute(
       "INSERT INTO test_cases (fk_PROBLEMid, input, expected_output) VALUES (?, ?, ?)",
       [problemId, input, output]
