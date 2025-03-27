@@ -81,7 +81,7 @@ router.post("/", async (req, res) => {
     if (result.affectedRows > 0) {
       res.status(201).json({ message: "Sprendimas pridėtas" });
     } else {
-      res.status(500).json({ message: "Nepavyko pridėti sprendimo" });
+      res.status(400).json({ message: "Nepavyko pridėti sprendimo" });
     }
   } catch (error) {
     console.error(error);
