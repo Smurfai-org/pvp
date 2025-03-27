@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { MessageContext } from "../../utils/MessageProvider";
 import AuthContext from "../../utils/AuthContext";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
+import LoginPrompt from "../../components/loginPrompt";
 
 function AdminDash() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -15,7 +16,7 @@ function AdminDash() {
   const { user, loggedIn } = useContext(AuthContext);
 
   if (!loggedIn || user.role != "admin") {
-    navigate("/login");
+    return <LoginPrompt />
   }
 
   const fetchData = async () => {
