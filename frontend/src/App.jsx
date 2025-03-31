@@ -5,7 +5,6 @@ import {
   useLocation,
 } from "react-router-dom";
 import Login from "./pages/login/Login";
-import Register from "./pages/Register";
 import Examples from "./pages/Examples";
 import Navbar from "./components/NavBar";
 import AdminDash from "./pages/AdminDash/AdminDash";
@@ -24,6 +23,7 @@ import { AuthProvider } from "./utils/AuthContext";
 import Course from "./pages/Course/Course";
 import CourseList from "./pages/CourseList/CourseList";
 import ViewProfile from "./pages/ViewProfile/ViewProfile";
+import Register from "./pages/Register/Register";
 
 function AppRoutes() {
   const location = useLocation();
