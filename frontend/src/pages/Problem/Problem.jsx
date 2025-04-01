@@ -17,7 +17,7 @@ import {
 } from "./problemCodeUtilities";
 import { MessageContext } from "../../utils/MessageProvider";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
-import LoginPrompt from "../../components/loginPrompt";
+import LoginPrompt from "../../components/LoginPrompt";
 
 const languages = [
   { label: "C++", value: "cpp" },

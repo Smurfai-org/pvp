@@ -17,10 +17,6 @@ router.get("/", async (req, res) => {
 
     const [result] = await pool.execute(query, params);
 
-    if (result.length === 0) {
-      return res.status(404).json({ message: "Pavyzdžiai nerasti" });
-    }
-
     res.status(200).json(result);
   } catch (error) {
     return res.status(500).json({ message: "Serverio klaida" });

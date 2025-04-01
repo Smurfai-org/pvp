@@ -6,9 +6,6 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const [result] = await pool.execute("SELECT * FROM progress");
-    if (result.length === 0) {
-      return res.status(404).json({ message: "Sprendimų nerasta" });
-    }
     res.status(200).json(result);
   } catch (error) {
     console.error(error);
@@ -23,11 +20,7 @@ router.get("/u=:userId", async (req, res) => {
       "SELECT * FROM progress WHERE fk_USERid = ?",
       [userId]
     );
-    if (rows.length === 0) {
-      res.status(404).json({ message: "Sprendimas nerastas" });
-    } else {
       res.status(200).json(rows);
-    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Serverio klaida" });
@@ -42,8 +35,6 @@ router.get("/p=:problemId", async (req, res) => {
       [problemId]
     );
     if (rows.length === 0) {
-      res.status(404).json({ message: "Sprendimas nerastas" });
-    } else {
       res.status(200).json(rows);
     }
   } catch (error) {
@@ -60,11 +51,7 @@ router.get("/:userId/:problemId", async (req, res) => {
       "SELECT * FROM progress WHERE fk_USERid = ? AND fk_PROBLEMid = ?",
       [userId, problemId]
     );
-    if (rows.length === 0) {
-      res.status(404).json({ message: "Sprendimas nerastas" });
-    } else {
       res.status(200).json(rows);
-    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Serverio klaida" });

@@ -1,0 +1,99 @@
+.testcases-container {
+    padding: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .testcases-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .testcases-list {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .testcase-item {
+    background-color: var(--white);
+    border-radius: 4px;
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .new-testcase {
+    border: 2px solid var(--primary);
+  }
+  
+  .testcase-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .testcase-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .testcase-content {
+    margin-bottom: 1rem;
+  }
+  
+  .input-section {
+    margin-bottom: 1rem;
+  }
+  
+  .input-section h4 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  textarea {
+    width: 50%;
+    height: 100px;
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid var(--light);
+    resize: none;
+    font-family: 'Consolas', 'Courier New', monospace;
+  }
+  
+  pre {
+    background-color: var(--light);
+    padding: 0.5rem;
+    border-radius: 4px;
+    overflow: auto;
+    font-family: monospace;
+    white-space: pre-wrap;
+  }
+
+  .rules-list {
+    list-style-type: disc;
+    padding: 0;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .warning-edit{
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .list-warning {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .problem-description {
+    margin-bottom: 1rem;
+  }

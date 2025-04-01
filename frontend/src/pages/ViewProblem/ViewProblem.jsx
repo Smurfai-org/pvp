@@ -1,5 +1,5 @@
-import { useEffect, useState, useContext } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useState, useContext} from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import "./ViewProblem.css";
 import Button from "../../components/Button";
 import TextBox from "../../components/textBox/TextBox";
@@ -10,6 +10,7 @@ import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 
 const ProblemDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [problem, setProblem] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(null);
@@ -144,6 +145,10 @@ const ProblemDetails = () => {
     }));
   };
 
+  const handleViewTestCases = () => {
+    navigate(`/view_problem/${id}/testcases`);
+  }
+
   return (
     <div className="problem-container">
       {isLoaded ? (
@@ -240,6 +245,8 @@ const ProblemDetails = () => {
               ) : (
                 <Button onClick={() => handleDelete(id)}>Ištrinti</Button>
               )}
+
+              <Button onClick={handleViewTestCases}>Testai</Button>
             </>
           )}
         </>
