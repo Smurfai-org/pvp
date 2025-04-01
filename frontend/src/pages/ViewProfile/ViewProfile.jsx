@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import "./ViewProfile.css";
 import defaultProfilePic from "../../assets/profile-default.svg";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
-import LoginPrompt from "../../components/loginPrompt";
+import LoginPrompt from "../../components/LoginPrompt";
 
 function ViewProfile() {
   const { loggedIn, user } = useContext(AuthContext);

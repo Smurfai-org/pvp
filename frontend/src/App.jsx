@@ -24,6 +24,7 @@ import Course from "./pages/Course/Course";
 import CourseList from "./pages/CourseList/CourseList";
 import ViewProfile from "./pages/ViewProfile/ViewProfile";
 import Register from "./pages/Register/Register";
+import ViewTC from "./pages/ViewTC/ViewTC"
 
 function AppRoutes() {
   const location = useLocation();
@@ -51,6 +52,7 @@ function AppRoutes() {
               <Route path="/courses/:id" element={<Course />} />
               <Route path="/add_problem/:id" element={<AddProblem />} />
               <Route path="/view_problem/:id" element={<ViewProblem />} />
+              <Route path="/view_problem/:id/testcases/" element={<ViewTC />} />
               <Route path="/courses" element={<CourseList />} />
               <Route
                 path="/generate_problem/:id"
