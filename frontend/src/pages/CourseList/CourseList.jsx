@@ -62,6 +62,14 @@ const CourseList = () => {
 
     const fetchProblems = async () => {
       try {
+        // Reiks padaryt kad atvaizduotu userio progresa
+        // const userId = user?.id;
+        // const url = userId
+        //   ? `http://localhost:5000/course/problems?id=${id}&userId=${userId}`
+        //   : `http://localhost:5000/course/problems?id=${id}`;
+
+        // const response = await fetch(url);
+
         const response = await fetch(`http://localhost:5000/problem/`);
         if (!response.ok) throw new Error(response.status);
         const data = await response.json();

@@ -44,6 +44,10 @@
   background-color: var(--light);
 }
 
+.hint-tile {
+  padding: 0įrem 0;
+}
+
 .test-case-header {
   display: flex;
   justify-content: space-between;
@@ -128,13 +132,13 @@
   height: 100%;
 }
 
-.monaco-editor, 
+.monaco-editor,
 .monaco-editor .inputarea.ime-input {
-  font-family: 'Consolas', 'Courier New', monospace !important;
+  font-family: "Consolas", "Courier New", monospace !important;
 }
 
 .monaco-editor .view-line * {
-  font-family: 'Consolas', 'Courier New', monospace !important;
+  font-family: "Consolas", "Courier New", monospace !important;
 }
 
 .blur-effect {

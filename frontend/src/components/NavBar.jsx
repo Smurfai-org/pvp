@@ -1,24 +1,28 @@
 import Hyperlink from "./Hyperlink";
 import { SearchBar } from "./SearchBar";
 import HyperlinkDropdown from "./HyperlinkDropdown";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import AuthContext from "../utils/AuthContext";
 
 const Navbar = () => {
   const { loggedIn, logout, user } = useContext(AuthContext);
-  const list =
-    user?.role === "admin"
-      ? [
-          // admino sarasas
-          { text: "Profilis", url: "/profile" },
-          { text: "Administratoriaus langas", url: "/admin_dash" },
-          { text: "Atsijungti", onClick: logout },
-        ]
-      : [
-          // userio sarasas
-          { text: "Profilis", url: "/profile" },
-          { text: "Atsijungti", onClick: logout },
-        ];
+  const [list, setList] = useState([]);
+  useEffect(() => {
+    setList(
+      user?.role === "admin"
+        ? [
+            // admino sarasas
+            { text: "Profilis", url: "/profile" },
+            { text: "Administratoriaus langas", url: "/admin_dash" },
+            { text: "Atsijungti", onClick: logout },
+          ]
+        : [
+            // userio sarasas
+            { text: "Profilis", url: "/profile" },
+            { text: "Atsijungti", onClick: logout },
+          ]
+    );
+  }, [loggedIn, logout, user]);
 
   return (
     <nav className="navbar">

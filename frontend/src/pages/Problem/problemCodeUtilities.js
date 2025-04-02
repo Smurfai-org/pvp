@@ -68,31 +68,34 @@ using namespace std;
 ${outputType} Sprendimas(${functionParams});
 
 int main() {
-    ${inputCode}
+  ${inputCode}
 
-    ${
-      outputType === "void"
-        ? `Sprendimas(${functionArgs})`
-        : `${outputType} user_result = Sprendimas(${functionArgs})`
-    };
+  ${
+    outputType === "void"
+      ? `Sprendimas(${functionArgs});`
+      : `${outputType} user_result = Sprendimas(${functionArgs});`
+  }
 
-    ${
-      outputType === "void"
-        ? ""
-        : `${outputType} result = ${expectedOutput};
-    cout << "Rezultatas: " << user_result << endl;
-    if (result == user_result) {
-        cout << "Testas įveiktas!" << endl;
-    } else {
-        cout << "Testas nepraeitas." << endl;
-    }`
-    }
-    
+  ${
+    outputType === "void"
+      ? ""
+      : `${outputType} result = ${
+          outputType === "string" ? `"${expectedOutput}"` : expectedOutput
+        };
+  cout << "Rezultatas: " << user_result << endl;
+  if (result == user_result) {
+      cout << "Testas įveiktas!" << endl;
+  } else {
+      cout << "Testas nepraeitas." << endl;
+  }`
+  }
+  
   return 0;
 }
 
 ${userCode}
 `;
+
   return code;
 };
 
@@ -117,7 +120,9 @@ ${userCode}
 user_result = Sprendimas(${functionArgs})
 print("Rezultatas:", user_result)
 
-result = ${expectedOutput}
+result = ${
+    typeof expectedOutput === "string" ? `"${expectedOutput}"` : expectedOutput
+  }
 if result == user_result:
   print("Testas įveiktas!")
 else:

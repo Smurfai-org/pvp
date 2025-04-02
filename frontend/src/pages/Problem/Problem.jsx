@@ -73,6 +73,8 @@ const Problem = () => {
 
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
+  const [hints, setHints] = useState([]);
+
   const onDropdownSelect = (selectedLabel) => {
     const selectedLang = languages.find((lang) => lang.label === selectedLabel);
     if (selectedLang) {
@@ -150,7 +152,7 @@ const Problem = () => {
   const handleRunButtonClick = async () => {
     if (!loggedIn) {
       setShowLoginPrompt(true);
-      console.log('click');
+      console.log("click");
     }
     if (testCases.length < 1) {
       await handleTestButtonClick();
@@ -298,7 +300,7 @@ const Problem = () => {
 
         if (loggedIn && userCodeRes?.ok) {
           const userData = await userCodeRes.json();
-          if (userData[0].score) setPassScore(userData[0].score);
+          if (userData[0]?.score) setPassScore(userData[0]?.score);
 
           const parsedUserCode = JSON.parse(userData[0]?.code || "{}");
 
@@ -378,6 +380,23 @@ const Problem = () => {
       }
     };
 
+    const fetchHints = async () => {
+      setHints([]);
+      try {
+        const response = await fetch(`http://localhost:5000/hint?id=${id}`);
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        setHints(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
     const updateProblemNavigation = () => {
       const currentIndex = courseProblemsOrder?.indexOf(Number(id));
 
@@ -413,6 +432,7 @@ const Problem = () => {
     };
 
     fetchData();
+    fetchHints();
     updateProblemNavigation();
     setIsOutputWindowMaximised(false);
   }, [id, courseProblemsOrder]);
@@ -442,141 +462,201 @@ const Problem = () => {
 
   return (
     <div className="relative">
-        <>
-          {showLoginPrompt ? (<LoginPrompt onClose={() => setShowLoginPrompt(false)}/>) : ''}
-          <div className={`full-screen-container transition duration-300 ${showLoginPrompt ? "blur-effect" : ""}`}>
-            <div className="problem-page-left">
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div style={{ display: "flex", gap: "1rem" }}>
-                  <Button extra="small secondary" onClick={handleBackToListButtonClick}>
-                    Atgal į sąrašą
-                  </Button>
-                  {previousProblemId !== null && (
-                    <Button extra="small secondary" onClick={() => handleArrowNavigationButtonClick(previousProblemId)}>
-                      <strong>{"<"}</strong>
-                    </Button>
-                  )}
-                  {nextProblemId !== null && (
-                    <Button extra="small secondary" onClick={() => handleArrowNavigationButtonClick(nextProblemId)}>
-                      <strong>{">"}</strong>
-                    </Button>
-                  )}
-                </div>
-                {isLoaded && passScore && (
-                  <div>
-                    Jūsų sprendimas įvertintas <strong>{passScore}%</strong>
-                  </div>
-                )}
-              </div>
-  
-              <div className="problem-info-screen">
-                <h2>{isLoaded ? problem?.name : <AnimatedLoadingText />}</h2>
-                {isLoaded && (
-                  <div className="problem-related-courses">
-                    <Hyperlink href={`/courses/${courseInfo?.id}`}>
-                      {courseInfo?.name}
-                    </Hyperlink>
-                    <strong className={problem?.difficulty}>
-                      {difficulty_dictionary[problem?.difficulty]}
-                    </strong>
-                  </div>
-                )}
-  
-                {isLoaded && (
-                  <div className="problem-related-courses">
-                    {problem?.courses?.map((course) => (
-                      <Hyperlink key={course?.id} href={`/course/${course.id}`}>
-                        {course?.name}
-                      </Hyperlink>
-                    ))}
-                  </div>
-                )}
-  
-                {isLoaded && (
-                  <div>
-                    <p dangerouslySetInnerHTML={{ __html: problem?.description }}></p>
-                  </div>
-                )}
-  
-                {isLoaded && (
-                  <div className="test-cases-list">
-                    {testCases?.map((item, index) => (
-                      <div key={index} className="test-case">
-                        <div className="test-case-header">
-                          <p style={{ fontWeight: "600", margin: 0 }}>Testas {index + 1}</p>
-                          <Button extra="small" onClick={() => handleTestButtonClick(index)}>
-                            Testuoti
-                          </Button>
-                        </div>
-                        <pre>
-                          {selectedLanguageValue === "cpp" ? item?.input?.cpp : item?.input?.python}
-                        </pre>
-                        <pre>
-                          <strong>Rezultatas:</strong> <br />
-                          {item?.expected_output}
-                        </pre>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-  
-            <div className="problem-page-right">
+      <>
+        {showLoginPrompt ? (
+          <LoginPrompt onClose={() => setShowLoginPrompt(false)} />
+        ) : (
+          ""
+        )}
+        <div
+          className={`full-screen-container transition duration-300 ${
+            showLoginPrompt ? "blur-effect" : ""
+          }`}
+        >
+          <div className="problem-page-left">
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
               <div style={{ display: "flex", gap: "1rem" }}>
-                <Button extra="small" onClick={handleRunButtonClick}>
-                  Leisti programą
+                <Button
+                  extra="small secondary"
+                  onClick={handleBackToListButtonClick}
+                >
+                  Atgal į sąrašą
                 </Button>
-                <Button extra="small bright" onClick={handleAIclick}>
-                  AI įvertinimas
-                </Button>
-                <Dropdown
-                  options={languages?.map((language) => language?.label)}
-                  placeholder={languages[0]?.label}
-                  onSelect={(value) => {
-                    onDropdownSelect(value);
-                  }}
-                />
+                {previousProblemId !== null && (
+                  <Button
+                    extra="small secondary"
+                    onClick={() =>
+                      handleArrowNavigationButtonClick(previousProblemId)
+                    }
+                  >
+                    <strong>{"<"}</strong>
+                  </Button>
+                )}
+                {nextProblemId !== null && (
+                  <Button
+                    extra="small secondary"
+                    onClick={() =>
+                      handleArrowNavigationButtonClick(nextProblemId)
+                    }
+                  >
+                    <strong>{">"}</strong>
+                  </Button>
+                )}
               </div>
-              <div className="code-editor-area" onClick={() => setIsOutputWindowMaximised(false)}>
-                <CodeEditor
-                  language={selectedLanguageValue}
-                  value={
-                    isLoaded
-                      ? selectedLanguageValue === "cpp"
-                        ? inputCode?.cpp
-                        : inputCode?.python
-                      : loadingText
-                  }
-                  setValue={(value) => {
-                    setInputCode({
-                      ...inputCode,
-                      [selectedLanguageValue]: value,
-                    });
-                  }}
-                  onResetClick={handleResetCodeButtonClick}
-                />
-              </div>
-              <div
-                style={{
-                  height: isOutputWindowMaximised ? "50%" : "15%",
-                }}
-                className="output-window"
-                onClick={() => setIsOutputWindowMaximised(true)}
-              >
-                <OutputSection
-                  ref={outputRef}
-                  outputText={outputText}
-                  language={selectedLanguageValue}
-                  isOutputWindowMaximised={isOutputWindowMaximised}
-                  setIsOutputWindowMaximised={setIsOutputWindowMaximised}
-                />
-              </div>
+              {isLoaded && passScore && (
+                <div>
+                  Jūsų sprendimas įvertintas <strong>{passScore}%</strong>
+                </div>
+              )}
+            </div>
+
+            <div className="problem-info-screen">
+              <h2>{isLoaded ? problem?.name : <AnimatedLoadingText />}</h2>
+              {isLoaded && (
+                <div className="problem-related-courses">
+                  <Hyperlink href={`/courses/${courseInfo?.id}`}>
+                    {courseInfo?.name}
+                  </Hyperlink>
+                  <strong className={problem?.difficulty}>
+                    {difficulty_dictionary[problem?.difficulty]}
+                  </strong>
+                </div>
+              )}
+
+              {isLoaded && (
+                <div className="problem-related-courses">
+                  {problem?.courses?.map((course) => (
+                    <Hyperlink key={course?.id} href={`/course/${course.id}`}>
+                      {course?.name}
+                    </Hyperlink>
+                  ))}
+                </div>
+              )}
+
+              {isLoaded && (
+                <div>
+                  <p
+                    dangerouslySetInnerHTML={{ __html: problem?.description }}
+                  ></p>
+                </div>
+              )}
+
+              {isLoaded && (
+                <div className="test-cases-list">
+                  {testCases?.map((item, index) => (
+                    <div key={index} className="test-case">
+                      <div className="test-case-header">
+                        <p style={{ fontWeight: "600", margin: 0 }}>
+                          Testas {index + 1}
+                        </p>
+                        <Button
+                          extra="small"
+                          onClick={() => handleTestButtonClick(index)}
+                        >
+                          Testuoti
+                        </Button>
+                      </div>
+                      <pre>
+                        {selectedLanguageValue === "cpp"
+                          ? item?.input?.cpp
+                          : item?.input?.python}
+                      </pre>
+                      <pre>
+                        <strong>Rezultatas:</strong> <br />
+                        {item?.expected_output}
+                      </pre>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {isLoaded && (
+                <div className="test-cases-list">
+                  {hints?.map((item, index) => (
+                    <div key={index} className="hint-tile">
+                      <details>
+                        <summary
+                          style={{
+                            fontWeight: "600",
+                            margin: 0,
+                            cursor: "pointer",
+                          }}
+                        >
+                          Užuomina {index + 1}
+                        </summary>
+                        <p>{item?.hint}</p>
+                      </details>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-        </>
+
+          <div className="problem-page-right">
+            <div style={{ display: "flex", gap: "1rem" }}>
+              <Button extra="small" onClick={handleRunButtonClick}>
+                Leisti programą
+              </Button>
+              <Button extra="small bright" onClick={handleAIclick}>
+                AI įvertinimas
+              </Button>
+              <Dropdown
+                options={languages?.map((language) => language?.label)}
+                placeholder={languages[0]?.label}
+                onSelect={(value) => {
+                  onDropdownSelect(value);
+                }}
+              />
+            </div>
+            <div
+              className="code-editor-area"
+              onClick={() => setIsOutputWindowMaximised(false)}
+            >
+              <CodeEditor
+                language={selectedLanguageValue}
+                value={
+                  isLoaded
+                    ? selectedLanguageValue === "cpp"
+                      ? inputCode?.cpp
+                      : inputCode?.python
+                    : loadingText
+                }
+                setValue={(value) => {
+                  setInputCode({
+                    ...inputCode,
+                    [selectedLanguageValue]: value,
+                  });
+                }}
+                onResetClick={handleResetCodeButtonClick}
+              />
+            </div>
+            <div
+              style={{
+                height: isOutputWindowMaximised ? "50%" : "15%",
+              }}
+              className="output-window"
+              onClick={() => setIsOutputWindowMaximised(true)}
+            >
+              <OutputSection
+                ref={outputRef}
+                outputText={outputText}
+                language={selectedLanguageValue}
+                isOutputWindowMaximised={isOutputWindowMaximised}
+                setIsOutputWindowMaximised={setIsOutputWindowMaximised}
+              />
+            </div>
+          </div>
+        </div>
+      </>
     </div>
-  );  
+  );
 };
 
 export default Problem;
