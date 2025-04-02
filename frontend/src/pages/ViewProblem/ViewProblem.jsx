@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext} from "react";
+import { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./ViewProblem.css";
 import Button from "../../components/Button";
@@ -147,7 +147,11 @@ const ProblemDetails = () => {
 
   const handleViewTestCases = () => {
     navigate(`/view_problem/${id}/testcases`);
-  }
+  };
+
+  const handleViewHints = () => {
+    navigate(`/view_problem/${id}/hints`);
+  };
 
   return (
     <div className="problem-container">
@@ -222,9 +226,6 @@ const ProblemDetails = () => {
                 <strong>Sprendimai:</strong> {problem.solution || "Nėra"}
               </p>
               <p>
-                <strong>Užuominos:</strong> {problem.hints || "Nėra"}
-              </p>
-              <p>
                 <strong>Generuota:</strong> {problem.generated ? "Taip" : "Ne"}
               </p>
               <p>
@@ -240,13 +241,16 @@ const ProblemDetails = () => {
 
               <Button onClick={() => setIsEditMode(true)}>Redaguoti</Button>
 
+              <Button onClick={handleViewTestCases}>Testai</Button>
+              <Button onClick={handleViewHints}>Užuominos</Button>
+
               {problem.deleted ? (
                 <Button onClick={() => handleRecover(id)}>Grąžinti</Button>
               ) : (
-                <Button onClick={() => handleDelete(id)}>Ištrinti</Button>
+                <Button extra="bright" onClick={() => handleDelete(id)}>
+                  Ištrinti
+                </Button>
               )}
-
-              <Button onClick={handleViewTestCases}>Testai</Button>
             </>
           )}
         </>
