@@ -2,6 +2,7 @@ import express from "express";
 import fetch from "node-fetch";
 import db from "../utils/db.js";
 import jwt, { decode } from "jsonwebtoken";
+import bcrypt from 'bcrypt';
 
 const router = express.Router();
 
@@ -92,5 +93,98 @@ const validateGoogle = async (decodedToken) => {
   ]);
   return user.length > 0 && user[0].id === decodedToken.id;
 };
+
+router.post('/register', async (req, res) => {
+  const { username, password, email, role, google_id, profile_pic } = req.body;
+
+  if (!username || !password || !email) {
+      return res.status(400).json({ message: 'Username, password, and email are required' });
+  }
+
+  try {
+      const saltRounds = 10;
+      const salt = await bcrypt.genSalt(saltRounds);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      
+      const sql = 'INSERT INTO users (username, password, email, role, google_id, profile_pic, creation_date, deleted) VALUES (?, ?, ?, ?, ?, ?, NOW(), 0)';
+      const values = [username, hashedPassword, email, role || 'user', google_id || null, profile_pic || null];
+
+      db.query(sql, values, (err, result) => {
+          if (err) return res.status(500).json({ error: err.message });
+          res.status(201).json({ message: 'User registered successfully' });
+      });
+  } catch (error) {
+      res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.post('/login', async (req, res) => {
+  console.log('Received req:', req.body);
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ message: 'Username and password are required' });
+  }
+
+  console.log('Querying the database...');
+  const sql = 'SELECT * FROM users WHERE username = ?';
+  console.log('SQL Query:', sql);
+  console.log('Parameters:', [username]);
+
+  try {
+    // Call the dbQuery function
+    const results = await db.execute(sql, [username]);
+    console.log('Query results:', results);  // Log query results
+
+    if (results.length === 0) {
+      console.log('No user found');
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const user = results[0];
+    console.log('Password from DB:', user.password);  // Check the password field
+
+    if (!user.password) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordMatch) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    console.log('Creating JWT token...');
+    const token = jwt.sign(
+      {
+        user: {
+          id: user.id,
+          role: user.role,
+          profile_pic: user.profile_pic,
+          email: user.email,
+          username: user.username,
+        },
+        id: user.id,
+        loginType: 'password',
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'None',
+      maxAge: 604800000,  // 7 days in milliseconds
+    });
+
+    res.status(200).json({ message: 'Login successful', token });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Server error, please try again later.' });
+  }
+});
+
+
 
 export default router;
