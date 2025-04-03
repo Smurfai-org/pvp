@@ -18,7 +18,7 @@ function Login() {
   const [usernameError, setUsernameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  const { showSuccessMessage, showErrorMessage} = useContext(MessageContext);
+  const { showSuccessMessage, showErrorMessage } = useContext(MessageContext);
 
   const isLoginValid = () => {
     let isValid = true;
@@ -44,12 +44,38 @@ function Login() {
   };
 
   const handleSubmit = () => {
+    console.log(isLoginValid());
     if (!isLoginValid()) return;
     handleLogin(username, password);
   };
 
-  const handleLogin = (username, password) => {
-    navigate("/");
+  const handleLogin = async (username, password) => {
+    console.log('asd');
+    try {
+      const response = await fetch("http://localhost:5000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+        credentials: "include",
+      });
+      console.log('sss');
+
+      if(response.status === 401) {
+        showErrorMessage('Netinkami prisijungimo duomenys');
+        setUsernameError('Netinkami duomenys');
+        setPasswordError('Netinkami duomenys');
+        console.log('ssssss');
+      }
+
+      if(response.ok) {
+        console.log('sssaaaaa');
+        showSuccessMessage('Sėkmingai prisijungėte');
+        navigate('/');
+      }
+    } catch (error) {
+      showErrorMessage('Nepavyko prisijungti');
+      console.log('ssseee');
+    }
   };
 
   const googleLoginButton = useGoogleLogin({
