@@ -1,6 +1,6 @@
 export const getTestCaseVariables = (test_case) => {
   const regex =
-    /\b(?:const\s+)?(int|double|float|long long|long|short|char|bool|string)\s+(\w+)/g;
+    /\b(?:const\s+)?(int|double|float|long long|long|short|char|bool|string|unsigned int)\s+(\w+)/g;
 
   const matches = [];
   let match;

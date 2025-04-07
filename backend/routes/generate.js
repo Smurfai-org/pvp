@@ -55,6 +55,27 @@ router.post('/hint', async (req, res) => {
         const aiHint = response.output_text;
         //console.log(aiHint);
         const parsed = JSON.parse(aiHint);
+
+        const [[hintCount]] = await pool.execute(
+            'SELECT COUNT(*) as count FROM hints WHERE fk_PROBLEMid = ? AND fk_USERid = ?',
+            [problemId, userId]
+        );
+
+        if (hintCount.count >= 3) {
+            await pool.execute(
+            'DELETE hints FROM hints INNER JOIN (SELECT id FROM hints WHERE fk_PROBLEMid = ? AND fk_USERid = ? ORDER BY id ASC LIMIT 1) AS oldest_hint ON hints.id = oldest_hint.id',
+            [problemId, userId]
+            );
+        }
+
+        const [saveHint] = await pool.execute(
+            'INSERT INTO hints (fk_PROBLEMid, hint, fk_USERid) VALUES (?, ?, ?)',
+            [problemId, parsed.hint, userId]
+        );
+        if (!saveHint) {
+            res.status(500).json({ message: 'Nepavyko išsaugoti patarimo' });
+        }
+
         res.status(200).json(parsed);
 
     } catch (error) {
