@@ -22,13 +22,19 @@ function MessageProvider({ children }) {
         }, 7500);
     };
 
+    const showHintMessage = (msg) => {
+        setMessage(msg);
+        setType('hint');
+        setShowAlert(true);
+    };
+
     const showSuccessMessage = (msg) => showMessage(msg, 'success');
     const showErrorMessage = (msg) => showMessage(msg, 'error');
     const showWarningMessage = (msg) => showMessage(msg, 'warning');
 
     return (
         <MessageContext.Provider
-            value={{ showSuccessMessage, showErrorMessage, showWarningMessage }}
+            value={{ showSuccessMessage, showErrorMessage, showWarningMessage, showHintMessage }}
         >
             {showAlert && <Alert message={message} type={type} onClick={() => setShowAlert(false)}/>}
             {children}
