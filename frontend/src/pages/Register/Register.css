@@ -1,0 +1,11 @@
+.loading {
+    width: 1em;
+}
+
+.clicked {
+    background-color: var(--highligth);
+}
+
+.clicked:hover {
+    cursor: not-allowed;
+}

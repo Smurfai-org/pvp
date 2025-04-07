@@ -7,15 +7,19 @@ import { useGoogleLogin } from "@react-oauth/google";
 import googleIcon from "../../assets/google_icon.svg";
 import { MessageContext } from "../../utils/MessageProvider";
 import Hyperlink from "../../components/Hyperlink";
+import loadingIcon from "../../assets/loading-anim.svg";
+import "./Register.css";
 
 function Register() {
   const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(false);
   
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  
+
   const [emailError, setEmailError] = useState("");
   const [usernameError, setUsernameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -25,68 +29,80 @@ function Register() {
 
   const isRegisterValid = () => {
     let isValid = true;
+    setEmailError("");
+    setUsernameError("");
+    setPasswordError("");
+    setConfirmPasswordError("");
+
     if (!email) {
       isValid = false;
-      setEmailError("Missing email");
+      setEmailError("Trūksta pašto");
     }
     if (!username) {
       isValid = false;
-      setUsernameError("Missing username");
+      setUsernameError("Trūksta slapyvardžio");
     }
     if (!password) {
       isValid = false;
-      setPasswordError("Missing password");
+      setPasswordError("Trūksta slaptažodžio");
     }
     if (password !== confirmPassword) {
       isValid = false;
-      setConfirmPasswordError("Passwords do not match");
+      setConfirmPasswordError("Slaptažodžiai nesutampa");
     }
     return isValid;
   };
 
-  const handleEmailChange = (event) => {
-    setEmailError("");
-    setEmail(event.target.value);
-  };
-
-  const handleUsernameChange = (event) => {
-    setUsernameError("");
-    setUsername(event.target.value);
-  };
-
-  const handlePasswordChange = (event) => {
-    setPasswordError("");
-    setPassword(event.target.value);
-  };
-
-  const handleConfirmPasswordChange = (event) => {
-    setConfirmPasswordError("");
-    setConfirmPassword(event.target.value);
-  };
-
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isRegisterValid()) return;
-    handleRegister(email, username, password);
+    setLoading(true);
+    await handleRegister(email, username, password);
   };
 
-  const handleRegister = (email, username, password) => {
-    navigate("/");
+  const handleRegister = async (email, username, password) => {
+    try {
+      const response = await fetch("http://localhost:5000/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, username, password }),
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showSuccessMessage("Sėkmingai prisiregistravote!");
+        setLoading(false);
+        navigate("/login");
+      } else {
+        setLoading(false);
+        showErrorMessage(data.message || "Registracija nepavyko, bandykite dar kartą.");
+      }
+    } catch (error) {
+      setLoading(false);
+      showErrorMessage("Serverio klaida, bandykite dar kartą.");
+      console.error("Error during registration:", error);
+    }
   };
 
   const googleLoginButton = useGoogleLogin({
     onSuccess: async (gresponse) => {
-      const response = await fetch("http://localhost:5000/loginGoogle", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ gresponse }),
-        credentials: "include",
-      });
+      try {
+        const response = await fetch("http://localhost:5000/loginGoogle", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ gresponse }),
+          credentials: "include",
+        });
 
-      if (response.ok) {
-        navigate("/", { replace: true });
-      } else {
-        const data = await response.json();
-        console.log(data);
+        if (response.ok) {
+          navigate("/", { replace: true });
+        } else {
+          const data = await response.json();
+          console.error(data);
+        }
+      } catch (error) {
+        console.error("Google login failed:", error);
       }
     },
     onError: () => {},
@@ -100,39 +116,43 @@ function Register() {
         <TextBox
           text="Email"
           value={email}
-          onChange={handleEmailChange}
+          onChange={(e) => setEmail(e.target.value)}
           errorText={emailError}
         />
         <TextBox
           text="Username"
           value={username}
-          onChange={handleUsernameChange}
+          onChange={(e) => setUsername(e.target.value)}
           errorText={usernameError}
         />
         <TextBox
           text="Password"
           type="password"
           value={password}
-          onChange={handlePasswordChange}
+          onChange={(e) => setPassword(e.target.value)}
           errorText={passwordError}
         />
         <TextBox
           text="Confirm Password"
           type="password"
           value={confirmPassword}
-          onChange={handleConfirmPasswordChange}
+          onChange={(e) => setConfirmPassword(e.target.value)}
           errorText={confirmPasswordError}
         />
         <div className="inline-centered-buttons-login">
-          <Button extra="login-btn" onClick={handleSubmit}>
-            Sign up
+          <Button extra={loading ? 'login-btn clicked' : 'login-btn'} onClick={() => { if (!loading) handleSubmit(); }}>
+            {loading ?
+              <img src={loadingIcon} alt='Įkeliama...' className="loading"/>
+            : "Sign up"}
           </Button>
-          <Button extra="secondary login-btn">Log in</Button>
+          <Button extra="secondary login-btn" onClick={() => navigate('/login')}>
+            Log in
+          </Button>
         </div>
         <div className="google-cnt">
           <Button extra="google-button" onClick={googleLoginButton}>
-            <img src={googleIcon} className="google-img" />
-            Prisijungti su Google
+            <img src={googleIcon} className="google-img" alt="Google Icon" />
+            Sign up with Google
           </Button>
         </div>
       </div>
