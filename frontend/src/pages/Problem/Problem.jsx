@@ -30,7 +30,7 @@ const Problem = () => {
   const outputRef = useRef(null);
   const location = useLocation();
   const originalCourseId = location.state?.courseId;
-  const { showSuccessMessage, showErrorMessage } = useContext(MessageContext);
+  const { showSuccessMessage, showErrorMessage, showHintMessage } = useContext(MessageContext);
 
   const [isLoaded, setIsLoaded] = useState(false);
   const loadingText = "Įkeliama...";
@@ -265,6 +265,40 @@ const Problem = () => {
       }
     }
   };
+
+const handleGenerateHintClick = async () => {
+  if (!loggedIn) {
+    setShowLoginPrompt(true);
+    return;
+  }
+  try {
+    const response = await fetch("http://localhost:5000/generate/hint", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: user?.id,
+        problemId: id,
+        language: selectedLanguageValue,
+      }),
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    if (data.hint) {
+      showHintMessage(data.hint);
+    } else {
+      showErrorMessage("Nepavyko sugeneruoti užuominos");
+    }
+  } catch (error) {
+    console.error("Error generating hint:", error);
+    showErrorMessage("Klaida generuojant užuominą");
+  }
+};
 
   useEffect(() => {
     const fetchProblem = async (automaticallyGeneratedInputCode) => {
@@ -603,6 +637,9 @@ const Problem = () => {
             <div style={{ display: "flex", gap: "1rem" }}>
               <Button extra="small" onClick={handleRunButtonClick}>
                 Leisti programą
+              </Button>
+              <Button extra="small" onClick={handleGenerateHintClick}>
+                Generuoti užuominą
               </Button>
               <Button extra="small bright" onClick={handleAIclick}>
                 AI įvertinimas
