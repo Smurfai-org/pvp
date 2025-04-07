@@ -16,10 +16,8 @@ const getData = async () => {
 
     if (response.ok) {
       const data = await response.json();
-      console.log("Validated user data:", data); // Log to check the response
       return data;
     } else {
-      console.log('No valid data from backend', await response.json());
       return null;
     }
   } catch (error) {

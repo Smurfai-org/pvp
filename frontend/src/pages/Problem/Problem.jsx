@@ -152,7 +152,7 @@ const Problem = () => {
   const handleRunButtonClick = async () => {
     if (!loggedIn) {
       setShowLoginPrompt(true);
-      console.log("click");
+      return;
     }
     if (testCases.length < 1) {
       await handleTestButtonClick();

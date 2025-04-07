@@ -95,54 +95,62 @@ const validateGoogle = async (decodedToken) => {
 };
 
 router.post('/register', async (req, res) => {
-  const { username, password, email, role, google_id, profile_pic } = req.body;
+  const { username, password, email } = req.body;
 
   if (!username || !password || !email) {
       return res.status(400).json({ message: 'Username, password, and email are required' });
+  }
+
+  const emailRegex = /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ message: 'Netinkamas paštas' });
   }
 
   try {
       const saltRounds = 10;
       const salt = await bcrypt.genSalt(saltRounds);
       const hashedPassword = await bcrypt.hash(password, salt);
-      
-      const sql = 'INSERT INTO users (username, password, email, role, google_id, profile_pic, creation_date, deleted) VALUES (?, ?, ?, ?, ?, ?, NOW(), 0)';
-      const values = [username, hashedPassword, email, role || 'user', google_id || null, profile_pic || null];
 
-      db.query(sql, values, (err, result) => {
-          if (err) return res.status(500).json({ error: err.message });
-          res.status(201).json({ message: 'User registered successfully' });
-      });
+      const [check] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
+
+      if(check.length != 0) {
+        return res.status(400).json({ message: 'Toks naudotojas jau egzistuoja' });
+      }
+      
+      const sql = 'INSERT INTO users (username, password, email, creation_date, deleted) VALUES (?, ?, ?, NOW(), 0)';
+      const values = [username, hashedPassword, email];
+
+      const [result] = await db.execute(sql, values);
+
+      if(result.affectedRows === 0) {
+        return res.status(401).json({ message: 'Nepavyko prisiregistruoti' });
+      }
+
+      return res.status(200).json({ message: 'Registracija sėkminga' });
+
   } catch (error) {
-      res.status(500).json({ error: 'Server error' });
+      console.error('Error during registration:', error);
+      res.status(500).json({ error: 'Server error, please try again later.' });
   }
 });
 
 router.post('/login', async (req, res) => {
-  console.log('Received req:', req.body);
   const { username, password } = req.body;
 
   if (!username || !password) {
     return res.status(400).json({ message: 'Username and password are required' });
   }
 
-  console.log('Querying the database...');
   const sql = 'SELECT * FROM users WHERE username = ?';
-  console.log('SQL Query:', sql);
-  console.log('Parameters:', [username]);
 
   try {
-    // Call the dbQuery function
-    const results = await db.execute(sql, [username]);
-    console.log('Query results:', results);  // Log query results
+    const [results] = await db.execute(sql, [username]);
 
     if (results.length === 0) {
-      console.log('No user found');
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     const user = results[0];
-    console.log('Password from DB:', user.password);  // Check the password field
 
     if (!user.password) {
       return res.status(401).json({ message: 'Invalid credentials' });
@@ -154,7 +162,6 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    console.log('Creating JWT token...');
     const token = jwt.sign(
       {
         user: {
@@ -175,7 +182,7 @@ router.post('/login', async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'None',
-      maxAge: 604800000,  // 7 days in milliseconds
+      maxAge: 604800000,
     });
 
     res.status(200).json({ message: 'Login successful', token });

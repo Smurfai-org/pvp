@@ -6,6 +6,9 @@ import { MessageContext } from "../utils/MessageProvider";
 import { useGoogleLogin } from "@react-oauth/google";
 import googleIcon from "../assets/google_icon.svg";
 import Hyperlink from "./Hyperlink";
+import loadingIcon from "../assets/loading-anim.svg";
+import '../pages/Register/Register.css';
+import { useNavigate } from "react-router-dom";
 
 const LoginPrompt = ( {onClose} ) => {
   const { loggedIn, login } = useContext(AuthContext);
@@ -15,6 +18,8 @@ const LoginPrompt = ( {onClose} ) => {
   const [usernameError, setUsernameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const { showSuccessMessage, showErrorMessage } = useContext(MessageContext);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   if (loggedIn) return null;
 
@@ -42,13 +47,37 @@ const LoginPrompt = ( {onClose} ) => {
   };
 
   const handleSubmit = () => {
+    console.log(isLoginValid());
     if (!isLoginValid()) return;
+    setLoading(true);
     handleLogin(username, password);
   };
 
-  const handleLogin = (username, password) => {
-    login(username, password);
-    window.location.reload();
+  const handleLogin = async (username, password) => {
+    try {
+      const response = await fetch("http://localhost:5000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+        credentials: "include",
+      });
+
+      if(response.status === 401) {
+        showErrorMessage('Netinkami prisijungimo duomenys');
+        setUsernameError('Netinkami duomenys');
+        setPasswordError('Netinkami duomenys');
+        setLoading(false);
+      }
+
+      if(response.ok) {
+        showSuccessMessage('Sėkmingai prisijungėte');
+        setLoading(false);
+        window.location.reload();
+      }
+    } catch (error) {
+      showErrorMessage(error.message || 'Nepavyko prisijungti');
+      setLoading(false);
+    }
   };
 
   const googleLoginButton = useGoogleLogin({
@@ -90,8 +119,10 @@ const LoginPrompt = ( {onClose} ) => {
             errorText={passwordError}
           />
           <div className="inline-centered-buttons-login">
-            <Button extra="login-btn" onClick={handleSubmit}>
-              Prisijungti
+            <Button extra={loading ? 'login-btn clicked' : 'login-btn'} onClick={() => { if (!loading) handleSubmit(); }}>
+              {loading ?
+                <img src={loadingIcon} alt='Įkeliama...' className="loading"/>
+              : "Log in"}
             </Button>
             <Button extra="secondary login-btn">Registruotis</Button>
           </div>

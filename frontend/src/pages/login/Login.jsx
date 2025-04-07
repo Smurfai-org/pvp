@@ -6,6 +6,8 @@ import "./login.css";
 import { useGoogleLogin } from "@react-oauth/google";
 import googleIcon from "../../assets/google_icon.svg";
 import { MessageContext } from "../../utils/MessageProvider";
+import loadingIcon from "../../assets/loading-anim.svg";
+import '../Register/Register.css';
 
 function Login() {
   const navigate = useNavigate();
@@ -17,6 +19,8 @@ function Login() {
 
   const [usernameError, setUsernameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+
+  const [loading, setLoading] = useState(false);
 
   const { showSuccessMessage, showErrorMessage } = useContext(MessageContext);
 
@@ -46,11 +50,11 @@ function Login() {
   const handleSubmit = () => {
     console.log(isLoginValid());
     if (!isLoginValid()) return;
+    setLoading(true);
     handleLogin(username, password);
   };
 
   const handleLogin = async (username, password) => {
-    console.log('asd');
     try {
       const response = await fetch("http://localhost:5000/auth/login", {
         method: "POST",
@@ -58,23 +62,23 @@ function Login() {
         body: JSON.stringify({ username, password }),
         credentials: "include",
       });
-      console.log('sss');
 
       if(response.status === 401) {
         showErrorMessage('Netinkami prisijungimo duomenys');
         setUsernameError('Netinkami duomenys');
         setPasswordError('Netinkami duomenys');
-        console.log('ssssss');
+        setLoading(false);
       }
 
       if(response.ok) {
-        console.log('sssaaaaa');
         showSuccessMessage('Sėkmingai prisijungėte');
+        setLoading(false);
         navigate('/');
+        window.location.reload();
       }
     } catch (error) {
       showErrorMessage('Nepavyko prisijungti');
-      console.log('ssseee');
+      setLoading(false);
     }
   };
 
@@ -86,18 +90,20 @@ function Login() {
         body: JSON.stringify({ gresponse }),
         credentials: "include",
       });
-      console.log("res", response);
 
       if (response.ok) {
         navigate(from, {replace: true});
       } else {
-        const data = await response.json();
-        console.log(data);
+        const data = await response.json(); 
       }
     },
     onError: () => {},
     flow: "auth-code",
   });
+
+  const navigateRegister = () => {
+    navigate('/register');
+  }
 
   return (
     <div className="full-page-container-login">
@@ -117,10 +123,12 @@ function Login() {
           errorText={passwordError}
         />
         <div className="inline-centered-buttons-login">
-          <Button extra="login-btn" onClick={handleSubmit}>
-            Log in
+          <Button extra={loading ? 'login-btn clicked' : 'login-btn'} onClick={() => { if (!loading) handleSubmit(); }}>
+            {loading ?
+              <img src={loadingIcon} alt='Įkeliama...' className="loading"/>
+            : "Log in"}
           </Button>
-          <Button extra="secondary login-btn">Sign up</Button>
+          <Button extra="secondary login-btn" onClick={navigateRegister}>Sign up</Button>
         </div>
         <div className="google-cnt">
           <Button extra="google-button" onClick={googleLoginButton}>
