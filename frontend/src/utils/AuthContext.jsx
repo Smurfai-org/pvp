@@ -26,8 +26,6 @@ const getData = async () => {
   }
 };
 
-
-
 export const AuthProvider = ({ children }) => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -63,10 +61,22 @@ export const AuthProvider = ({ children }) => {
     window.location.href = '/login';
   };
 
+  const login = async () => {
+    const data = await getData();
+  
+    if (data) {
+      setLoggedIn(true);
+      setUser(data.user);
+    } else {
+      setLoggedIn(false);
+      setUser(null);
+    }
+  };
+
   if (loading) return null;
 
   return (
-    <AuthContext.Provider value={{ loggedIn, user, loading, logout }}>
+    <AuthContext.Provider value={{ loggedIn, user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

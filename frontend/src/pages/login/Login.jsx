@@ -8,6 +8,7 @@ import googleIcon from "../../assets/google_icon.svg";
 import { MessageContext } from "../../utils/MessageProvider";
 import loadingIcon from "../../assets/loading-anim.svg";
 import '../Register/Register.css';
+import AuthContext from "../../utils/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ function Login() {
   const [loading, setLoading] = useState(false);
 
   const { showSuccessMessage, showErrorMessage } = useContext(MessageContext);
+  const { login } = useContext(AuthContext);
 
   const isLoginValid = () => {
     let isValid = true;
@@ -73,8 +75,8 @@ function Login() {
       if(response.ok) {
         showSuccessMessage('Sėkmingai prisijungėte');
         setLoading(false);
+        await login();
         navigate('/');
-        window.location.reload();
       }
     } catch (error) {
       showErrorMessage('Nepavyko prisijungti');
@@ -92,6 +94,7 @@ function Login() {
       });
 
       if (response.ok) {
+        await login();
         navigate(from, {replace: true});
       } else {
         const data = await response.json(); 
