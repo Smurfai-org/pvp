@@ -19,7 +19,6 @@ const LoginPrompt = ( {onClose} ) => {
   const [passwordError, setPasswordError] = useState("");
   const { showSuccessMessage, showErrorMessage } = useContext(MessageContext);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   if (loggedIn) return null;
 
@@ -90,7 +89,7 @@ const LoginPrompt = ( {onClose} ) => {
       });
 
       if (response.ok) {
-        window.location.reload();
+        await login();
       } else {
         const data = await response.json();
         console.log(data);
