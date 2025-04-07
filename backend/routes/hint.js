@@ -17,10 +17,6 @@ router.get("/", async (req, res) => {
 
     const [result] = await pool.execute(query, params);
 
-    if (result.length === 0) {
-      return res.status(404).json({ message: "Patarimų nerasta" });
-    }
-
     res.status(200).json(result);
   } catch (error) {
     console.error(error);
