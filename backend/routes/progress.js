@@ -1,5 +1,6 @@
 import express from "express";
 import pool from "../utils/db.js";
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
@@ -59,6 +60,11 @@ router.get("/:userId/:problemId", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json();
+  }
+
   const { userId, problemId, code, score, status } = req.body;
   try {
     const [result] = await pool.execute(
@@ -77,6 +83,16 @@ router.post("/", async (req, res) => {
 });
 
 router.put("/:userId/:problemId", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json();
+  }
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (decoded.user.role !== "admin" || decoded.user.id !== req.params.userId) {
+    return res.status(403).json();
+  }
+
   const { code, score, status } = req.body;
   if (!code && !score && !status) {
     res.status(400).json({ message: "Nėra ką atnaujinti" });

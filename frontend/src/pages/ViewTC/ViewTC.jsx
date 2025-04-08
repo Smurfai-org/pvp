@@ -5,6 +5,7 @@ import Button from "../../components/Button";
 import { MessageContext } from "../../utils/MessageProvider";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import AuthContext from "../../utils/AuthContext";
+import cookies from "js-cookie";
 
 const ViewTC = () => {
   const { id } = useParams();
@@ -110,7 +111,10 @@ const ViewTC = () => {
         `http://localhost:5000/test_cases/${testCaseId}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json", 
+            "Authorization": `Bearer ${cookies.get("token")}`,
+          },
           body: JSON.stringify({
             ...updatedTestCase,
             input: formattedInput,
@@ -148,7 +152,10 @@ const ViewTC = () => {
         `http://localhost:5000/test_cases/${testCaseId}`,
         {
           method: "DELETE",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${cookies.get("token")}`
+          },
           credentials: "include",
         }
       );
@@ -233,7 +240,10 @@ const ViewTC = () => {
 
       const response = await fetch("http://localhost:5000/test_cases/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${cookies.get("token")}`,
+         },
         body: JSON.stringify({
           ...newTestCase,
           problemId: id,

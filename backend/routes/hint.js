@@ -1,5 +1,6 @@
 import express from "express";
 import pool from "../utils/db.js";
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
@@ -25,6 +26,16 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json();
+  }
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (decoded.user.role !== "admin") {
+    return res.status(403).json();
+  }
+
   const { problemId, hint } = req.body;
   try {
     const [result] = await pool.execute(
@@ -42,6 +53,15 @@ router.post("/", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json();
+  }
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (decoded.user.role !== "admin") {
+    return res.status(403).json();
+  }
   const { hint } = req.body;
   try {
     const [result] = await pool.execute(
@@ -59,6 +79,15 @@ router.put("/:id", async (req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json();
+  }
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (decoded.user.role !== "admin") {
+    return res.status(403).json();
+  }
   try {
     const [result] = await pool.execute(
       "UPDATE hints SET deleted = 1 WHERE id = ?",

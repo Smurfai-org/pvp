@@ -10,6 +10,10 @@ const client = new OpenAI({
 });
     
 router.post('/hint', async (req, res) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json();
+    }
     const { userId, problemId, language } = req.body;
 
     try {
@@ -19,7 +23,7 @@ router.post('/hint', async (req, res) => {
         );
 
         const [[progress]] = await pool.execute(
-            'SELECT code, status FROM progress WHERE fk_USERid = ? AND fk_PROBLEMid = ?',
+            'SELECT code, score FROM progress WHERE fk_USERid = ? AND fk_PROBLEMid = ?',
             [userId, problemId]
         );
         
@@ -27,7 +31,7 @@ router.post('/hint', async (req, res) => {
             return res.status(400).json({ message: 'Trūksta duomenų' });
         }
 
-        if (progress.status == "finished") { // reikės ateityje pakeist
+        if (progress.scre === 100) { // reikės ateityje pakeist
             const noHint = {
                 hint: "Užduotis jau išspręsta, tad patarimo nereikės.",
                 problemId,
@@ -92,7 +96,6 @@ router.post('/hint', async (req, res) => {
         console.error(error);
         return res.status(500).json({ message: 'Serverio klaida' });
     }
-
 });
 
 export default router;

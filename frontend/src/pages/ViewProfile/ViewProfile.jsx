@@ -6,6 +6,7 @@ import "./ViewProfile.css";
 import defaultProfilePic from "../../assets/profile-default.svg";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import LoginPrompt from "../../components/LoginPrompt";
+import cookies from "js-cookie";
 
 function ViewProfile() {
   const { loggedIn, user } = useContext(AuthContext);

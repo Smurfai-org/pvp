@@ -8,6 +8,7 @@ import OutputSection from "./Output";
 import "./problem.css";
 import { difficulty_dictionary } from "../../constants";
 import AuthContext from "../../utils/AuthContext";
+import cookies from "js-cookie";
 import {
   determineOutputType,
   getStartingCodeFromVariables,
@@ -18,6 +19,8 @@ import {
 import { MessageContext } from "../../utils/MessageProvider";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import LoginPrompt from "../../components/LoginPrompt";
+
+const tokenCookie = cookies.get("token");
 
 const languages = [
   { label: "C++", value: "cpp" },
@@ -198,7 +201,10 @@ const Problem = () => {
     try {
       const res = await fetch("http://localhost:5000/problem/solve", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${tokenCookie}`,
+         },
         body: JSON.stringify({
           code: inputCode,
           userId: user?.id,
@@ -236,7 +242,10 @@ const Problem = () => {
           `http://localhost:5000/enrolled/${user?.id}/${courseInfo?.id}`,
           {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${tokenCookie}`,
+             },
             body: JSON.stringify({
               completed_problems: completed_problems,
               language: selectedLanguageValue,
@@ -251,7 +260,10 @@ const Problem = () => {
       try {
         await fetch(`http://localhost:5000/enrolled`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${tokenCookie}`,
+          },
           body: JSON.stringify({
             courseId: courseInfo?.id,
             userId: user?.id,
@@ -274,7 +286,10 @@ const handleGenerateHintClick = async () => {
   try {
     const response = await fetch("http://localhost:5000/generate/hint", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${tokenCookie}`,
+      },
       body: JSON.stringify({
         userId: user?.id,
         problemId: id,
