@@ -3,6 +3,7 @@ import { TextBox } from '../../components/textBox/TextBox';
 import Dropdown from '../../components/Dropdown';
 import Button from '../../components/Button';
 import { useParams, useNavigate } from 'react-router-dom';
+import cookies from 'js-cookie';
 
 function AddProblem() {
   const param = useParams();
@@ -31,8 +32,12 @@ function AddProblem() {
     try {
       const response = await fetch('http://localhost:5000/problem/create', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(problem)
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Authorization': `Bearer ${cookies.get('token')}` 
+        },
+        body: JSON.stringify(problem),
+        credentials: 'include'
       });
 
       const data = await response.json();

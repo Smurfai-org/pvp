@@ -1,11 +1,11 @@
 import express from "express";
 import pool from "../utils/db.js";
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
 router.get("/", async (req, res) => {
   const { id } = req.query;
-
   try {
     let query = "SELECT * FROM problems";
     let params = [];
@@ -27,7 +27,17 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/create", async (req, res) => {
+router.post("/create", async (req, res) => { 
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json();
+    }
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.user.role !== "admin") {
+      return res.status(403).json();
+    }
+
   const {
     name,
     description,
@@ -68,6 +78,16 @@ router.post("/create", async (req, res) => {
 });
 
 router.post("/update", async (req, res) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json();
+    }
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.user.role !== "admin") {
+      return res.status(403).json();
+    }
+
   const {
     id,
     name,
@@ -111,6 +131,16 @@ router.post("/update", async (req, res) => {
 });
 
 router.post("/delete", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json();
+  }
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (decoded.user.role !== "admin") {
+    return res.status(403).json();
+  }
+
   const { id } = req.body;
 
   if (!id) {
@@ -134,6 +164,16 @@ router.post("/delete", async (req, res) => {
 });
 
 router.post("/restore", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json();
+  }
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (decoded.user.role !== "admin") {
+    return res.status(403).json();
+  }
+
   const { id } = req.body;
 
   if (!id) {
@@ -212,6 +252,16 @@ router.post("/:id/hints", async (req, res) => {
 });
 
 router.put("/:id/hints/:id2", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json();
+  }
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (decoded.user.role !== "admin") {
+    return res.status(403).json();
+  }
+
   const { hint } = req.body;
   try {
     const [result] = await pool.execute(
@@ -229,6 +279,16 @@ router.put("/:id/hints/:id2", async (req, res) => {
 });
 
 router.delete("/:id/hints/:id2", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json();
+  }
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (decoded.user.role !== "admin") {
+    return res.status(403).json();
+  }
+
   try {
     const [result] = await pool.execute(
       "UPDATE hints SET deleted = 1 WHERE id = ?",
@@ -245,6 +305,10 @@ router.delete("/:id/hints/:id2", async (req, res) => {
 });
 
 router.post("/solve", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json();
+  }
   const { code, userId, probId, score } = req.body;
 
   try {

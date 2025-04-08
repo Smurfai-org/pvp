@@ -5,6 +5,7 @@ import Button from "../../components/Button";
 import { MessageContext } from "../../utils/MessageProvider";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import AuthContext from "../../utils/AuthContext";
+import cookies from "js-cookie";
 
 const ViewHints = () => {
   const { id } = useParams();
@@ -91,7 +92,10 @@ const ViewHints = () => {
 
       const response = await fetch(`http://localhost:5000/hint/${hintId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${cookies.get("token")}`
+         },
         body: JSON.stringify({
           ...updatedHint,
           hint: updatedHint,
@@ -125,7 +129,10 @@ const ViewHints = () => {
     try {
       const response = await fetch(`http://localhost:5000/hint/${hintId}`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${cookies.get("token")}`
+         },
         credentials: "include",
       });
 
@@ -174,7 +181,10 @@ const ViewHints = () => {
     try {
       const response = await fetch("http://localhost:5000/hint/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${cookies.get("token")}`
+         },
         body: JSON.stringify({
           problemId: id,
           hint: newHint,

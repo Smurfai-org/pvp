@@ -52,7 +52,7 @@ router.get("/problems", async (req, res) => {
   const { id, userId } = req.query;
 
   try {
-    let query = "SELECT * FROM problems WHERE fk_COURSEid = ?";
+    let query = "SELECT * FROM problems WHERE fk_COURSEid = ? AND deleted = 0";
     const params = [id];
 
     const [problems] = await pool.execute(query, params);

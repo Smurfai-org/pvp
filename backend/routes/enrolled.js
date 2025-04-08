@@ -42,6 +42,11 @@ router.get("/:userId/:courseId", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json();
+  }
+
   const { courseId, userId, completed_problems, language } = req.body;
   try {
     const [result] = await pool.execute(
@@ -60,6 +65,10 @@ router.post("/", async (req, res) => {
 });
 
 router.put("/:userId/:courseId", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json();
+  }
   const { completed_problems, language } = req.body;
   if (!completed_problems && !language) {
     res.status(400).json({ message: "Nėra ką atnaujinti" });

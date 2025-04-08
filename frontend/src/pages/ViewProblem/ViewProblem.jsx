@@ -7,6 +7,7 @@ import Checkbox from "../../components/Checkbox";
 import Dropdown from "../../components/Dropdown";
 import { MessageContext } from "../../utils/MessageProvider";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
+import cookies from "js-cookie";
 
 const ProblemDetails = () => {
   const { id } = useParams();
@@ -52,7 +53,10 @@ const ProblemDetails = () => {
     try {
       const response = await fetch("http://localhost:5000/problem/update", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${cookies.get("token")}`,
+         },
         body: JSON.stringify(editedProblem),
         credentials: "include",
       });
@@ -81,8 +85,12 @@ const ProblemDetails = () => {
         `http://localhost:5000/problem/delete?id=${id}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json", 
+            "Authorization": `Bearer ${cookies.get("token")}` 
+          },
           body: JSON.stringify({ id }),
+          credentials: "include",
         }
       );
 
@@ -105,7 +113,10 @@ const ProblemDetails = () => {
     try {
       const response = await fetch(`http://localhost:5000/problem/restore?`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${cookies.get("token")}`,
+         },
         body: JSON.stringify({ id }),
         credentials: "include",
       });

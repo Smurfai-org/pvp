@@ -8,6 +8,7 @@ import exitButton from "../../assets/exit-icon.svg";
 import checkButton from "../../assets/check-icon.svg";
 import { MessageContext } from "../../utils/MessageProvider";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
+import cookies from "js-cookie";
 
 function ViewCourse() {
   const { id } = useParams();
@@ -78,6 +79,8 @@ function ViewCourse() {
     fetchProblems();
   }, [id]);
 
+  const tokenCookie = cookies.get("token");
+
   const handleEdit = () => setEditActive(true);
   const exitEdit = () => setEditActive(false);
 
@@ -93,13 +96,17 @@ function ViewCourse() {
     try {
       const res = await fetch(`http://localhost:5000/course/update`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json", 
+          "Authorization": `Bearer ${tokenCookie}`
+         },
         body: JSON.stringify({
           id,
           name: courseTitle,
           description: courseDescription,
           icon_url: "",
         }),
+        credentials: "include",
       });
 
       if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
