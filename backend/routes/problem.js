@@ -7,11 +7,11 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   const { id } = req.query;
   try {
-    let query = "SELECT * FROM problems";
+    let query = "SELECT * FROM problems WHERE deleted = 0";
     let params = [];
 
     if (id) {
-      query += " WHERE id = ?";
+      query += " AND id = ?";
       params.push(id);
     }
 
