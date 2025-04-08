@@ -1,5 +1,6 @@
 import express from "express";
 import pool from "../utils/db.js";
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
@@ -95,6 +96,16 @@ router.get("/problems", async (req, res) => {
 });
 
 router.post("/create", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json();
+  }
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (decoded.user.role !== "admin") {
+    return res.status(403).json();
+  }
+
   const { name, description, icon_url } = req.body;
 
   if (!name || !description) {
@@ -115,11 +126,22 @@ router.post("/create", async (req, res) => {
       return res.status(500).json({ message: "Nepavyko sukurti kurso" });
     }
   } catch (error) {
+    console.error(error);
     return res.status(500).json({ message: "Serverio klaida" });
   }
 });
 
 router.post("/update", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json();
+  }
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (decoded.user.role !== "admin") {
+    return res.status(403).json();
+  }
+
   const { id, name, description, icon_url } = req.body;
 
   if (!id || !name || !description) {
@@ -143,6 +165,15 @@ router.post("/update", async (req, res) => {
 });
 
 router.post("/delete", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json();
+  }
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (decoded.user.role !== "admin") {
+    return res.status(403).json();
+  }
   const { id } = req.body;
 
   if (!id) {
@@ -166,6 +197,16 @@ router.post("/delete", async (req, res) => {
 });
 
 router.post("/restore", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json();
+  }
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (decoded.user.role !== "admin") {
+    return res.status(403).json();
+  }
+  
   const { id } = req.body;
 
   if (!id) {
