@@ -19,13 +19,23 @@ router.post('/hint', async (req, res) => {
         );
 
         const [[progress]] = await pool.execute(
-            'SELECT code FROM progress WHERE fk_USERid = ? AND fk_PROBLEMid = ?',
+            'SELECT code, status FROM progress WHERE fk_USERid = ? AND fk_PROBLEMid = ?',
             [userId, problemId]
         );
         
         if (!problem || !progress || !language) {
-            res.status(404).json({ message: 'Trūksta duomenų' });
+            return res.status(400).json({ message: 'Trūksta duomenų' });
         }
+
+        if (progress.status == "finished") { // reikės ateityje pakeist
+            const noHint = {
+                hint: "Užduotis jau išspręsta, tad patarimo nereikės.",
+                problemId,
+                userId,
+            };
+            return res.status(200).json(noHint);
+        }
+
 
         const codeObj = JSON.parse(progress.code);
 
@@ -73,14 +83,14 @@ router.post('/hint', async (req, res) => {
             [problemId, parsed.hint, userId]
         );
         if (!saveHint) {
-            res.status(500).json({ message: 'Nepavyko išsaugoti patarimo' });
+            return res.status(500).json({ message: 'Nepavyko išsaugoti patarimo' });
         }
 
-        res.status(200).json(parsed);
+        return res.status(200).json(parsed);
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Serverio klaida' });
+        return res.status(500).json({ message: 'Serverio klaida' });
     }
 
 });
