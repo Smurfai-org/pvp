@@ -5,6 +5,7 @@ import "./CourseCreate.css";
 import Card from "../../components/Card";
 import { useNavigate } from "react-router-dom";
 import { MessageContext } from "../../utils/MessageProvider";
+import cookies from "js-cookie";
 
 function CourseCreate() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ function CourseCreate() {
   const { showSuccessMessage, showErrorMessage, showWarningMessage } =
     useContext(MessageContext);
 
+  const tokenCookie = cookies.get("token");
   const handleSubmit = async () => {
     const data = {
       name: courseTitle,
@@ -24,7 +26,11 @@ function CourseCreate() {
     try {
       const req = await fetch("http://localhost:5000/course/create", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${tokenCookie}`,
+        },
+        credentials: "include",
         body: JSON.stringify(data),
       });
 
