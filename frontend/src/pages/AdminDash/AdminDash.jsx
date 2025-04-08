@@ -7,6 +7,7 @@ import { MessageContext } from "../../utils/MessageProvider";
 import AuthContext from "../../utils/AuthContext";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import LoginPrompt from "../../components/LoginPrompt";
+import cookies from "js-cookie";
 
 function AdminDash() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -18,6 +19,9 @@ function AdminDash() {
   if (!loggedIn || user.role != "admin") {
     return <LoginPrompt />
   }
+
+  const tokenCookie = cookies.get("token");
+
 
   const fetchData = async () => {
     try {
@@ -58,7 +62,11 @@ function AdminDash() {
         `http://localhost:5000/course/delete?id=${id}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${tokenCookie}`,
+          },
+          credentials: "include",
           body: JSON.stringify({ id }),
         }
       );
@@ -77,12 +85,15 @@ function AdminDash() {
   };
 
   const handleRecover = async (id) => {
-    if (!window.confirm("Ar tikrai norite atkurti šią problemą?")) return;
+    if (!window.confirm("Ar tikrai norite atkurti šį kursą?")) return;
 
     try {
       const response = await fetch(`http://localhost:5000/course/restore?`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${tokenCookie}`,
+        },
         body: JSON.stringify({ id }),
         credentials: "include",
       });
@@ -90,13 +101,13 @@ function AdminDash() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Klaida atkuriant užduotį");
+        throw new Error(data.message || "Klaida atkuriant kursą");
       }
 
-      showSuccessMessage("Užduotis sėkmingai atkurta");
+      showSuccessMessage("Kursas sėkmingai atkurtas!");
       window.location.reload();
     } catch {
-      showErrorMessage("Klaida atkuriant užduotį");
+      showErrorMessage("Klaida atkuriant kursą");
     }
   };
 

@@ -100,6 +100,9 @@ router.post("/create", async (req, res) => {
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json();
   }
+  if (!jwt.verify(authHeader.split(" ")[1], process.env.JWT_SECRET)) {
+    return res.status(401).json();
+  }
   const token = authHeader.split(" ")[1];
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   if (decoded.user.role !== "admin") {
