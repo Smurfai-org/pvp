@@ -597,9 +597,15 @@ const handleGenerateHintClick = async () => {
                         </Button>
                       </div>
                       <pre>
-                        {selectedLanguageValue === "cpp"
-                          ? item?.input?.cpp
-                          : item?.input?.python}
+                        <code
+                          style={{
+                            padding: 0
+                          }}
+                        >
+                          {selectedLanguageValue === "cpp"
+                            ? item?.input?.cpp
+                            : item?.input?.python}
+                        </code>
                       </pre>
                       <pre>
                         <strong>Rezultatas:</strong> <br />
