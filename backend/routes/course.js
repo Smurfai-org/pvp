@@ -14,7 +14,7 @@ router.get("/", async (req, res) => {
       SELECT c.*, 
              MAX(e.completed_problems) AS completed_problems, 
              MAX(e.language) AS language,
-             (SELECT COUNT(*) FROM problems p WHERE p.fk_COURSEid = c.id) AS total_problems
+             (SELECT COUNT(*) FROM problems p WHERE p.fk_COURSEid = c.id AND p.deleted = 0) AS total_problems
       FROM courses c
       LEFT JOIN enrolled e 
         ON c.id = e.fk_COURSEid`;
@@ -209,7 +209,7 @@ router.post("/restore", async (req, res) => {
   if (decoded.user.role !== "admin") {
     return res.status(403).json();
   }
-  
+
   const { id } = req.body;
 
   if (!id) {
