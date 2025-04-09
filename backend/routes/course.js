@@ -11,28 +11,42 @@ router.get("/", async (req, res) => {
 
   try {
     let query = `
-      SELECT c.*, 
-             MAX(e.completed_problems) AS completed_problems, 
-             MAX(e.language) AS language,
-             (SELECT COUNT(*) FROM problems p WHERE p.fk_COURSEid = c.id AND p.deleted = 0) AS total_problems
+      SELECT 
+        c.*, 
+        (
+          SELECT e.completed_problems 
+          FROM enrolled e 
+          WHERE e.fk_COURSEid = c.id AND e.fk_USERid = ?
+          LIMIT 1
+        ) AS completed_problems,
+        (
+          SELECT e.language 
+          FROM enrolled e 
+          WHERE e.fk_COURSEid = c.id AND e.fk_USERid = ?
+          LIMIT 1
+        ) AS language,
+        (
+          SELECT COUNT(*) 
+          FROM problems p 
+          WHERE p.fk_COURSEid = c.id AND p.deleted = 0
+        ) AS total_problems
       FROM courses c
-      LEFT JOIN enrolled e 
-        ON c.id = e.fk_COURSEid`;
+    `;
 
     let params = [];
+
+    if (userId) {
+      params.push(userId, userId);
+    } else {
+      params.push(null, null);
+    }
 
     if (id) {
       query += " WHERE c.id = ?";
       params.push(id);
     }
 
-    if (userId) {
-      query += id ? " AND" : " WHERE";
-      query += " e.fk_USERid = ?";
-      params.push(userId);
-    }
-
-    query += " GROUP BY c.id";
+    query += " ORDER BY c.id";
 
     const [result] = await pool.execute(query, params);
 
@@ -41,6 +55,7 @@ router.get("/", async (req, res) => {
         .status(id ? 404 : 200)
         .json(id ? { message: "Kursas nerastas" } : []);
     }
+
     res.status(200).json(result);
   } catch (error) {
     console.error(error.message);

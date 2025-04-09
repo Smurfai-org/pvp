@@ -29,7 +29,13 @@ const Course = () => {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/course/?id=${id}`);
+        const userId = user?.id;
+        const url = userId
+          ? `http://localhost:5000/course/?id=${id}&userId=${userId}`
+          : `http://localhost:5000/course/?id=${id}`;
+
+        const res = await fetch(url);
+
         if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
 
         const data = await res.json();
