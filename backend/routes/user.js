@@ -80,14 +80,14 @@ router.put("/:id", async (req, res) => {
   }
   const token = authHeader.split(" ")[1];
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  if (decoded.user.role !== "admin" || decoded.user.id !== req.params.id) {
+  if (decoded.user.role !== "admin" && decoded.user.id != req.params.id) {
     return res.status(403).json();
   }
 
   const userId = req.params.id;
-  const { username, password } = req.body;
+  const { username, email, password } = req.body;
 
-  if (!username && !password) {
+  if (!username && !email && !password) {
     return res.status(400).json({ message: "Nėra ką atnaujinti" });
   }
 
@@ -111,6 +111,10 @@ router.put("/:id", async (req, res) => {
       updates.push("username = ?");
       values.push(username);
     }
+    if (email) {
+      updates.push("email = ?");
+      values.push(email);
+    }
     if (password) {
       const hashedPassword = await hashPassword(password);
       updates.push("password = ?");
@@ -127,7 +131,34 @@ router.put("/:id", async (req, res) => {
     const [result] = await pool.execute(query, values);
 
     if (result.affectedRows > 0) {
-      return res.status(200).json({ message: "Vartotojas atnaujintas" });
+      const [updatedUser] = await pool.execute(
+        "SELECT id, role, profile_pic, email, username FROM users WHERE id = ?", 
+        [userId]
+      );
+
+      const newToken = jwt.sign(
+        {
+          user: {
+            id: updatedUser[0].id,
+            role: updatedUser[0].role,
+            profile_pic: updatedUser[0].profile_pic,
+            email: updatedUser[0].email,
+            username: updatedUser[0].username,
+          },
+          id: updatedUser[0].id,
+          loginType: "password",
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+      res.cookie("token", newToken, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "none",
+        maxAge: 604800000,
+      });
+
+      return res.status(200).json({ token: newToken });
     } else {
       return res.status(404).json({ message: "Vartotojas nerastas" });
     }
@@ -144,7 +175,7 @@ router.delete("/:id", async (req, res) => {
   }
   const token = authHeader.split(" ")[1];
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  if (decoded.user.role !== "admin" || decoded.user.id !== req.params.id) {
+  if (decoded.user.role !== "admin" && decoded.user.id != req.params.id) {
     return res.status(403).json();
   }
   try {
