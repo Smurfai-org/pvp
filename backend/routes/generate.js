@@ -31,7 +31,7 @@ router.post('/hint', async (req, res) => {
             return res.status(400).json({ message: 'Trūksta duomenų' });
         }
 
-        if (progress.scre === 100) { // reikės ateityje pakeist
+        if (progress.score === 100) { // reikės ateityje pakeist
             const noHint = {
                 hint: "Užduotis jau išspręsta, tad patarimo nereikės.",
                 problemId,
