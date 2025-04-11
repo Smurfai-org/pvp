@@ -80,9 +80,7 @@ router.put("/:id", async (req, res) => {
   }
   const token = authHeader.split(" ")[1];
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  if (decoded.user.role !== "admin" || decoded.user.id != req.params.id) {
-    console.log(req.params.id);
-    console.log(decoded.user.id);
+  if (decoded.user.role !== "admin" && decoded.user.id != req.params.id) {
     return res.status(403).json();
   }
 
@@ -177,7 +175,7 @@ router.delete("/:id", async (req, res) => {
   }
   const token = authHeader.split(" ")[1];
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  if (decoded.user.role !== "admin" || decoded.user.id != req.params.id) {
+  if (decoded.user.role !== "admin" && decoded.user.id != req.params.id) {
     return res.status(403).json();
   }
   try {
