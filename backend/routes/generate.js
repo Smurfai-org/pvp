@@ -63,7 +63,7 @@ router.post('/hint', async (req, res) => {
                     content: JSON.stringify(userInput)
                 },
             ],
-            temperature: 0.7,
+            temperature: 1.5,
         });
 
         const aiHint = response.output_text;

@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 const router = express.Router();
 
 router.get("/", async (req, res) => {
+  const token = req.cookies.token;
   const { id } = req.query;
 
   try {
@@ -12,8 +13,8 @@ router.get("/", async (req, res) => {
     let params = [];
 
     if (id) {
-      query += " AND fk_PROBLEMid = ?";
-      params.push(id);
+      query += " AND fk_PROBLEMid = ? AND (fk_USERid IS NULL OR fk_USERid = ?)";
+      params.push(id, jwt.verify(token, process.env.JWT_SECRET).user.id);
     }
 
     const [result] = await pool.execute(query, params);
