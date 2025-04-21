@@ -66,9 +66,9 @@ router.post("/create", async (req, res) => {
             VALUES (?, ?, ?, ?, ?, ?)`;
 
     const [result] = await pool.execute(query, values);
-
-    if (result && result.insertId) {
-      return res.status(201).json({ message: "Užduotis sukurta sėkmingai" });
+    const insertId = result.insertId;
+    if (result && insertId) {
+      return res.status(201).json({ message: "Užduotis sukurta sėkmingai", insertId });
     } else {
       return res.status(500).json({ message: "Nepavyko sukurti užduoties" });
     }

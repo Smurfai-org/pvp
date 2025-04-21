@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { TextBox } from '../../components/textBox/TextBox';
 import Dropdown from '../../components/Dropdown';
 import Button from '../../components/Button';
 import { useParams, useNavigate } from 'react-router-dom';
 import cookies from 'js-cookie';
 import './AddProblem.css';
+import { MessageContext } from '../../utils/MessageProvider';
 
 function AddProblem() {
+  const { showErrorMessage, showSuccessMessage } = useContext(MessageContext);
   const param = useParams();
   const navigate = useNavigate();
 
@@ -19,6 +21,9 @@ function AddProblem() {
     fk_AI_RESPONSEid: null
   });
 
+  const [hints, setHints] = useState(['']);
+  const [testCases, setTestCases] = useState([{ input: { cpp: '', python: '' }, output: '' }]); // Updated to handle both cpp and python
+
   const handleDifficultyChange = (selectedValue) => {
     setProblem((prevProblem) => ({
       ...prevProblem,
@@ -27,6 +32,34 @@ function AddProblem() {
         selectedValue === 'Sudėtingas' ? 'medium' :
         selectedValue === 'Sunkus' ? 'hard' : ''
     }));
+  };
+
+  const handleHintChange = (index, value) => {
+    const updatedHints = [...hints];
+    updatedHints[index] = value;
+    setHints(updatedHints);
+  };
+
+  const addHintField = () => {
+    setHints([...hints, '']);
+  };
+
+  const removeHintField = (index) => {
+    setHints(hints.filter((_, i) => i !== index));
+  };
+
+  const handleTestCaseChange = (index, language, value) => {
+    const updated = [...testCases];
+    updated[index].input[language] = value;
+    setTestCases(updated);
+  };
+
+  const addTestCase = () => {
+    setTestCases([...testCases, { input: { cpp: '', python: '' }, output: '' }]);
+  };
+
+  const removeTestCase = (index) => {
+    setTestCases(testCases.filter((_, i) => i !== index));
   };
 
   const handlePost = async () => {
@@ -47,9 +80,59 @@ function AddProblem() {
         throw new Error(data.message || 'Klaida kuriant problemą');
       }
 
+      const insertId = data.insertId;
+
+      // Create all non-empty hints
+      const validHints = hints.filter(h => h.trim());
+      for (let hintText of validHints) {
+        const hintRes = await fetch("http://localhost:5000/hint/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${cookies.get("token")}`
+          },
+          body: JSON.stringify({
+            problemId: insertId,
+            hint: hintText.trim(),
+          }),
+          credentials: "include"
+        });
+
+        const hintData = await hintRes.json();
+
+        if (!hintRes.ok) {
+          throw new Error(hintData.message || "Klaida kuriant užuominą");
+        }
+      }
+
+      // Post test cases
+      const validTestCases = testCases.filter(tc => tc.input.cpp.trim() || tc.input.python.trim() && tc.output.trim());
+      for (let testCase of validTestCases) {
+        const tcRes = await fetch('http://localhost:5000/test_cases/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${cookies.get("token")}`
+          },
+          body: JSON.stringify({
+            problemId: insertId,
+            input: testCase.input,
+            output: testCase.output,
+          }),
+          credentials: 'include'
+        });
+
+        const tcData = await tcRes.json();
+
+        if (!tcRes.ok) {
+          throw new Error(tcData.message || 'Klaida kuriant testą');
+        }
+      }
+
+      showSuccessMessage("Problema, užuominos ir testai sėkmingai pridėti");
       navigate(-1);
     } catch (error) {
-      alert(`Klaida: ${error.message}`);
+      showErrorMessage(`Klaida: ${error.message}`);
     }
   };
 
@@ -63,15 +146,72 @@ function AddProblem() {
         <textarea
           required
           rows={5}
-          onChange={(e) => setProblem(prev => ({ ...prev, description: e.target.value }))}
+          onChange={(e) => setProblem(prev => ({ ...prev, description: e.target.value }))} 
         />
+        
         <Dropdown 
           className='dropdown'
           options={['Lengvas', 'Sudėtingas', 'Sunkus']} 
           placeholder='Sudėtingumas' 
           onSelect={handleDifficultyChange} 
         />
-        
+
+        <div className="hint-section">
+          <h3>Užuominos (pasirinktinai)</h3>
+          {hints.map((hint, index) => (
+            <div key={index} className="hint-item">
+              <textarea
+                rows={3}
+                placeholder={`Užuomina #${index + 1}`}
+                value={hint}
+                onChange={(e) => handleHintChange(index, e.target.value)}
+              />
+              {hints.length > 1 && (
+                <Button extra="small secondary" onClick={() => removeHintField(index)}>
+                  Pašalinti
+                </Button>
+              )}
+            </div>
+          ))}
+          <Button extra="small" onClick={addHintField}>
+            Pridėti dar vieną užuominą
+          </Button>
+        </div>
+
+        <div className="testcase-section">
+          <h3>Testų atvejai</h3>
+          {testCases.map((tc, index) => (
+            <div key={index}>
+              <h4>C++ įvestis:</h4>
+              <textarea
+                rows={2}
+                value={tc.input.cpp}
+                onChange={(e) => handleTestCaseChange(index, 'cpp', e.target.value)}
+              />
+              <h4>Python įvestis:</h4>
+              <textarea
+                rows={2}
+                value={tc.input.python}
+                onChange={(e) => handleTestCaseChange(index, 'python', e.target.value)}
+              />
+              <h4>Norimas rezultatas:</h4>
+              <textarea
+                rows={2}
+                value={tc.output}
+                onChange={(e) => handleTestCaseChange(index, 'output', e.target.value)}
+              />
+              {testCases.length > 1 && (
+                <Button extra="small secondary" onClick={() => removeTestCase(index)}>
+                  Pašalinti
+                </Button>
+              )}
+            </div>
+          ))}
+          <Button extra="small" onClick={addTestCase}>
+            Pridėti dar vieną testą
+          </Button>
+        </div>
+
         <Button extra='submit-btn' onClick={handlePost}>Išsaugoti</Button>
       </div>
     </div>
