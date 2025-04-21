@@ -16,6 +16,7 @@ function CourseCreate() {
     useContext(MessageContext);
 
   const tokenCookie = cookies.get("token");
+  console.log("Token from cookies:", tokenCookie);
   const handleSubmit = async () => {
     const data = {
       name: courseTitle,
@@ -57,15 +58,13 @@ function CourseCreate() {
           onChange={(e) => setCourseTitle(e.target.value)}
           placeholder="Kurso pavadinimas"
         />
-
-        <TextBox
-          id="paragraph"
-          text="Kurso aprašymas"
+        <p>Kurso aprašymas:</p>
+        <textarea
+          required
+          rows={5}
           value={courseDescription}
           onChange={(e) => setCourseDescription(e.target.value)}
-          placeholder="Kurso aprašymas"
         />
-
         <Button onClick={handleSubmit}>Pateikti</Button>
       </div>
       <div className="create-card">

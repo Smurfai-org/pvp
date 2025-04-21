@@ -138,17 +138,18 @@ function ViewCourse() {
         {isLoaded.course ? (
           editActive ? (
             <>
-              <div>
+              <div className="edit-form">
                 <TextBox
                   text="Kurso pavadinimas"
                   value={courseTitle}
                   id="name"
                   onChange={(e) => setCourseTitle(e.target.value)}
                 />
-                <TextBox
-                  text="Kurso aprašymas"
+                <p>Aprašymas</p>
+                <textarea
+                  required
+                  rows={5}
                   value={courseDescription}
-                  id="description"
                   onChange={(e) => setCourseDescription(e.target.value)}
                 />
               </div>
@@ -188,7 +189,6 @@ function ViewCourse() {
 
       <div>
         <Button onClick={handleAddProblem}>Kurti problemą</Button>
-        <Button onClick={handleGenProblem}>Generuoti problemą</Button>
       </div>
 
       <div className="table-container">
