@@ -49,3 +49,17 @@ tbody tr:hover {
     width: 1.75rem;
     cursor: pointer;
 }
+
+.edit-form {
+    min-width: 10rem;
+}
+
+.edit-form textarea {
+    width: 40rem;
+    height: 5rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid var(--dark);
+    resize: none;
+    margin-bottom: 1rem;
+}

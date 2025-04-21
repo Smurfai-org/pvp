@@ -4,6 +4,7 @@ import Dropdown from '../../components/Dropdown';
 import Button from '../../components/Button';
 import { useParams, useNavigate } from 'react-router-dom';
 import cookies from 'js-cookie';
+import './AddProblem.css';
 
 function AddProblem() {
   const param = useParams();
@@ -53,19 +54,26 @@ function AddProblem() {
   };
 
   return (
-    <div style={{ maxWidth: '500px', margin: 'auto', padding: '20px' }}>
-      <h2>Pridėti problemą</h2>
-      
-      <TextBox text='Problemos pavadinimas' onChange={(e) => setProblem(prev => ({ ...prev, name: e.target.value }))} />
-      <TextBox text='Problemos aprašymas' onChange={(e) => setProblem(prev => ({ ...prev, description: e.target.value }))} />
-      
-      <Dropdown 
-        options={['Lengvas', 'Sudėtingas', 'Sunkus']} 
-        placeholder='Sudėtingumas' 
-        onSelect={handleDifficultyChange} 
-      />
-      
-      <Button onClick={handlePost}>Išsaugoti</Button>
+    <div className='problem-wrapper'>
+      <div className='problem-form'>
+        <h2>Pridėti problemą</h2>
+        
+        <TextBox text='Problemos pavadinimas' onChange={(e) => setProblem(prev => ({ ...prev, name: e.target.value }))} />
+        <p>Aprašymas:</p>
+        <textarea
+          required
+          rows={5}
+          onChange={(e) => setProblem(prev => ({ ...prev, description: e.target.value }))}
+        />
+        <Dropdown 
+          className='dropdown'
+          options={['Lengvas', 'Sudėtingas', 'Sunkus']} 
+          placeholder='Sudėtingumas' 
+          onSelect={handleDifficultyChange} 
+        />
+        
+        <Button extra='submit-btn' onClick={handlePost}>Išsaugoti</Button>
+      </div>
     </div>
   );
 }
