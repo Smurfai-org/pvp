@@ -101,7 +101,7 @@ const ProblemDetails = () => {
       }
 
       showSuccessMessage("Užduotis sėkmingai ištrinta");
-      window.location.reload();
+      navigate(-1);
     } catch {
       showErrorMessage("Nepavyko ištrinti užduoties");
     }

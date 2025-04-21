@@ -3,10 +3,15 @@ import { SearchBar } from "./SearchBar";
 import HyperlinkDropdown from "./HyperlinkDropdown";
 import { useContext, useEffect, useState } from "react";
 import AuthContext from "../utils/AuthContext";
+import { useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const { loggedIn, logout, user } = useContext(AuthContext);
   const [list, setList] = useState([]);
+  const router = useLocation()
+  const fixedRoutes = ['/'];
+  const isFixed = fixedRoutes.includes(router.pathname)
+
   useEffect(() => {
     setList(
       user?.role === "admin"
@@ -25,7 +30,7 @@ const Navbar = () => {
   }, [loggedIn, logout, user]);
 
   return (
-    <nav className="navbar">
+    <nav className={isFixed ? "navbar fixed" : "navbar" }>
       <Hyperlink href="/">Logo</Hyperlink>
 
       <div className="nav-search">
