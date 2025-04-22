@@ -22,7 +22,7 @@ function AddProblem() {
   });
 
   const [hints, setHints] = useState(['']);
-  const [testCases, setTestCases] = useState([{ input: { cpp: '', python: '' }, output: '' }]); // Updated to handle both cpp and python
+  const [testCases, setTestCases] = useState([{ input: { cpp: '', python: '' }, output: '' }]);
 
   const handleDifficultyChange = (selectedValue) => {
     setProblem((prevProblem) => ({
@@ -48,9 +48,13 @@ function AddProblem() {
     setHints(hints.filter((_, i) => i !== index));
   };
 
-  const handleTestCaseChange = (index, language, value) => {
+  const handleTestCaseChange = (index, field, value) => {
     const updated = [...testCases];
-    updated[index].input[language] = value;
+    if (field === 'output') {
+      updated[index].output = value;
+    } else {
+      updated[index].input[field] = value;
+    }
     setTestCases(updated);
   };
 
@@ -82,7 +86,6 @@ function AddProblem() {
 
       const insertId = data.insertId;
 
-      // Create all non-empty hints
       const validHints = hints.filter(h => h.trim());
       for (let hintText of validHints) {
         const hintRes = await fetch("http://localhost:5000/hint/", {
@@ -180,6 +183,40 @@ function AddProblem() {
 
         <div className="testcase-section">
           <h3>Testų atvejai</h3>
+          <div className="rules-list">
+            <p>
+              <strong>
+                Esate pilnai atsakingas už visas potencines klaidas
+              </strong>
+              , kurios įvyks jeigu nesilaikysite taisyklių:
+            </p>
+            <li>
+              Kodo sintaksė privalo <strong>būti teisinga.</strong>{" "}
+              Nepamirškite kabliataškių (C++ atveju), patikrinkite
+              operatorių teisingumą.
+            </li>
+            <li>
+              Kintamųjų duomenų tipai privalo{" "}
+              <strong>atitikti užduotį.</strong>{" "}
+            </li>
+            <li>
+              Kintamųjų skaičius privalo <strong>būti lygus</strong>{" "}
+              tarp C++ ir Python kalbų.
+            </li>
+            <li>
+              Norimo rezultato reikšmė privalo{" "}
+              <strong>laikytis užduotyje nustatytų gairių.</strong>{" "}
+              Pavyzdžiui, jeigu užduotis prašo pateikti du skaičius po
+              kablelio, norimas rezultatas taip pat pateiks du skaičius
+              po kablelio ir t.t.
+            </li>
+            <li className="list-warning">
+              Prieš išsaugojant testą,{" "}
+              <strong>
+                dar kartą patikrinkite visus testo laukus.
+              </strong>
+            </li>
+          </div>
           {testCases.map((tc, index) => (
             <div key={index}>
               <h4>C++ įvestis:</h4>

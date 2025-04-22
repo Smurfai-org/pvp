@@ -1,8 +1,12 @@
 .problem-container {
-    max-width: 600px;
+    max-width: 80%;
     margin: 20px auto;
     padding: 20px;
     border: 1px solid #ddd;
     background: #f9f9f9;
-  }
-  
+
+}
+
+.form-container {
+  overflow-wrap: break-word;
+}

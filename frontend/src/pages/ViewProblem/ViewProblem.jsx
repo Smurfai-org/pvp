@@ -226,7 +226,7 @@ const ProblemDetails = () => {
               <Button onClick={handleSave}>Išsaugoti</Button>
             </>
           ) : (
-            <>
+            <div className="form-container">
               <p>
                 <strong>Aprašymas:</strong> {problem.description}
               </p>
@@ -262,7 +262,7 @@ const ProblemDetails = () => {
                   Ištrinti
                 </Button>
               )}
-            </>
+            </div>
           )}
         </>
       ) : (

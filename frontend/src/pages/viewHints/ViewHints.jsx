@@ -41,13 +41,20 @@ const ViewHints = () => {
 
   loggedIn && user && user.role !== "admin" && navigate("/");
   if (!loggedIn) {
-    navigate("/");
+    navigate("/login");
   }
 
   const fetchHints = async () => {
     try {
       setIsLoaded(false);
-      const response = await fetch(`http://localhost:5000/hint?id=${id}`);
+      const response = await fetch(`http://localhost:5000/hint?id=${id}`, {
+          method: "GET",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${cookies.get("token")}`
+          },
+          credentials: "include",
+      });
 
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
