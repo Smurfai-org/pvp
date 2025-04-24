@@ -28,8 +28,9 @@ const CourseList = () => {
         const response = await fetch("http://localhost:5000/course/");
         if (!response.ok) throw new Error(response.status);
         const data = await response.json();
-        setCourses(data);
-        return data;
+        const activeCourses = data.filter((course) => course.deleted !== 1);
+        setCourses(activeCourses);
+        return activeCourses;
       } catch (error) {
         console.error("Failed to fetch courses", error);
       } finally {
