@@ -6,11 +6,23 @@ import { useParams, useNavigate } from 'react-router-dom';
 import cookies from 'js-cookie';
 import './AddProblem.css';
 import { MessageContext } from '../../utils/MessageProvider';
+import AuthContext from '../../utils/AuthContext';
+import LoginPrompt from '../../components/LoginPrompt';
 
 function AddProblem() {
   const { showErrorMessage, showSuccessMessage } = useContext(MessageContext);
   const param = useParams();
   const navigate = useNavigate();
+  const { user, loggedIn } = useContext(AuthContext);
+
+  if (!loggedIn) {
+    return <LoginPrompt />
+  }
+
+  if (user.role != 'admin') {
+    navigate('/404');
+    return;
+  }
 
   const [problem, setProblem] = useState({
     name: '',
@@ -86,6 +98,7 @@ function AddProblem() {
 
       const insertId = data.insertId;
 
+      // post hints
       const validHints = hints.filter(h => h.trim());
       for (let hintText of validHints) {
         const hintRes = await fetch("http://localhost:5000/hint/", {

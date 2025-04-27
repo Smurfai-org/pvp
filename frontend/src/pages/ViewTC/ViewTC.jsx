@@ -6,6 +6,7 @@ import { MessageContext } from "../../utils/MessageProvider";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import AuthContext from "../../utils/AuthContext";
 import cookies from "js-cookie";
+import LoginPrompt from "../../components/LoginPrompt";
 
 const ViewTC = () => {
   const { id } = useParams();
@@ -23,6 +24,15 @@ const ViewTC = () => {
     expected_output: "",
     fk_PROBLEMid: id,
   });
+
+  if (!loggedIn) {
+    return <LoginPrompt />
+  }
+
+  if(user.role != 'admin') {
+    navigate('/404');
+    return;
+  }
 
   useEffect(() => {
     fetchTestCases();
@@ -42,11 +52,6 @@ const ViewTC = () => {
       console.error(err);
     }
   };
-
-  loggedIn && user && user.role !== "admin" && navigate("/");
-  if (!loggedIn) {
-    navigate("/");
-  }
 
   const fetchTestCases = async () => {
     try {

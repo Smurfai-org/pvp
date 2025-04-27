@@ -8,6 +8,8 @@ import Dropdown from "../../components/Dropdown";
 import { MessageContext } from "../../utils/MessageProvider";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import cookies from "js-cookie";
+import AuthContext from "../../utils/AuthContext";
+import LoginPrompt from "../../components/LoginPrompt";
 
 const ProblemDetails = () => {
   const { id } = useParams();
@@ -26,6 +28,16 @@ const ProblemDetails = () => {
     fk_AI_RESPONSEid: "",
   });
   const { showSuccessMessage, showErrorMessage } = useContext(MessageContext);
+  const { user, loggedIn } = useContext(AuthContext);
+
+  if(!loggedIn) {
+    return <LoginPrompt />
+  }
+
+  if(user.role != 'admin') {
+    navigate('/404');
+    return;
+  }
 
   useEffect(() => {
     const fetchProblem = async () => {

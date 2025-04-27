@@ -1,10 +1,17 @@
 import React, { useState } from 'react';
 import './styles.css';
 
-function ToggleSwitch({ children }) {
+function ToggleSwitch({ children, onToggleChange }) {
   const [isOn, setIsOn] = useState(false);
 
-  const toggleSwitch = () => setIsOn(!isOn);
+  const toggleSwitch = () => {
+    const newState = !isOn;
+    setIsOn(newState);
+    
+    if (onToggleChange) {
+      onToggleChange(newState);
+    }
+  };
 
   return (
     <div className="toggle-container">
