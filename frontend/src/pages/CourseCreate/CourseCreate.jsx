@@ -6,6 +6,8 @@ import Card from "../../components/Card";
 import { useNavigate } from "react-router-dom";
 import { MessageContext } from "../../utils/MessageProvider";
 import cookies from "js-cookie";
+import AuthContext from "../../utils/AuthContext";
+import LoginPrompt from "../../components/LoginPrompt";
 
 function CourseCreate() {
   const navigate = useNavigate();
@@ -14,6 +16,16 @@ function CourseCreate() {
   const [courseIcon, setCourseIcon] = useState("");
   const { showSuccessMessage, showErrorMessage, showWarningMessage } =
     useContext(MessageContext);
+  const { user, loggedIn } = useContext(AuthContext);
+
+  if(!loggedIn) {
+    return <LoginPrompt />
+  }
+
+  if(user.role != 'admin') {
+    navigate('/404');
+    return;
+  }
 
   const tokenCookie = cookies.get("token");
   console.log("Token from cookies:", tokenCookie);

@@ -9,6 +9,8 @@ import checkButton from "../../assets/check-icon.svg";
 import { MessageContext } from "../../utils/MessageProvider";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import cookies from "js-cookie";
+import AuthContext from "../../utils/AuthContext";
+import LoginPrompt from "../../components/LoginPrompt";
 
 function ViewCourse() {
   const { id } = useParams();
@@ -24,6 +26,16 @@ function ViewCourse() {
   const [courseTitle, setCourseTitle] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
   const [courseIcon, setcourseIcon] = useState("");
+  const { user, loggedIn } = useContext(AuthContext);
+
+  if(!loggedIn) {
+    return <LoginPrompt />
+  }
+
+  if(user.role != 'admin') {
+    navigate('/404');
+    return;
+  }
 
   useEffect(() => {
     const fetchCourse = async () => {

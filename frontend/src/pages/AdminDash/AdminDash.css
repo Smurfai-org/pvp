@@ -6,5 +6,42 @@
   }
 
 .dashboard {
-    padding: 0 2rem;
+  padding: 0 2rem;
+}
+
+.admin-dash-actions {
+  display: inline-flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.admin-dash-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.admin-nav-container {
+  display: flex;
+  flex-direction: column;
+  width: 10rem;
+  min-width: fit-content;
+  height: 100%;
+  border-right: 1px solid var(--dark);
+  overflow-y: hidden;
+}
+
+.admin-dash-tab {
+  padding: 1rem;
+  cursor: pointer;
+}
+
+.admin-nav-container .active {
+  background-color: var(--highligth);
+  color: var(--light);
+}
+
+.admin-dash-wrapper {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2rem;
 }

@@ -8,7 +8,6 @@ const Card = ({
   onClick = () => {},
   showActions = false,
   onDelete = () => {},
-  onRestore = () => {},
   isDeleted = false,
 }) => {
   return (
@@ -28,7 +27,7 @@ const Card = ({
               alt="Restore"
               onClick={(e) => {
                 e.stopPropagation();
-                onRestore();
+                onDelete();
               }}
             />
           ) : (

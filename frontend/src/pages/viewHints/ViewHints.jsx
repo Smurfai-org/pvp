@@ -6,6 +6,7 @@ import { MessageContext } from "../../utils/MessageProvider";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import AuthContext from "../../utils/AuthContext";
 import cookies from "js-cookie";
+import LoginPrompt from "../../components/LoginPrompt";
 
 const ViewHints = () => {
   const { id } = useParams();
@@ -19,6 +20,15 @@ const ViewHints = () => {
   const [editedHints, setEditedHints] = useState({});
   const [isCreatingNewHint, setIsCreatingNewHint] = useState(false);
   const [newHint, setNewHint] = useState("");
+
+  if (!loggedIn) {
+    return <LoginPrompt />
+  }
+
+  if(user.role != 'admin') {
+    navigate('/404');
+    return;
+  }
 
   useEffect(() => {
     fetchHints();
@@ -38,11 +48,6 @@ const ViewHints = () => {
       console.error(err);
     }
   };
-
-  loggedIn && user && user.role !== "admin" && navigate("/");
-  if (!loggedIn) {
-    navigate("/login");
-  }
 
   const fetchHints = async () => {
     try {
