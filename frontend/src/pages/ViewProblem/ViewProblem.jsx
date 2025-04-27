@@ -198,17 +198,18 @@ const ProblemDetails = () => {
                 />
               </div>
               <div className="form-group">
-                <TextBox
-                  text="Aprašymas"
-                  value={editedProblem.description}
-                  onChange={(e) =>
-                    setEditedProblem((prev) => ({
-                      ...prev,
-                      description: e.target.value,
-                    }))
-                  }
-                  name="description"
-                />
+              <p>Aprašymas:</p>
+              <textarea
+                required
+                rows={5}
+                value={editedProblem.description}
+                onChange={(e) => 
+                  setEditedProblem((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
+              />
               </div>
               <div className="form-group">
                 <Dropdown

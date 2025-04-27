@@ -18,9 +18,11 @@
 .admin-dash-actions {
   display: flex;
   justify-content: space-between;
+  margin-bottom: 0.5rem;
 }
 
 .admin-nav-container {
+  position: fixed;
   display: flex;
   flex-direction: column;
   width: 10rem;
@@ -31,8 +33,14 @@
 }
 
 .admin-dash-tab {
+  display: flex;
   padding: 1rem;
   cursor: pointer;
+  align-items: center;
+}
+
+.admin-dash-tab:hover {
+  background-color: #dedfdf;
 }
 
 .admin-nav-container .active {
@@ -44,4 +52,23 @@
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 2rem;
+  min-height: 100vh;
+}
+
+.admin-content {
+  margin-left: 10rem;
+  width: calc(100vw - 10rem);
+}
+
+.admin-exit-icon {
+  width: 1rem;
+  margin-right: 0.5rem;
+}
+
+.admin-nav-container .exit-btn {
+  background-color: var(--bright);
+}
+
+.admin-nav-container .exit-btn:hover {
+  background-color: #db6765;
 }
