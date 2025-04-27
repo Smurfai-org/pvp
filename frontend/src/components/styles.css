@@ -544,6 +544,10 @@ code {
   z-index: 1000;
 }
 
+.nav-off {
+  display: none;
+}
+
 .nav-links {
   display: flex;
   align-items: center;

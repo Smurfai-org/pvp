@@ -10,7 +10,9 @@ const Navbar = () => {
   const [list, setList] = useState([]);
   const router = useLocation()
   const fixedRoutes = ['/'];
+  const offRoutes = ['/admin_dash'];
   const isFixed = fixedRoutes.includes(router.pathname)
+  const isOff = offRoutes.includes(router.pathname);
 
   useEffect(() => {
     setList(
@@ -30,7 +32,7 @@ const Navbar = () => {
   }, [loggedIn, logout, user]);
 
   return (
-    <nav className={isFixed ? "navbar fixed" : "navbar" }>
+    <nav className={`navbar ${isFixed ? "fixed" : ""} ${isOff ? "nav-off" : ""}`}>
       <Hyperlink href="/">Logo</Hyperlink>
 
       <div className="nav-search">

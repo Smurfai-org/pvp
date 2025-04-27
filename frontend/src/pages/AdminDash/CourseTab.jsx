@@ -164,7 +164,7 @@ function CourseTab() {
 
     return (
         <div className="dashboard">
-          <h2>Administratoriaus skydelis</h2>
+          <h1>Kursai</h1>
           <div className="admin-dash-actions">
             <Button onClick={handleCreate}>Sukurti kursą</Button>
             <SearchBar onSearch={handleSearch} />
@@ -172,7 +172,6 @@ function CourseTab() {
             <ToggleSwitch onToggleChange={handleToggleChange}>{toggleState ? 'Ištrinti kursai' : 'Esami kursai'}</ToggleSwitch>
           </div>
       
-          <h2>Kursai</h2>
           {isLoaded ? (
             <>
               <div className="admin-dashboard">
