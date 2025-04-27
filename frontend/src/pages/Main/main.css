@@ -40,9 +40,10 @@
   font-size: 1.8rem;
   border: none;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-  width: 300px;
+  min-width: fit-content;
   height: 100px;
   cursor: pointer;
+  text-wrap: nowrap;
 }
 
 .button-container .button-style:hover {
