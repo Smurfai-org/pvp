@@ -9,7 +9,7 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const [result] = await pool.execute(
-      "SELECT id, username, creation_date, role FROM users WHERE deleted = 0"
+      "SELECT id, username, email, creation_date, deleted, role FROM users"
     );
     if (result.length === 0) {
       return res.status(404).json({ message: "Vartotojų nerasta" });
