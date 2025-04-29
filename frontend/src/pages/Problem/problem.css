@@ -17,11 +17,94 @@
 }
 
 .problem-info-screen {
+  position: relative;
   flex-grow: 1;
   background-color: var(--white);
   padding: 1rem;
   box-sizing: border-box;
   overflow-y: auto;
+  padding-top: 2rem;
+}
+
+.problem-info-navigation-bar {
+  width: 100%;
+  padding-left: 0.8rem;
+  box-sizing: border-box;
+  background-color: var(--secondary);
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  align-items: center;
+}
+
+.problem-info-navigation-bar div {
+  font-weight: 500;
+  padding: 0.2rem;
+  margin: 0.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  gap: 0.3rem;
+}
+
+.problem-info-navigation-bar div:hover {
+  cursor: pointer;
+  background-color: var(--white);
+  transition: 0.1s;
+}
+
+.problem-info-navigation-bar-button-selected {
+  background-color: var(--light);
+  transition: 0.1s;
+}
+
+.problem-ai-window {
+  position: relative;
+  margin-top: 1rem;
+  height: calc(100% - 1rem);
+}
+
+.problem-ai-help-text-window {
+  background-color: var(--white);
+}
+
+.problem-ai-help-interaction-window {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+.problem-ai-help-interaction-window input {
+  width: 50%;
+  padding: 0.5rem;
+  border-radius: 5px;
+  border: 1px solid var(--light);
+}
+
+.chat-input-container {
+  width: 100%;
+}
+
+.chat-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid var(--light);
+  resize: none;
+  overflow: hidden;
+  line-height: 1.5;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.chat-input-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
 }
 
 .problem-related-courses {
@@ -102,6 +185,10 @@
   flex-shrink: 0;
 }
 
+.problem-sticky-header strong {
+  font-weight: 500;
+}
+
 .output-text-container {
   flex-grow: 1;
   overflow-y: auto;
@@ -145,4 +232,24 @@
   filter: blur(8px);
   pointer-events: none;
   transition: filter 0.3s ease-in-out;
+}
+
+.chat-transcript {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.chat-message.user {
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  max-width: 75%;
+  line-height: 1.4;
+  align-self: flex-end;
+  background-color: var(--light);
+}
+
+.chat-message.ai {
+  align-self: flex-start;
+  padding: 1rem 0;
 }
