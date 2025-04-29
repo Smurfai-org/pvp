@@ -6,6 +6,7 @@ import { MessageContext } from "../../utils/MessageProvider";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import AuthContext from "../../utils/AuthContext";
 import cookies from "js-cookie";
+import LoginPrompt from "../../components/LoginPrompt";
 
 const ViewHints = () => {
   const { id } = useParams();
@@ -19,6 +20,15 @@ const ViewHints = () => {
   const [editedHints, setEditedHints] = useState({});
   const [isCreatingNewHint, setIsCreatingNewHint] = useState(false);
   const [newHint, setNewHint] = useState("");
+
+  if (!loggedIn) {
+    return <LoginPrompt />
+  }
+
+  if(user.role != 'admin') {
+    navigate('/404');
+    return;
+  }
 
   useEffect(() => {
     fetchHints();
@@ -39,15 +49,17 @@ const ViewHints = () => {
     }
   };
 
-  loggedIn && user && user.role !== "admin" && navigate("/");
-  if (!loggedIn) {
-    navigate("/");
-  }
-
   const fetchHints = async () => {
     try {
       setIsLoaded(false);
-      const response = await fetch(`http://localhost:5000/hint?id=${id}`);
+      const response = await fetch(`http://localhost:5000/hint?id=${id}`, {
+          method: "GET",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${cookies.get("token")}`
+          },
+          credentials: "include",
+      });
 
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);

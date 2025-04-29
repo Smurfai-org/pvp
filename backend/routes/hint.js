@@ -5,16 +5,20 @@ import jwt from "jsonwebtoken";
 const router = express.Router();
 
 router.get("/", async (req, res) => {
-  const token = req.cookies.token;
   const { id } = req.query;
-
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json();
+  }
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
   try {
     let query = "SELECT * FROM hints WHERE deleted = 0";
     let params = [];
 
     if (id) {
       query += " AND fk_PROBLEMid = ? AND (fk_USERid IS NULL OR fk_USERid = ?)";
-      params.push(id, jwt.verify(token, process.env.JWT_SECRET).user.id);
+      params.push(id, decoded.user.id);
     }
 
     const [result] = await pool.execute(query, params);

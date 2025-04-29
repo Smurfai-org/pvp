@@ -1,164 +1,55 @@
-import { useEffect, useState, useContext } from "react";
-import Card from "../../components/Card";
+import { useState } from "react";
 import "./AdminDash.css";
-import Button from "../../components/Button";
-import { useNavigate } from "react-router-dom";
-import { MessageContext } from "../../utils/MessageProvider";
+import CourseTab from "./CourseTab";
+import UserTab from "./UserTab";
+import { useContext } from "react";
 import AuthContext from "../../utils/AuthContext";
-import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import LoginPrompt from "../../components/LoginPrompt";
-import cookies from "js-cookie";
+import ExitIcon from '../../assets/leave-icon.svg';
+import { useNavigate } from "react-router-dom";
 
 function AdminDash() {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [courses, setCourses] = useState([]);
-  const navigate = useNavigate();
-  const { showSuccessMessage, showErrorMessage } = useContext(MessageContext);
   const { user, loggedIn } = useContext(AuthContext);
+  const [tabs, setTabs] = useState(['Kursai', 'Naudotojai']);
+  const [openTab, setOpenTab] = useState('Kursai');
+  const navigate = useNavigate();
 
   if (!loggedIn || user.role != "admin") {
-    return <LoginPrompt />
+    return <LoginPrompt />;
   }
 
-  const tokenCookie = cookies.get("token");
+  const ToggleTab = (tab) => {
+    setOpenTab(tab);
+  }
 
-
-  const fetchData = async () => {
-    try {
-      const req = await fetch(`http://localhost:5000/course/`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (!req.ok) {
-        throw new Error(res.status);
-      }
-      const res = await req.json();
-
-      setCourses(res);
-    } catch {
-      showErrorMessage("Nepavyko rasti kursų");
-    } finally {
-      setIsLoaded(true);
+  const renderTab = () => {
+    switch (openTab) {
+      case 'Kursai':
+        return <CourseTab />;
+      case 'Naudotojai':
+        return <UserTab />;
+      default:
+        return <CourseTab />;
     }
-  };
+  }
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const handleExit = () => {
+    navigate('/');
+  }
 
-  const handleCreate = () => {
-    navigate("/create_course");
-  };
-
-  const handleCardClick = (id) => {
-    navigate(`/view_course/${id}`);
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Ar tikrai norite ištrinti šį kursą?")) return;
-
-    try {
-      const response = await fetch(
-        `http://localhost:5000/course/delete?id=${id}`,
+  return(
+    <div className="admin-dash-wrapper">
+      <div className="admin-nav-container">
+        <div className="admin-dash-tab exit-btn"  onClick={() => handleExit()}><img src={ExitIcon} className="admin-exit-icon"/>Išeiti</div>
         {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${tokenCookie}`,
-          },
-          credentials: "include",
-          body: JSON.stringify({ id }),
+          tabs.map((tab) => (
+            <div key={tab} className={`admin-dash-tab ${openTab === tab ? 'active' : ''}`} onClick={() => ToggleTab(tab)}>{tab}</div>
+          ))
         }
-      );
-
-      if (!response.ok) {
-        throw new Error("Nepavyko ištrinti kurso");
-      }
-
-      showSuccessMessage("Kursas sėkmingai ištrintas!");
-
-      fetchData();
-    } catch (error) {
-      console.error("Klaida:", error);
-      showErrorMessage(error.message || "Nepavyko ištrinti kurso");
-    }
-  };
-
-  const handleRecover = async (id) => {
-    if (!window.confirm("Ar tikrai norite atkurti šį kursą?")) return;
-
-    try {
-      const response = await fetch(`http://localhost:5000/course/restore?`, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${tokenCookie}`,
-        },
-        body: JSON.stringify({ id }),
-        credentials: "include",
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Klaida atkuriant kursą");
-      }
-
-      showSuccessMessage("Kursas sėkmingai atkurtas!");
-      window.location.reload();
-    } catch {
-      showErrorMessage("Klaida atkuriant kursą");
-    }
-  };
-
-  const sortedCourses = courses.sort((a, b) =>
-    a.created_at.localeCompare(b.created_at)
-  );
-  const nonDeletedCourses = sortedCourses.filter((course) => !course.deleted);
-  const deletedCourses = sortedCourses.filter((course) => course.deleted);
-
-  return (
-    <div className="dashboard">
-      <h2>Administratoriaus skydelis</h2>
-      <Button onClick={handleCreate}>Sukurti kursą</Button>
-
-      <h2>Kursai</h2>
-      {isLoaded ? (
-        <>
-          <div className="admin-dashboard">
-            {nonDeletedCourses.map((course) => (
-              <div className="course-card-container" key={course.id}>
-                <Card
-                  title={course.name}
-                  paragraph={course.description}
-                  onClick={() => handleCardClick(course.id)}
-                  showActions={true}
-                  onDelete={() => handleDelete(course.id)}
-                  isDeleted={false}
-                />
-              </div>
-            ))}
-          </div>
-
-          <h2>Ištrinti kursai</h2>
-          <div className="admin-dashboard">
-            {deletedCourses.map((course) => (
-              <div className="course-card-container" key={course.id}>
-                <Card
-                  title={course.name}
-                  paragraph={course.description}
-                  onClick={() => handleCardClick(course.id)}
-                  showActions={true}
-                  onRestore={() => handleRecover(course.id)}
-                  isDeleted={true}
-                />
-              </div>
-            ))}
-          </div>
-        </>
-      ) : (
-        <AnimatedLoadingText />
-      )}
+      </div>
+      <div className="admin-content">
+        {renderTab()}
+      </div>
     </div>
   );
 }

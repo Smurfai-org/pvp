@@ -8,6 +8,8 @@ import Dropdown from "../../components/Dropdown";
 import { MessageContext } from "../../utils/MessageProvider";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import cookies from "js-cookie";
+import AuthContext from "../../utils/AuthContext";
+import LoginPrompt from "../../components/LoginPrompt";
 
 const ProblemDetails = () => {
   const { id } = useParams();
@@ -26,6 +28,16 @@ const ProblemDetails = () => {
     fk_AI_RESPONSEid: "",
   });
   const { showSuccessMessage, showErrorMessage } = useContext(MessageContext);
+  const { user, loggedIn } = useContext(AuthContext);
+
+  if(!loggedIn) {
+    return <LoginPrompt />
+  }
+
+  if(user.role != 'admin') {
+    navigate('/404');
+    return;
+  }
 
   useEffect(() => {
     const fetchProblem = async () => {
@@ -101,7 +113,7 @@ const ProblemDetails = () => {
       }
 
       showSuccessMessage("Užduotis sėkmingai ištrinta");
-      window.location.reload();
+      navigate(-1);
     } catch {
       showErrorMessage("Nepavyko ištrinti užduoties");
     }
@@ -186,17 +198,18 @@ const ProblemDetails = () => {
                 />
               </div>
               <div className="form-group">
-                <TextBox
-                  text="Aprašymas"
-                  value={editedProblem.description}
-                  onChange={(e) =>
-                    setEditedProblem((prev) => ({
-                      ...prev,
-                      description: e.target.value,
-                    }))
-                  }
-                  name="description"
-                />
+              <p>Aprašymas:</p>
+              <textarea
+                required
+                rows={5}
+                value={editedProblem.description}
+                onChange={(e) => 
+                  setEditedProblem((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
+              />
               </div>
               <div className="form-group">
                 <Dropdown
@@ -226,7 +239,7 @@ const ProblemDetails = () => {
               <Button onClick={handleSave}>Išsaugoti</Button>
             </>
           ) : (
-            <>
+            <div className="form-container">
               <p>
                 <strong>Aprašymas:</strong> {problem.description}
               </p>
@@ -262,7 +275,7 @@ const ProblemDetails = () => {
                   Ištrinti
                 </Button>
               )}
-            </>
+            </div>
           )}
         </>
       ) : (

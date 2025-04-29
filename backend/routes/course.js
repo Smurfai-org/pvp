@@ -113,15 +113,21 @@ router.get("/problems", async (req, res) => {
 router.post("/create", async (req, res) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json();
+    return res.status(401).json({ message: "Authorization header missing or invalid" });
   }
-  if (!jwt.verify(authHeader.split(" ")[1], process.env.JWT_SECRET)) {
-    return res.status(401).json();
-  }
+
   const token = authHeader.split(" ")[1];
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+  } catch (err) {
+    console.error("JWT verification failed:", err.message);
+    return res.status(401).json({ message: "Invalid token" });
+  }
+
   if (decoded.user.role !== "admin") {
-    return res.status(403).json();
+    return res.status(403).json({ message: "Permission denied" });
   }
 
   const { name, description, icon_url } = req.body;

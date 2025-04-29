@@ -6,5 +6,163 @@
   }
 
 .dashboard {
-    padding: 0 2rem;
+  padding: 0 2rem;
+}
+
+.admin-dash-actions {
+  display: inline-flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.admin-dash-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.admin-nav-container {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  width: 10rem;
+  min-width: fit-content;
+  height: 100%;
+  border-right: 1px solid var(--dark);
+  overflow-y: hidden;
+}
+
+.admin-dash-tab {
+  display: flex;
+  padding: 1rem;
+  cursor: pointer;
+  align-items: center;
+}
+
+.admin-dash-tab:hover {
+  background-color: #dedfdf;
+}
+
+.admin-nav-container .active {
+  background-color: var(--highligth);
+  color: var(--light);
+}
+
+.admin-dash-wrapper {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2rem;
+  min-height: 100vh;
+}
+
+.admin-content {
+  margin-left: 10rem;
+  width: calc(100vw - 10rem);
+}
+
+.admin-exit-icon {
+  width: 1rem;
+  margin-right: 0.5rem;
+}
+
+.admin-nav-container .exit-btn {
+  background-color: var(--bright);
+}
+
+.admin-nav-container .exit-btn:hover {
+  background-color: #db6765;
+}
+
+.user-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 300px);
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.user-card {
+  background: #ffffff;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease;
+  flex: 0 0 auto;
+}
+
+.user-card p {
+  margin: 0.5rem 0;
+  color: #555;
+}
+
+.user-card strong {
+  color: #222;
+}
+
+.user-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.user-actions button {
+  flex: 1;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-content label {
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.25rem;
+  border: 1px solid #ccc;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }

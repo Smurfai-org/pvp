@@ -6,6 +6,8 @@ import Card from "../../components/Card";
 import { useNavigate } from "react-router-dom";
 import { MessageContext } from "../../utils/MessageProvider";
 import cookies from "js-cookie";
+import AuthContext from "../../utils/AuthContext";
+import LoginPrompt from "../../components/LoginPrompt";
 
 function CourseCreate() {
   const navigate = useNavigate();
@@ -14,8 +16,19 @@ function CourseCreate() {
   const [courseIcon, setCourseIcon] = useState("");
   const { showSuccessMessage, showErrorMessage, showWarningMessage } =
     useContext(MessageContext);
+  const { user, loggedIn } = useContext(AuthContext);
+
+  if(!loggedIn) {
+    return <LoginPrompt />
+  }
+
+  if(user.role != 'admin') {
+    navigate('/404');
+    return;
+  }
 
   const tokenCookie = cookies.get("token");
+  console.log("Token from cookies:", tokenCookie);
   const handleSubmit = async () => {
     const data = {
       name: courseTitle,
@@ -57,15 +70,13 @@ function CourseCreate() {
           onChange={(e) => setCourseTitle(e.target.value)}
           placeholder="Kurso pavadinimas"
         />
-
-        <TextBox
-          id="paragraph"
-          text="Kurso aprašymas"
+        <p>Kurso aprašymas:</p>
+        <textarea
+          required
+          rows={5}
           value={courseDescription}
           onChange={(e) => setCourseDescription(e.target.value)}
-          placeholder="Kurso aprašymas"
         />
-
         <Button onClick={handleSubmit}>Pateikti</Button>
       </div>
       <div className="create-card">

@@ -1,8 +1,21 @@
 .problem-container {
-    max-width: 600px;
+    max-width: 80%;
     margin: 20px auto;
     padding: 20px;
     border: 1px solid #ddd;
     background: #f9f9f9;
-  }
-  
+
+}
+
+.problem-container textarea {
+  width: 50%;
+  height: 100px;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--light);
+  resize: none;
+}
+
+.form-container {
+  overflow-wrap: break-word;
+}

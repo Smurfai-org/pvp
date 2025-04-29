@@ -6,7 +6,6 @@ import "../login/login.css";
 import { useGoogleLogin } from "@react-oauth/google";
 import googleIcon from "../../assets/google_icon.svg";
 import { MessageContext } from "../../utils/MessageProvider";
-import Hyperlink from "../../components/Hyperlink";
 import loadingIcon from "../../assets/loading-anim.svg";
 import "./Register.css";
 
@@ -114,26 +113,26 @@ function Register() {
       <div className="centered-content-login">
         <h2>Register</h2>
         <TextBox
-          text="Email"
+          text="El. paštas"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           errorText={emailError}
         />
         <TextBox
-          text="Username"
+          text="Vardas"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           errorText={usernameError}
         />
         <TextBox
-          text="Password"
+          text="Slaptažodis"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           errorText={passwordError}
         />
         <TextBox
-          text="Confirm Password"
+          text="Pakartokite slaptažodį"
           type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
@@ -146,13 +145,13 @@ function Register() {
             : "Sign up"}
           </Button>
           <Button extra="secondary login-btn" onClick={() => navigate('/login')}>
-            Log in
+            Jau turiu paskyrą
           </Button>
         </div>
         <div className="google-cnt">
           <Button extra="google-button" onClick={googleLoginButton}>
             <img src={googleIcon} className="google-img" alt="Google Icon" />
-            Sign up with Google
+            Prisijungti su Google
           </Button>
         </div>
       </div>

@@ -9,6 +9,8 @@ import checkButton from "../../assets/check-icon.svg";
 import { MessageContext } from "../../utils/MessageProvider";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import cookies from "js-cookie";
+import AuthContext from "../../utils/AuthContext";
+import LoginPrompt from "../../components/LoginPrompt";
 
 function ViewCourse() {
   const { id } = useParams();
@@ -24,6 +26,16 @@ function ViewCourse() {
   const [courseTitle, setCourseTitle] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
   const [courseIcon, setcourseIcon] = useState("");
+  const { user, loggedIn } = useContext(AuthContext);
+
+  if(!loggedIn) {
+    return <LoginPrompt />
+  }
+
+  if(user.role != 'admin') {
+    navigate('/404');
+    return;
+  }
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -138,17 +150,18 @@ function ViewCourse() {
         {isLoaded.course ? (
           editActive ? (
             <>
-              <div>
+              <div className="edit-form">
                 <TextBox
                   text="Kurso pavadinimas"
                   value={courseTitle}
                   id="name"
                   onChange={(e) => setCourseTitle(e.target.value)}
                 />
-                <TextBox
-                  text="Kurso aprašymas"
+                <p>Aprašymas</p>
+                <textarea
+                  required
+                  rows={5}
                   value={courseDescription}
-                  id="description"
                   onChange={(e) => setCourseDescription(e.target.value)}
                 />
               </div>
@@ -187,8 +200,7 @@ function ViewCourse() {
       </div>
 
       <div>
-        <Button onClick={handleAddProblem}>Kurti problemą</Button>
-        <Button onClick={handleGenProblem}>Generuoti problemą</Button>
+        <Button onClick={handleAddProblem}>Kurti užduotį</Button>
       </div>
 
       <div className="table-container">
@@ -207,7 +219,7 @@ function ViewCourse() {
               problems.length === 0 ? (
                 <tr>
                   <td colSpan="5">
-                    <p>Šis kursas neturi sukurtų problemų</p>
+                    <p>Šis kursas neturi sukurtų užduočių</p>
                   </td>
                 </tr>
               ) : (

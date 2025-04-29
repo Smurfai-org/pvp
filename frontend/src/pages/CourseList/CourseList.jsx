@@ -28,8 +28,9 @@ const CourseList = () => {
         const response = await fetch("http://localhost:5000/course/");
         if (!response.ok) throw new Error(response.status);
         const data = await response.json();
-        setCourses(data);
-        return data;
+        const activeCourses = data.filter((course) => course.deleted !== 1);
+        setCourses(activeCourses);
+        return activeCourses;
       } catch (error) {
         console.error("Failed to fetch courses", error);
       } finally {
@@ -268,7 +269,7 @@ const CourseList = () => {
         )}
       </div>
       <div className="page-wrapper">
-        <h2>Individualios pamokos</h2>
+        <h2>Individualios užduotys</h2>
         {isLoaded.problems ? (
           <div className="problems-container">
             {problems.map((problem, index, array) => (

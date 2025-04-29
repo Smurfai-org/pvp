@@ -536,6 +536,18 @@ code {
   padding: 0 0.5rem;
 }
 
+.fixed {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background-color: var(--light);
+  z-index: 1000;
+}
+
+.nav-off {
+  display: none;
+}
+
 .nav-links {
   display: flex;
   align-items: center;
@@ -618,4 +630,3 @@ code {
 .close-btn:hover {
   background: #e60000;
 }
-
