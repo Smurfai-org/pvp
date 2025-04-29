@@ -117,7 +117,7 @@ const Course = () => {
       </div>
       <div className="course-info-container">
         <div className="course-info-top-row">
-          <h2>Kurso problemos</h2>
+          <h2>Kurso užduotys</h2>
         </div>
         <div className="problems-container">
           {isLoaded.problems ? (
@@ -133,7 +133,7 @@ const Course = () => {
                 </div>
               ))
             ) : (
-              <p>Kursas problemų neturi.</p>
+              <p>Kursas neturi užduočių.</p>
             )
           ) : (
             <AnimatedLoadingText />
