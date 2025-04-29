@@ -33,7 +33,8 @@ const Problem = () => {
   const outputRef = useRef(null);
   const location = useLocation();
   const originalCourseId = location.state?.courseId;
-  const { showSuccessMessage, showErrorMessage, showHintMessage } = useContext(MessageContext);
+  const { showSuccessMessage, showErrorMessage, showHintMessage } =
+    useContext(MessageContext);
 
   const [isLoaded, setIsLoaded] = useState(false);
   const loadingText = "Įkeliama...";
@@ -42,6 +43,7 @@ const Problem = () => {
   const { loggedIn, user } = useContext(AuthContext);
 
   const [isOutputWindowMaximised, setIsOutputWindowMaximised] = useState(false);
+  const [showAiWindow, setShowAiWindow] = useState(false);
 
   const [problem, setProblem] = useState("");
   const [previousProblemId, setPreviousProblemId] = useState(null);
@@ -92,6 +94,14 @@ const Problem = () => {
         courseProblemsOrder: courseProblemsOrder,
       },
     });
+  };
+
+  const handleProblemInfoButtonClick = () => {
+    setShowAiWindow(false);
+  };
+
+  const handleAiHelpButtonClick = () => {
+    setShowAiWindow(true);
   };
 
   const handleBackToListButtonClick = () => {
@@ -201,10 +211,10 @@ const Problem = () => {
     try {
       const res = await fetch("http://localhost:5000/problem/solve", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${tokenCookie}`,
-         },
+          Authorization: `Bearer ${tokenCookie}`,
+        },
         body: JSON.stringify({
           code: inputCode,
           userId: user?.id,
@@ -242,10 +252,10 @@ const Problem = () => {
           `http://localhost:5000/enrolled/${user?.id}/${courseInfo?.id}`,
           {
             method: "PUT",
-            headers: { 
+            headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${tokenCookie}`,
-             },
+              Authorization: `Bearer ${tokenCookie}`,
+            },
             body: JSON.stringify({
               completed_problems: completed_problems,
               language: selectedLanguageValue,
@@ -260,9 +270,9 @@ const Problem = () => {
       try {
         await fetch(`http://localhost:5000/enrolled`, {
           method: "POST",
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${tokenCookie}`,
+            Authorization: `Bearer ${tokenCookie}`,
           },
           body: JSON.stringify({
             courseId: courseInfo?.id,
@@ -278,42 +288,56 @@ const Problem = () => {
     }
   };
 
-const handleGenerateHintClick = async () => {
-  if (!loggedIn) {
-    setShowLoginPrompt(true);
-    return;
-  }
-  try {
-    const response = await fetch("http://localhost:5000/generate/hint", {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${tokenCookie}`,
-      },
-      body: JSON.stringify({
-        userId: user?.id,
-        problemId: id,
-        language: selectedLanguageValue,
-      }),
-      credentials: "include",
-    });
+  const handleGenerateHintClick = async () => {
+    if (!loggedIn) {
+      setShowLoginPrompt(true);
+      return;
+    }
+    try {
+      const response = await fetch("http://localhost:5000/generate/hint", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${tokenCookie}`,
+        },
+        body: JSON.stringify({
+          userId: user?.id,
+          problemId: id,
+          language: selectedLanguageValue,
+        }),
+        credentials: "include",
+      });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error: ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.hint) {
+        showHintMessage(data.hint);
+      } else {
+        showErrorMessage("Nepavyko sugeneruoti užuominos");
+      }
+    } catch (error) {
+      console.error("Error generating hint:", error);
+      showErrorMessage("Klaida generuojant užuominą");
+    }
+  };
+
+  const handleSendAiMessageClick = async (message) => {
+    if (!loggedIn) {
+      setShowLoginPrompt(true);
+      return;
     }
 
-    const data = await response.json();
-    
-    if (data.hint) {
-      showHintMessage(data.hint);
-    } else {
-      showErrorMessage("Nepavyko sugeneruoti užuominos");
+    try {
+      console.log(message);
+    } catch (error) {
+      console.error("Error using AI chat:", error);
+      showErrorMessage("Klaida bendraujant su AI asistentu");
     }
-  } catch (error) {
-    console.error("Error generating hint:", error);
-    showErrorMessage("Klaida generuojant užuominą");
-  }
-};
+  };
 
   useEffect(() => {
     const fetchProblem = async (automaticallyGeneratedInputCode) => {
@@ -513,6 +537,20 @@ const handleGenerateHintClick = async () => {
     fetchCourse();
   }, [problem]);
 
+  const mockMessages = [
+    { sender: "user", text: "How do I solve this math problem?" },
+    { sender: "ai", text: "Try applying the quadratic formula." },
+    { sender: "user", text: "Got it. That helps, thanks!" },
+    // { sender: "user", text: "Got it. That helps, thanks!" },
+    // { sender: "user", text: "Got it. That helps, thanks!" },
+    // { sender: "user", text: "Got it. That helps, thanks!" },
+    // { sender: "user", text: "Got it. That helps, thanks!" },
+    // { sender: "user", text: "Got it. That helps, thanks!" },
+    // { sender: "user", text: "Got it. That helps, thanks!" },
+    // { sender: "user", text: "Got it. That helps, thanks!" },
+    // { sender: "user", text: "Got it. That helps, thanks!" },
+  ];
+
   return (
     <div className="relative">
       <>
@@ -564,95 +602,166 @@ const handleGenerateHintClick = async () => {
               </div>
               {isLoaded && passScore && (
                 <div>
-                  Jūsų sprendimas įvertintas <strong>{passScore}%</strong>
+                  Išspręsta <strong>{passScore}%</strong>
                 </div>
               )}
             </div>
 
             <div className="problem-info-screen">
-              <h2>{isLoaded ? problem?.name : <AnimatedLoadingText />}</h2>
-              {isLoaded && (
-                <div className="problem-related-courses">
-                  <Hyperlink href={`/courses/${courseInfo?.id}`}>
-                    {courseInfo?.name}
-                  </Hyperlink>
-                  <strong className={problem?.difficulty}>
-                    {difficulty_dictionary[problem?.difficulty]}
-                  </strong>
+              <div className="problem-info-navigation-bar">
+                <div
+                  className={
+                    !showAiWindow
+                      ? "problem-info-navigation-bar-button-selected"
+                      : ""
+                  }
+                  onClick={handleProblemInfoButtonClick}
+                >
+                  <svg
+                    width="18"
+                    height="16"
+                    viewBox="0 0 22 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M11.139 18.487C12.5303 17.4667 16.3703 16.0383 20.5999 18.487V3.1826M1.3999 2.90434V18.487C2.79121 17.4667 6.63121 16.0383 10.8608 18.487V3.46086M1.3999 2.86508C2.79121 1.84479 6.63121 0.416387 10.8608 2.86508M11.139 2.86508C12.5303 1.84479 16.3703 0.416387 20.5999 2.86508"
+                      stroke="black"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  Užduotis
                 </div>
-              )}
-
-              {isLoaded && (
-                <div className="problem-related-courses">
-                  {problem?.courses?.map((course) => (
-                    <Hyperlink key={course?.id} href={`/course/${course.id}`}>
-                      {course?.name}
-                    </Hyperlink>
-                  ))}
+                <div
+                  className={
+                    showAiWindow
+                      ? "problem-info-navigation-bar-button-selected"
+                      : ""
+                  }
+                  onClick={handleAiHelpButtonClick}
+                >
+                  <svg
+                    width="12"
+                    height="18"
+                    viewBox="0 0 14 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M9.4 13.0001V17.2001C9.4 17.8628 8.86274 18.4001 8.2 18.4001H5.8C5.13726 18.4001 4.6 17.8628 4.6 17.2001V13.0001M13 7.6001C13 10.9138 10.3137 13.6001 7 13.6001C3.68629 13.6001 1 10.9138 1 7.6001C1 4.28639 3.68629 1.6001 7 1.6001C10.3137 1.6001 13 4.28639 13 7.6001Z"
+                      stroke="black"
+                      strokeWidth="2"
+                    />
+                  </svg>
+                  AI pagalba
                 </div>
-              )}
-
-              {isLoaded && (
-                <div>
-                  <p
-                    dangerouslySetInnerHTML={{ __html: problem?.description }}
-                  ></p>
-                </div>
-              )}
-
-              {isLoaded && (
-                <div className="test-cases-list">
-                  {testCases?.map((item, index) => (
-                    <div key={index} className="test-case">
-                      <div className="test-case-header">
-                        <p style={{ fontWeight: "600", margin: 0 }}>
-                          Testas {index + 1}
-                        </p>
-                        <Button
-                          extra="small"
-                          onClick={() => handleTestButtonClick(index)}
-                        >
-                          Testuoti
-                        </Button>
-                      </div>
-                      <pre>
-                        <code
-                          style={{
-                            padding: 0
-                          }}
-                        >
-                          {selectedLanguageValue === "cpp"
-                            ? item?.input?.cpp
-                            : item?.input?.python}
-                        </code>
-                      </pre>
-                      <pre>
-                        <strong>Rezultatas:</strong> <br />
-                        {item?.expected_output}
-                      </pre>
+              </div>
+              {!showAiWindow ? (
+                <>
+                  <h2>{isLoaded ? problem?.name : <AnimatedLoadingText />}</h2>
+                  {isLoaded && (
+                    <div className="problem-related-courses">
+                      <Hyperlink href={`/courses/${courseInfo?.id}`}>
+                        {courseInfo?.name}
+                      </Hyperlink>
+                      <strong className={problem?.difficulty}>
+                        {difficulty_dictionary[problem?.difficulty]}
+                      </strong>
                     </div>
-                  ))}
-                </div>
-              )}
+                  )}
 
-              {isLoaded && (
-                <div className="test-cases-list">
-                  {hints?.map((item, index) => (
-                    <div key={index} className="hint-tile">
-                      <details>
-                        <summary
-                          style={{
-                            fontWeight: "600",
-                            margin: 0,
-                            cursor: "pointer",
-                          }}
+                  {isLoaded && (
+                    <div className="problem-related-courses">
+                      {problem?.courses?.map((course) => (
+                        <Hyperlink
+                          key={course?.id}
+                          href={`/course/${course.id}`}
                         >
-                          Užuomina {index + 1}
-                        </summary>
-                        <p>{item?.hint}</p>
-                      </details>
+                          {course?.name}
+                        </Hyperlink>
+                      ))}
                     </div>
-                  ))}
+                  )}
+
+                  {isLoaded && (
+                    <div>
+                      <p
+                        dangerouslySetInnerHTML={{
+                          __html: problem?.description,
+                        }}
+                      ></p>
+                    </div>
+                  )}
+
+                  {isLoaded && (
+                    <div className="test-cases-list">
+                      {testCases?.map((item, index) => (
+                        <div key={index} className="test-case">
+                          <div className="test-case-header">
+                            <p style={{ fontWeight: "600", margin: 0 }}>
+                              Testas {index + 1}
+                            </p>
+                            <Button
+                              extra="small"
+                              onClick={() => handleTestButtonClick(index)}
+                            >
+                              Testuoti
+                            </Button>
+                          </div>
+                          <pre>
+                            <code
+                              style={{
+                                padding: 0,
+                              }}
+                            >
+                              {selectedLanguageValue === "cpp"
+                                ? item?.input?.cpp
+                                : item?.input?.python}
+                            </code>
+                          </pre>
+                          <pre>
+                            <strong>Rezultatas:</strong> <br />
+                            {item?.expected_output}
+                          </pre>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {isLoaded && (
+                    <div className="test-cases-list">
+                      {hints?.map((item, index) => (
+                        <div key={index} className="hint-tile">
+                          <details>
+                            <summary
+                              style={{
+                                fontWeight: "600",
+                                margin: 0,
+                                cursor: "pointer",
+                              }}
+                            >
+                              Užuomina {index + 1}
+                            </summary>
+                            <p>{item?.hint}</p>
+                          </details>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="problem-ai-window">
+                  <div className="problem-ai-help-text-window">
+                    <ChatTranscript messages={mockMessages} />
+                  </div>
+                  <div className="problem-ai-help-interaction-window">
+                    <ChatInput
+                      onGenerateHint={handleGenerateHintClick}
+                      onSend={(message) => handleSendAiMessageClick(message)}
+                    />
+                  </div>
                 </div>
               )}
             </div>
@@ -722,3 +831,52 @@ const handleGenerateHintClick = async () => {
 };
 
 export default Problem;
+
+const ChatInput = ({ onGenerateHint, onSend }) => {
+  const [message, setMessage] = useState("");
+  const textareaRef = useRef(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height =
+        textareaRef.current.scrollHeight + "px";
+    }
+  }, [message]);
+
+  return (
+    <div className="chat-input-container">
+      <textarea
+        ref={textareaRef}
+        className="chat-textarea"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="Klauskite dirbtinio intelekto..."
+        rows={1}
+      />
+      <div className="chat-input-actions">
+        <Button extra="small bright" onClick={() => onGenerateHint?.()}>
+          Generuoti užuominą
+        </Button>
+        <Button extra="small" onClick={() => onSend?.(message)}>
+          Klausti
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+const ChatTranscript = ({ messages = [] }) => {
+  return (
+    <div className="chat-transcript">
+      {messages?.map((msg, index) => (
+        <div
+          key={index}
+          className={`chat-message ${msg.sender === "user" ? "user" : "ai"}`}
+        >
+          {msg.text}
+        </div>
+      ))}
+    </div>
+  );
+};
