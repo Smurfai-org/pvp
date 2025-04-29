@@ -111,15 +111,15 @@ function Login() {
   return (
     <div className="full-page-container-login">
       <div className="centered-content-login">
-        <h2>Login</h2>
+        <h2>Prisijungti</h2>
         <TextBox
-          text="Username"
+          text="Vardas"
           value={username}
           onChange={handleUsernameChange}
           errorText={usernameError}
         />
         <TextBox
-          text="Password"
+          text="Slaptažodis"
           type="password"
           value={password}
           onChange={handlePasswordChange}
@@ -131,7 +131,7 @@ function Login() {
               <img src={loadingIcon} alt='Įkeliama...' className="loading"/>
             : "Log in"}
           </Button>
-          <Button extra="secondary login-btn" onClick={navigateRegister}>Sign up</Button>
+          <Button extra="secondary login-btn" onClick={navigateRegister}>Registruotis</Button>
         </div>
         <div className="google-cnt">
           <Button extra="google-button" onClick={googleLoginButton}>

@@ -119,7 +119,7 @@ function Register() {
           errorText={emailError}
         />
         <TextBox
-          text="Slapyvardis"
+          text="Vardas"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           errorText={usernameError}
