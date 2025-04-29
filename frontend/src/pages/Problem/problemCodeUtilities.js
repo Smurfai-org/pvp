@@ -1,24 +1,116 @@
 export const getTestCaseVariables = (test_case) => {
-  const regex =
-    /\b(?:const\s+)?(int|double|float|long long|long|short|char|bool|string|unsigned int)\s+(\w+)/g;
+  const cppCode = test_case?.input?.cpp || "";
+  const lines = cppCode.split("\n");
 
-  const matches = [];
-  let match;
+  // Supported base types and modifiers
+  const baseTypes = new Set([
+    "int",
+    "double",
+    "float",
+    "long",
+    "short",
+    "char",
+    "bool",
+    "string",
+    "unsigned",
+  ]);
 
-  while ((match = regex.exec(test_case?.input?.cpp)) !== null) {
-    matches.push({ type: match[1], name: match[2] });
+  const results = [];
+
+  // Helper to parse a declaration string into type and name
+  const parseDecl = (decl) => {
+    // Remove any initialization (anything after '=') and semicolons
+    decl = decl.replace(/=.*/g, "").replace(/;/g, "").trim();
+    if (!decl) return;
+
+    // Separate pointer stars attached to type or name
+    decl = decl.replace(/\*/g, " * ");
+
+    // Tokenize by whitespace
+    const tokens = decl.split(/\s+/);
+    if (tokens.length < 2) return;
+
+    // The last token is the variable name (including array brackets or pointer)
+    let name = tokens.pop();
+
+    // Determine special type
+    let special_type = "normal";
+    if (name.includes("[")) {
+      special_type = "array";
+    } else if (name.includes("*")) {
+      special_type = "pointer";
+    }
+
+    // Remove array brackets and pointer asterisks from the name
+    name = name
+      .replace(/\[.*\]/g, "")
+      .replace(/\*/g, "")
+      .trim();
+
+    // Remaining tokens form the full type
+    const type = tokens.join(" ").trim();
+
+    // Add special_type to the result
+    results.push({ type, name, special_type });
+  };
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) continue;
+
+    // 1) Extract parameters from function definitions
+    if (line.includes("(") && line.includes(")") && line.endsWith("{")) {
+      const paramsSection = line
+        .slice(line.indexOf("(") + 1, line.lastIndexOf(")"))
+        .trim();
+      if (paramsSection) {
+        const params = paramsSection.split(",");
+        for (const p of params) {
+          parseDecl(p);
+        }
+      }
+      continue;
+    }
+
+    // 2) Handle standalone variable declarations
+    // Skip lines that don't start with a type or 'const'
+    const firstWord = line.split(/\s+/)[0];
+    if (!baseTypes.has(firstWord) && firstWord !== "const") continue;
+
+    // Remove trailing '{' or ')' if any
+    const cleanLine = line.replace(/[{}();]/g, "");
+    // Split multiple declarations by comma
+    const parts = cleanLine.split(",");
+    for (const part of parts) {
+      parseDecl(part);
+    }
   }
 
-  return matches;
+  return results;
 };
 
 export const getStartingCodeFromVariables = (
   variables = null,
   result_type = null
 ) => {
-  if (variables && result_type) {
+  if (variables?.length > 0 && result_type?.length > 0) {
     const cppCode = `${result_type} Sprendimas(${variables
-      ?.map((m) => m?.type + " " + m?.name)
+      ?.map((m) => {
+        if (!m?.type || !m?.name) return "";
+
+        let typePrefix = m.type;
+        let nameSuffix = "";
+
+        if (m.special_type === "array") {
+          nameSuffix = "[]";
+        } else if (m.special_type === "pointer") {
+          typePrefix = typePrefix + "*";
+        } else if (m.special_type === "const_pointer") {
+          typePrefix = "const " + typePrefix + "*";
+        }
+
+        return `${typePrefix} ${m.name}${nameSuffix}`.trim();
+      })
       .join(", ")}) {
   return 0;
 }`;
@@ -49,7 +141,13 @@ export const problemCodeFullCpp = (
   const outputType = determineOutputType(test_case?.expected_output || "");
 
   const functionParams = test_case_variables
-    ?.map((m) => (m?.type && m?.name ? `${m.type} ${m.name}` : ""))
+    ?.map((m) =>
+      m?.type && m?.name
+        ? `${m.type} ${m.special_type === "pointer" ? "*" : ""}${m.name}${
+            m.special_type === "array" ? "[]" : ""
+          }`
+        : ""
+    )
     .filter(Boolean)
     .join(", ");
 
@@ -95,7 +193,6 @@ int main() {
 
 ${userCode}
 `;
-
   return code;
 };
 
@@ -121,7 +218,9 @@ user_result = Sprendimas(${functionArgs})
 print("Rezultatas:", user_result)
 
 result = ${
-    typeof expectedOutput === "string" ? `"${expectedOutput}"` : expectedOutput
+    typeof expectedOutput === "string" && isNaN(expectedOutput)
+      ? `"${expectedOutput}"`
+      : expectedOutput
   }
 if result == user_result:
   print("Testas įveiktas!")

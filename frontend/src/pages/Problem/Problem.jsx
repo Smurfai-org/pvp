@@ -353,7 +353,7 @@ const Problem = () => {
           sender: "user",
           text: message,
           timestamp: new Date().toISOString(),
-        }
+        },
       ]);
 
       socket.emit("message", { message });
@@ -586,44 +586,43 @@ const Problem = () => {
     });
 
     socketClient.on("history", (history) => {
-      const parsedHistory = history.map(msg => ({
+      const parsedHistory = history.map((msg) => ({
         sender: msg.role === "user" ? "user" : "ai",
         text: msg.content,
-        timestamp: msg.timestamp
+        timestamp: msg.timestamp,
       }));
       setChatMessages(parsedHistory);
     });
 
     socketClient.on("response", (data) => {
-      setChatMessages(prevMessages => [
+      setChatMessages((prevMessages) => [
         ...prevMessages,
         {
           sender: "ai",
           text: data.message,
-          timestamp: data.timestamp
-        }
+          timestamp: data.timestamp,
+        },
       ]);
-  });
+    });
 
-  socketClient.on("error", (error) => {
-    setChatError(error.message || "Klaida socket'e");
-    showErrorMessage(error.message || "Klaida socket'e");
-  });
+    socketClient.on("error", (error) => {
+      setChatError(error.message || "Klaida socket'e");
+      showErrorMessage(error.message || "Klaida socket'e");
+    });
 
-  socketClient.on("disconnect", () => {
-    console.log("Socket disconnected:", socketClient.id);
-    setIsConnected(false);
-  });
+    socketClient.on("disconnect", () => {
+      console.log("Socket disconnected:", socketClient.id);
+      setIsConnected(false);
+    });
 
-  setSocket(socketClient);
+    setSocket(socketClient);
 
-  return () => {
-    if (socketClient) {
-      socketClient.disconnect();
-    }
-  };
-}, [loggedIn, tokenCookie]);
-
+    return () => {
+      if (socketClient) {
+        socketClient.disconnect();
+      }
+    };
+  }, [loggedIn, tokenCookie]);
 
   // const mockMessages = [
   //   { sender: "user", text: "How do I solve this math problem?" },
@@ -845,7 +844,7 @@ const Problem = () => {
                     <ChatTranscript messages={chatMessages} />
                     {chatError && (
                       <div className="chat-error-message">{chatError}</div>
-                    )}                
+                    )}
                   </div>
                   <div className="problem-ai-help-interaction-window">
                     <ChatInput
@@ -984,17 +983,17 @@ const ChatTranscript = ({ messages = [] }) => {
       {messages.length === 0 ? (
         <div className="chat-empty-state">
           <p>Klauskite AI asistento...</p>
-          </div>
-      ) : (
-      messages?.map((msg, index) => (
-        <div
-          key={index}
-          className={`chat-message ${msg.sender === "user" ? "user" : "ai"}`}
-        >
-          {msg.text}
         </div>
-      ))
-    )}
+      ) : (
+        messages?.map((msg, index) => (
+          <div
+            key={index}
+            className={`chat-message ${msg.sender === "user" ? "user" : "ai"}`}
+          >
+            {msg.text}
+          </div>
+        ))
+      )}
       <div ref={messagesEndRef} />
     </div>
   );
