@@ -269,7 +269,7 @@ const CourseList = () => {
         )}
       </div>
       <div className="page-wrapper">
-        <h2>Individualios pamokos</h2>
+        <h2>Individualios užduotys</h2>
         {isLoaded.problems ? (
           <div className="problems-container">
             {problems.map((problem, index, array) => (

@@ -200,7 +200,7 @@ function ViewCourse() {
       </div>
 
       <div>
-        <Button onClick={handleAddProblem}>Kurti problemą</Button>
+        <Button onClick={handleAddProblem}>Kurti užduotį</Button>
       </div>
 
       <div className="table-container">
@@ -219,7 +219,7 @@ function ViewCourse() {
               problems.length === 0 ? (
                 <tr>
                   <td colSpan="5">
-                    <p>Šis kursas neturi sukurtų problemų</p>
+                    <p>Šis kursas neturi sukurtų užduočių</p>
                   </td>
                 </tr>
               ) : (
