@@ -19,6 +19,7 @@ import {
 import { MessageContext } from "../../utils/MessageProvider";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import LoginPrompt from "../../components/LoginPrompt";
+import io from "socket.io-client";
 
 const tokenCookie = cookies.get("token");
 
@@ -51,6 +52,11 @@ const Problem = () => {
   const [selectedLanguageValue, setSelectedLanguageValue] = useState(
     languages[0]?.value
   );
+
+  const [socket, setSocket] = useState(null);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [isConnected, setIsConnected] = useState(false);
+  const [chatError, setChatError] = useState(null);
 
   // SĄRAŠAS testavimo atveju. Vieno jų tipas pvz toks:
   // {id: 1, input: {cpp: 'const int num1 = 5;\nconst int num2 = 10;', python: 'num1 = 5\nnum2 = 10'}, expected_output: '15', fk_PROBLEMid: 18}
@@ -331,8 +337,28 @@ const Problem = () => {
       return;
     }
 
+    if (!socket || !isConnected) {
+      showErrorMessage("Nepavyko prisijungti prie AI asistento");
+      return;
+    }
+
+    if (!message.trim()) {
+      return;
+    }
+
     try {
-      console.log(message);
+      setChatMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          sender: "user",
+          text: message,
+          timestamp: new Date().toISOString(),
+        },
+      ]);
+
+      socket.emit("message", { message });
+
+      return "";
     } catch (error) {
       console.error("Error using AI chat:", error);
       showErrorMessage("Klaida bendraujant su AI asistentu");
@@ -537,19 +563,82 @@ const Problem = () => {
     fetchCourse();
   }, [problem]);
 
-  const mockMessages = [
-    { sender: "user", text: "How do I solve this math problem?" },
-    { sender: "ai", text: "Try applying the quadratic formula." },
-    { sender: "user", text: "Got it. That helps, thanks!" },
-    { sender: "user", text: "Got it. That helps, thanks!" },
-    { sender: "user", text: "Got it. That helps, thanks!" },
-    { sender: "user", text: "Got it. That helps, thanks!" },
-    { sender: "user", text: "Got it. That helps, thanks!" },
-    { sender: "user", text: "Got it. That helps, thanks!" },
-    { sender: "user", text: "Got it. That helps, thanks!" },
-    { sender: "user", text: "Got it. That helps, thanks!" },
-    { sender: "user", text: "Got it. That helps, thanks!" },
-  ];
+  useEffect(() => {
+    if (!loggedIn) return;
+
+    const socketClient = io("http://localhost:5000", {
+      transports: ["websocket"],
+      autoConnect: true,
+    });
+
+    socketClient.on("connect", () => {
+      console.log("Prisijungta prie socket:", socketClient.id);
+      setIsConnected(true);
+
+      socketClient.emit("authenticate", tokenCookie);
+    });
+
+    socketClient.on("authenticated", (data) => {
+      if (data.success) {
+        console.log("Socket authenticated:", data.user);
+      } else {
+        console.error("Socket authentication failed:", data.message);
+        setChatError(data.message || "Nepavyko autentifikuoti socket");
+      }
+    });
+
+    socketClient.on("history", (history) => {
+      const parsedHistory = history.map((msg) => ({
+        sender: msg.role === "user" ? "user" : "ai",
+        text: msg.content,
+        timestamp: msg.timestamp,
+      }));
+      setChatMessages(parsedHistory);
+    });
+
+    socketClient.on("response", (data) => {
+      setChatMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          sender: "ai",
+          text: data.message,
+          timestamp: data.timestamp,
+        },
+      ]);
+    });
+
+    socketClient.on("error", (error) => {
+      setChatError(error.message || "Klaida socket'e");
+      showErrorMessage(error.message || "Klaida socket'e");
+    });
+
+    socketClient.on("disconnect", () => {
+      console.log("Socket disconnected:", socketClient.id);
+      setIsConnected(false);
+    });
+
+    setSocket(socketClient);
+
+    return () => {
+      if (socketClient) {
+        socketClient.disconnect();
+      }
+    };
+  }, [loggedIn, tokenCookie]);
+
+  // const mockMessages = [
+  //   { sender: "user", text: "How do I solve this math problem?" },
+  //   { sender: "ai", text: "Try applying the quadratic formula." },
+  //   { sender: "user", text: "Got it. That helps, thanks!" },
+  //   // { sender: "user", text: "Got it. That helps, thanks!" },
+  //   // { sender: "user", text: "Got it. That helps, thanks!" },
+  //   // { sender: "user", text: "Got it. That helps, thanks!" },
+  //   // { sender: "user", text: "Got it. That helps, thanks!" },
+  //   // { sender: "user", text: "Got it. That helps, thanks!" },
+  //   // { sender: "user", text: "Got it. That helps, thanks!" },
+  //   // { sender: "user", text: "Got it. That helps, thanks!" },
+  //   // { sender: "user", text: "Got it. That helps, thanks!" },
+  // ];
 
   return (
     <div className="relative">
@@ -754,7 +843,10 @@ const Problem = () => {
               ) : (
                 <div className="problem-ai-window">
                   <div className="problem-ai-help-text-window">
-                    <ChatTranscript messages={mockMessages} />
+                    <ChatTranscript messages={chatMessages} />
+                    {chatError && (
+                      <div className="chat-error-message">{chatError}</div>
+                    )}
                   </div>
                   <div className="problem-ai-help-interaction-window">
                     <ChatInput
@@ -844,6 +936,15 @@ const ChatInput = ({ onGenerateHint, onSend }) => {
     }
   }, [message]);
 
+  const handleSend = () => {
+    if (!message.trim()) return;
+
+    const cleared = onSend?.(message);
+    if (cleared !== undefined) {
+      setMessage(cleared);
+    }
+  };
+
   return (
     <div className="chat-input-container">
       <textarea
@@ -853,6 +954,12 @@ const ChatInput = ({ onGenerateHint, onSend }) => {
         onChange={(e) => setMessage(e.target.value)}
         placeholder="Klauskite dirbtinio intelekto..."
         rows={1}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+          }
+        }}
       />
       <div className="chat-input-actions">
         <Button extra="small bright" onClick={() => onGenerateHint?.()}>
@@ -867,16 +974,32 @@ const ChatInput = ({ onGenerateHint, onSend }) => {
 };
 
 const ChatTranscript = ({ messages = [] }) => {
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: "smooth",
+      });
+    }
+  }, [messages]);
   return (
     <div className="chat-transcript">
-      {messages?.map((msg, index) => (
-        <div
-          key={index}
-          className={`chat-message ${msg.sender === "user" ? "user" : "ai"}`}
-        >
-          {msg.text}
+      {messages.length === 0 ? (
+        <div className="chat-empty-state">
+          <p>Klauskite AI asistento...</p>
         </div>
-      ))}
+      ) : (
+        messages?.map((msg, index) => (
+          <div
+            key={index}
+            className={`chat-message ${msg.sender === "user" ? "user" : "ai"}`}
+          >
+            {msg.text}
+          </div>
+        ))
+      )}
+      <div ref={messagesEndRef} />
     </div>
   );
 };
