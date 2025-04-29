@@ -541,14 +541,14 @@ const Problem = () => {
     { sender: "user", text: "How do I solve this math problem?" },
     { sender: "ai", text: "Try applying the quadratic formula." },
     { sender: "user", text: "Got it. That helps, thanks!" },
-    // { sender: "user", text: "Got it. That helps, thanks!" },
-    // { sender: "user", text: "Got it. That helps, thanks!" },
-    // { sender: "user", text: "Got it. That helps, thanks!" },
-    // { sender: "user", text: "Got it. That helps, thanks!" },
-    // { sender: "user", text: "Got it. That helps, thanks!" },
-    // { sender: "user", text: "Got it. That helps, thanks!" },
-    // { sender: "user", text: "Got it. That helps, thanks!" },
-    // { sender: "user", text: "Got it. That helps, thanks!" },
+    { sender: "user", text: "Got it. That helps, thanks!" },
+    { sender: "user", text: "Got it. That helps, thanks!" },
+    { sender: "user", text: "Got it. That helps, thanks!" },
+    { sender: "user", text: "Got it. That helps, thanks!" },
+    { sender: "user", text: "Got it. That helps, thanks!" },
+    { sender: "user", text: "Got it. That helps, thanks!" },
+    { sender: "user", text: "Got it. That helps, thanks!" },
+    { sender: "user", text: "Got it. That helps, thanks!" },
   ];
 
   return (
