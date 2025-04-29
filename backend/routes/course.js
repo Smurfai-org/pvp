@@ -183,11 +183,7 @@ router.post("/update", async (req, res) => {
 });
 
 router.post("/delete", async (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-    return res.status(401).json();
-  }
-  const token = authHeader.split(" ")[1];
+  const token = req.cookies.token;
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   if (decoded.user.role !== "admin") {
     return res.status(403).json();
@@ -215,11 +211,10 @@ router.post("/delete", async (req, res) => {
 });
 
 router.post("/restore", async (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
+  const token = req.cookies.token;
+  if (!token) {
     return res.status(401).json();
   }
-  const token = authHeader.split(" ")[1];
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   if (decoded.user.role !== "admin") {
     return res.status(403).json();
