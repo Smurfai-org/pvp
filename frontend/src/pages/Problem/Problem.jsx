@@ -357,8 +357,6 @@ const Problem = () => {
       ]);
 
       socket.emit("message", { message });
-
-      return "";
     } catch (error) {
       console.error("Error using AI chat:", error);
       showErrorMessage("Klaida bendraujant su AI asistentu");
@@ -939,11 +937,8 @@ const ChatInput = ({ onGenerateHint, onSend }) => {
 
   const handleSend = () => {
     if (!message.trim()) return;
-
-    const cleared = onSend?.(message);
-    if (cleared !== undefined) {
-      setMessage(cleared);
-    }
+    onSend?.(message);
+    setMessage("");
   };
 
   return (
@@ -966,7 +961,7 @@ const ChatInput = ({ onGenerateHint, onSend }) => {
         <Button extra="small bright" onClick={() => onGenerateHint?.()}>
           Generuoti užuominą
         </Button>
-        <Button extra="small" onClick={() => onSend?.(message)}>
+        <Button extra="small" onClick={handleSend}>
           Klausti
         </Button>
       </div>
