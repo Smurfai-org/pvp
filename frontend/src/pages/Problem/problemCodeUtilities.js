@@ -136,7 +136,8 @@ export const getStartingCodeFromVariables = (
 export const problemCodeFullCpp = (
   test_case = {},
   test_case_variables = [],
-  userCode
+  userCode,
+  printResult = true
 ) => {
   const outputType = determineOutputType(test_case?.expected_output || "");
 
@@ -180,11 +181,17 @@ int main() {
       : `${outputType} result = ${
           outputType === "string" ? `"${expectedOutput}"` : expectedOutput
         };
+
+  ${
+    printResult
+      ? `
   cout << "Rezultatas: " << user_result << endl;
   if (result == user_result) {
       cout << "Testas įveiktas!" << endl;
   } else {
       cout << "Testas nepraeitas." << endl;
+  }`
+      : `cout << user_result << endl;`
   }`
   }
   
@@ -199,7 +206,8 @@ ${userCode}
 export const problemCodeFullPython = (
   test_case = {},
   test_case_variables = [],
-  userCode
+  userCode,
+  printResult = true
 ) => {
   const inputCode = test_case?.input?.python || "";
   const expectedOutput = test_case?.expected_output || "";
@@ -215,17 +223,23 @@ ${inputCode}
 ${userCode}
 
 user_result = Sprendimas(${functionArgs})
-print("Rezultatas:", user_result)
 
 result = ${
     typeof expectedOutput === "string" && isNaN(expectedOutput)
       ? `"${expectedOutput}"`
       : expectedOutput
   }
+
+${
+  printResult
+    ? `
+print("Rezultatas:", user_result)
 if result == user_result:
   print("Testas įveiktas!")
 else:
-  print("Testas nepraeitas.")
+  print("Testas nepraeitas.")`
+    : `print(user_result)`
+}
 `;
 
   const codeWithNoTestCases = `

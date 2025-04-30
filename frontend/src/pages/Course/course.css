@@ -77,15 +77,15 @@
 }
 
 .course-not-started {
-  color: var(--dark);
+  color: var(--light);
 }
 
 .course-in-progress {
-  color: var(--premium);
+  color: var(--bright);
 }
 
 .course-finished {
-  color: var(--highligth);
+  color: var(--premium);
 }
 
 .problems-container hr {

@@ -126,23 +126,35 @@ const Problem = () => {
     });
   };
 
-  const handleTestButtonClick = async (index = null, dontPrint = false) => {
+  const handleTestButtonClick = async (
+    index = null,
+    dontPrint = false,
+    skipEvaluation = false
+  ) => {
     const sourceCode =
       selectedLanguageValue === "cpp"
         ? problemCodeFullCpp(
             testCases[index],
             testCaseVariables,
-            inputCode?.cpp
+            inputCode?.cpp,
+            !skipEvaluation
           )
         : problemCodeFullPython(
             testCases[index],
             testCaseVariables,
-            inputCode?.python
+            inputCode?.python,
+            !skipEvaluation
           );
 
     if (outputRef.current) {
       try {
         const resultNotFormatted = await outputRef.current.runCode(sourceCode);
+
+        if (skipEvaluation) {
+          setOutputText(resultNotFormatted);
+          setIsOutputWindowMaximised(true);
+        }
+
         let didPass = false;
 
         const lines = resultNotFormatted.split("\n");
@@ -175,6 +187,20 @@ const Problem = () => {
       return;
     }
     if (testCases.length < 1) {
+      await handleTestButtonClick(null, true, true);
+      return;
+    }
+
+    const { result } = await handleTestButtonClick(0, true, true);
+    setOutputText(result);
+  };
+
+  const handleRunTestCases = async () => {
+    if (!loggedIn) {
+      setShowLoginPrompt(true);
+      return;
+    }
+    if (testCases.length < 1) {
       await handleTestButtonClick();
       return;
     }
@@ -201,13 +227,13 @@ const Problem = () => {
     }
   };
 
-  const handleAIclick = async () => {
+  const handleCheckclick = async () => {
     if (!loggedIn) {
       setShowLoginPrompt(true);
       return;
     }
     //Paleisti, kad praeitu testus
-    const score = await handleRunButtonClick();
+    const score = await handleRunTestCases();
 
     //AI CALLAS KAD IVERTINTU BUS CIA
 
@@ -625,20 +651,6 @@ const Problem = () => {
     };
   }, [loggedIn, tokenCookie]);
 
-  // const mockMessages = [
-  //   { sender: "user", text: "How do I solve this math problem?" },
-  //   { sender: "ai", text: "Try applying the quadratic formula." },
-  //   { sender: "user", text: "Got it. That helps, thanks!" },
-  //   // { sender: "user", text: "Got it. That helps, thanks!" },
-  //   // { sender: "user", text: "Got it. That helps, thanks!" },
-  //   // { sender: "user", text: "Got it. That helps, thanks!" },
-  //   // { sender: "user", text: "Got it. That helps, thanks!" },
-  //   // { sender: "user", text: "Got it. That helps, thanks!" },
-  //   // { sender: "user", text: "Got it. That helps, thanks!" },
-  //   // { sender: "user", text: "Got it. That helps, thanks!" },
-  //   // { sender: "user", text: "Got it. That helps, thanks!" },
-  // ];
-
   return (
     <div className="relative">
       <>
@@ -863,11 +875,8 @@ const Problem = () => {
               <Button extra="small" onClick={handleRunButtonClick}>
                 Leisti programą
               </Button>
-              <Button extra="small" onClick={handleGenerateHintClick}>
-                Generuoti užuominą
-              </Button>
-              <Button extra="small bright" onClick={handleAIclick}>
-                AI įvertinimas
+              <Button extra="small bright" onClick={handleCheckclick}>
+                Tikrinti
               </Button>
               <Dropdown
                 options={languages?.map((language) => language?.label)}
@@ -959,7 +968,7 @@ const ChatInput = ({ onGenerateHint, onSend }) => {
       />
       <div className="chat-input-actions">
         <Button extra="small bright" onClick={() => onGenerateHint?.()}>
-          Generuoti užuominą
+          Generuoti užuominą užduočiai
         </Button>
         <Button extra="small" onClick={handleSend}>
           Klausti
