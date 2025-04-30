@@ -20,6 +20,7 @@ import { MessageContext } from "../../utils/MessageProvider";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import LoginPrompt from "../../components/LoginPrompt";
 import io from "socket.io-client";
+import ReactMarkdown from "react-markdown";
 
 const tokenCookie = cookies.get("token");
 
@@ -999,7 +1000,13 @@ const ChatTranscript = ({ messages = [] }) => {
             key={index}
             className={`chat-message ${msg.sender === "user" ? "user" : "ai"}`}
           >
-            {msg.text}
+            {msg.sender === "user" ?(
+              msg.text
+            ) : (
+              <ReactMarkdown>
+                {msg.text}
+                </ReactMarkdown>
+            )}
           </div>
         ))
       )}

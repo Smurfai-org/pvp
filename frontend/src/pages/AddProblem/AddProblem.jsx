@@ -93,7 +93,7 @@ function AddProblem() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Klaida kuriant problemą');
+        throw new Error(data.message || 'Klaida kuriant užduotį');
       }
 
       const insertId = data.insertId;
@@ -155,9 +155,9 @@ function AddProblem() {
   return (
     <div className='problem-wrapper'>
       <div className='problem-form'>
-        <h2>Pridėti problemą</h2>
+        <h2>Pridėti užduotį</h2>
         
-        <TextBox text='Problemos pavadinimas' onChange={(e) => setProblem(prev => ({ ...prev, name: e.target.value }))} />
+        <TextBox text='Užduoties pavadinimas' onChange={(e) => setProblem(prev => ({ ...prev, name: e.target.value }))} />
         <p>Aprašymas:</p>
         <textarea
           required
