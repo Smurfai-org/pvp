@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 const router = express.Router();
 
 router.get("/", async (req, res) => {
-  const { id } = req.query;
+  const { id, userId } = req.query;
   try {
     let query = "SELECT * FROM problems WHERE deleted = 0";
     let params = [];
@@ -15,28 +15,57 @@ router.get("/", async (req, res) => {
       params.push(id);
     }
 
-    const [result] = await pool.execute(query, params);
+    const [problems] = await pool.execute(query, params);
 
-    if (result.length === 0) {
+    if (problems.length === 0) {
       return res.status(404).json({ message: "Užduotys nerastos" });
     }
 
-    res.status(200).json(result);
+    if (userId) {
+      const problemIds = problems.map((p) => p.id);
+      const placeholders = problemIds.map(() => "?").join(",");
+      const progressQuery = `
+        SELECT fk_PROBLEMid, score, status 
+        FROM progress 
+        WHERE fk_USERid = ? AND fk_PROBLEMid IN (${placeholders})
+      `;
+
+      if (problemIds.length > 0) {
+        const [progress] = await pool.execute(progressQuery, [
+          userId,
+          ...problemIds,
+        ]);
+
+        const progressMap = progress.reduce((acc, p) => {
+          acc[p.fk_PROBLEMid] = { score: p.score, status: p.status };
+          return acc;
+        }, {});
+
+        problems.forEach((problem) => {
+          if (progressMap[problem.id]) {
+            problem.progress = progressMap[problem.id];
+          }
+        });
+      }
+    }
+
+    res.status(200).json(problems);
   } catch (error) {
+    console.error(error); // Log the error for debugging
     return res.status(500).json({ message: "Serverio klaida" });
   }
 });
 
-router.post("/create", async (req, res) => { 
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json();
-    }
-    const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (decoded.user.role !== "admin") {
-      return res.status(403).json();
-    }
+router.post("/create", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json();
+  }
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (decoded.user.role !== "admin") {
+    return res.status(403).json();
+  }
 
   const {
     name,
@@ -68,7 +97,9 @@ router.post("/create", async (req, res) => {
     const [result] = await pool.execute(query, values);
     const insertId = result.insertId;
     if (result && insertId) {
-      return res.status(201).json({ message: "Užduotis sukurta sėkmingai", insertId });
+      return res
+        .status(201)
+        .json({ message: "Užduotis sukurta sėkmingai", insertId });
     } else {
       return res.status(500).json({ message: "Nepavyko sukurti užduoties" });
     }
@@ -78,15 +109,15 @@ router.post("/create", async (req, res) => {
 });
 
 router.post("/update", async (req, res) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json();
-    }
-    const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (decoded.user.role !== "admin") {
-      return res.status(403).json();
-    }
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json();
+  }
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (decoded.user.role !== "admin") {
+    return res.status(403).json();
+  }
 
   const {
     id,
