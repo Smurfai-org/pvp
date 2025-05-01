@@ -2,6 +2,8 @@ import OpenAI from 'openai';
 import jwt from 'jsonwebtoken';
 import pool from "./db.js";
 
+const ERROR_NOT_PREMIUM = 111;
+
 const client = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 
@@ -14,7 +16,11 @@ export const validateAuth = async (token) => {
 
     try {
         const dec = jwt.verify(token, process.env.JWT_SECRET);
-        return { valid: true, user: dec.user };
+        if (dec.user.premium === 1) {
+            return { valid: true, user: dec.user };
+        } else {
+            return { valid: false, code: ERROR_NOT_PREMIUM, message: "Pokalbio funkcija leidžiama tik premium naudotojams." };
+        }
     } catch (err) {
         return { valid: false, message: "Nepavyko atkoduoti žetono" };
     }
@@ -116,7 +122,10 @@ export function setupSocketIO(io) {
                     const hist = await getUserChatHistory(user.id);
                     convoHist.set(user.id, hist);
                     socket.emit("history", hist);
-                } else {
+                } else if (result.code === ERROR_NOT_PREMIUM) {
+                    socket.emit("authenticated", { success: false, code: ERROR_NOT_PREMIUM, message: result.message });
+                }
+                else {
                     socket.emit("authenticated", { success: false, message: result.message });
                 }
             } catch (error) {
@@ -128,7 +137,7 @@ export function setupSocketIO(io) {
 
         socket.on("message", async (data) => {
             if (!user) {
-                socket.emit("error", { message: "Unauthorized" });
+                socket.emit("error", { message: "Neturite prieigos prie pokalbio funkcijos." });
                 return;
             }
 

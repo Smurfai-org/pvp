@@ -6,11 +6,10 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   const { id } = req.query;
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  const token = req.cookies.token;
+  if (!token) {
     return res.status(401).json();
   }
-  const token = authHeader.split(" ")[1];
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   try {
     let query = "SELECT * FROM hints WHERE deleted = 0";

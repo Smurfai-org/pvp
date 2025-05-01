@@ -1,5 +1,4 @@
 import express from "express";
-import axios from "axios";
 import pool from "../utils/db.js";
 import OpenAI from "openai";
 const router = express.Router();

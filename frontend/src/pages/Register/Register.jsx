@@ -111,7 +111,7 @@ function Register() {
   return (
     <div className="full-page-container-login">
       <div className="centered-content-login">
-        <h2>Register</h2>
+        <h2>Registruotis</h2>
         <TextBox
           text="El. paštas"
           value={email}

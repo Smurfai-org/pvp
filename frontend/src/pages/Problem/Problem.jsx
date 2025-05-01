@@ -29,6 +29,8 @@ const languages = [
   { label: "Python", value: "python" },
 ];
 
+const ERROR_NOT_PREMIUM = 111;
+
 const Problem = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -58,6 +60,7 @@ const Problem = () => {
   const [chatMessages, setChatMessages] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const [chatError, setChatError] = useState(null);
+  const [notPremium, setNotPremium] = useState(false);
 
   // SĄRAŠAS testavimo atveju. Vieno jų tipas pvz toks:
   // {id: 1, input: {cpp: 'const int num1 = 5;\nconst int num2 = 10;', python: 'num1 = 5\nnum2 = 10'}, expected_output: '15', fk_PROBLEMid: 18}
@@ -606,9 +609,14 @@ const Problem = () => {
     socketClient.on("authenticated", (data) => {
       if (data.success) {
         console.log("Socket authenticated:", data.user);
-      } else {
-        console.error("Socket authentication failed:", data.message);
-        setChatError(data.message || "Nepavyko autentifikuoti socket");
+      } else if (!data.success) {
+        if (data.code === ERROR_NOT_PREMIUM) {
+           setNotPremium(true); 
+          setChatError(data.message);
+        } else {
+          console.error(data.message || "Klaida autentifikuojant socket");
+          setChatError(data.message || "Klaida autentifikuojant socket");
+        }
       }
     });
 
@@ -863,6 +871,7 @@ const Problem = () => {
                     <ChatInput
                       onGenerateHint={handleGenerateHintClick}
                       onSend={(message) => handleSendAiMessageClick(message)}
+                      notPremium={notPremium}
                     />
                   </div>
                 </div>
@@ -931,8 +940,7 @@ const Problem = () => {
 };
 
 export default Problem;
-
-const ChatInput = ({ onGenerateHint, onSend }) => {
+const ChatInput = ({ onGenerateHint, onSend, notPremium }) => {
   const [message, setMessage] = useState("");
   const textareaRef = useRef(null);
 
@@ -959,18 +967,19 @@ const ChatInput = ({ onGenerateHint, onSend }) => {
         onChange={(e) => setMessage(e.target.value)}
         placeholder="Klauskite dirbtinio intelekto..."
         rows={1}
+        disabled={notPremium}
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
             handleSend();
-          }
-        }}
+          }}
+        }
       />
       <div className="chat-input-actions">
         <Button extra="small bright" onClick={() => onGenerateHint?.()}>
           Generuoti užuominą užduočiai
         </Button>
-        <Button extra="small" onClick={handleSend}>
+        <Button extra="small" onClick={handleSend} disabled={!message}>
           Klausti
         </Button>
       </div>
