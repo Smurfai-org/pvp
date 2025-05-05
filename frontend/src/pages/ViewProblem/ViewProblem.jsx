@@ -10,7 +10,7 @@ import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import cookies from "js-cookie";
 import AuthContext from "../../utils/AuthContext";
 import LoginPrompt from "../../components/LoginPrompt";
-
+import ReactMarkdown from "react-markdown";
 const ProblemDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -240,9 +240,7 @@ const ProblemDetails = () => {
             </>
           ) : (
             <div className="form-container">
-              <p>
-                <strong>Aprašymas:</strong> {problem.description}
-              </p>
+                <strong>Aprašymas:</strong> <ReactMarkdown>{problem.description}</ReactMarkdown>
               <p>
                 <strong>Sudėtingumas:</strong> {problem.difficulty}
               </p>

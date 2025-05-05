@@ -11,6 +11,8 @@ import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import cookies from "js-cookie";
 import AuthContext from "../../utils/AuthContext";
 import LoginPrompt from "../../components/LoginPrompt";
+import ReactMarkdown from "react-markdown";
+import { difficulty_dictionary } from "../../constants";
 
 function ViewCourse() {
   const { id } = useParams();
@@ -229,9 +231,9 @@ function ViewCourse() {
                     onClick={() => navigate(`/view_problem/${problem.id}`)}
                   >
                     <td>{problem.name}</td>
-                    <td>{problem.description}</td>
+                    <td><ReactMarkdown>{problem.description}</ReactMarkdown></td>
                     <td>{problem.generated ? "Taip" : "NE"}</td>
-                    <td>{problem.difficulty}</td>
+                    <td>{difficulty_dictionary[problem?.difficulty]}</td>
                     <td>{problem.deleted ? "Taip" : "NE"}</td>
                   </tr>
                 ))
