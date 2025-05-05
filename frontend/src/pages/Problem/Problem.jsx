@@ -795,11 +795,9 @@ const Problem = () => {
 
                   {isLoaded && (
                     <div>
-                      <p
-                        dangerouslySetInnerHTML={{
-                          __html: problem?.description,
-                        }}
-                      ></p>
+                      <ReactMarkdown>
+                        {problem?.description}
+                      </ReactMarkdown>
                     </div>
                   )}
 
