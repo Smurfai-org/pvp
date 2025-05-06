@@ -26,12 +26,38 @@ export const validateAuth = async (token) => {
     }
 };
 
-export const getResponse = async (message, convoHistory = []) => {
+export const getResponse = async (message, convoHistory = [], problemContext = null) => {
     try {
+        let prompt = 'Tu esi AI programavimo asistentas, skirtas padėti 17–18 metų mokiniams mokytis C++ ir Python programavimo kalbų. Tavo paskirtis – atsakyti tik į klausimus, tiesiogiai susijusius su programavimu šiomis kalbomis. Tu neteiki jokios informacijos, kuri nėra susijusi su programavimu – tai apima istoriją, politiką, sveikatą, psichologiją, religiją, naujienas, pramogas ir kitus neprogramavimo dalykus. \n\nJeigu mokinys klausia apie temą, nesusijusią su programavimu, mandagiai atsakyk, kad tu esi tik programavimo asistentas ir negali atsakyti į tokio tipo klausimus.\n\nJeigu mokinys naudoja įžeidžiančią, nepagarbią ar neetišką kalbą (įskaitant keiksmažodžius ar neapykantos kalbą), tu ramiai ir profesionaliai atsakai, kad toks bendravimo stilius nepriimtinas, ir grįžti prie programavimo temos, jei įmanoma. \n\nNiekada neatsakinėk į klausimus, kurie gali būti netinkami, pavojingi, ar nesusiję su mokymusi programuoti. Visada būk aiškus, mandagus ir orientuotas į mokymąsi. Tavo atsakymai turi būti aiškūs, edukaciniai ir pritaikyti 17–18 metų mokinių supratimo lygiui.'
+        if (problemContext) {
+            prompt += `\n\nŠiuo metu mokinys sprendžia šią programavimo užduotį: 
+            Užduoties pavadinimas: ${problemContext.problemName}
+            Pasirinkta programavimo kalba: ${problemContext.language}
+            Užduoties aprašymas: ${problemContext.problemDescription}
+
+            ${problemContext.testCases && problemContext.testCases.length > 0 ? `Pavyzdiniai testiniai atvejai:
+                ${problemContext.testCases.map((tc, idx) => 
+                  `Testas ${idx + 1}:
+                   Įvestis: ${tc.input}
+                   Laukiamas rezultatas: ${tc.expected_output}`
+                ).join('\n\n')}` : ''}`;
+
+                if (problemContext.code) {
+                    prompt += `\n\nMokinio parašytas kodas:
+                    \`\`\`${problemContext.language === 'cpp' ? 'cpp' : 'python'}
+                    ${problemContext.code}
+                    \`\`\`
+                    \n\n
+
+                    Analizuok šį kodą savo atsakymuose. Atkreipk dėmesį į galimas klaidas ar neefektyvumus. Teik konstruktyvius patarimus, kurie padėtų mokiniui tobulėti. Nekopijuok viso kodo ir neteik pilno sprendimo - geriau paaiškink koncepcijas ir pateik trumpus pavyzdžius, kaip galima taisyti problemas ar tobulinti kodą. Jeigu kodas nieko neturi (pvz. tik return 0 ar panašiai), tai pasakyk, kad mokinys dar neparašė jokio kodo ir paaiškink, nuo kur galima pradėti užduotį. \n\n`;
+                }
+                prompt += `\n\nJeigu mokinys tavęs klaus apie užduotį, savo atsakymuose atsižvelk į jos informaciją. Padėk mokiniui suprasti užduotį ir ją išspręsti, tačiau neteik pilno sprendimo kodo. Geriau pateik patarimų, užuominų, konceptualių paaiškinimų ir pavyzdžių, kurie padėtų mokiniui savarankiškai rasti sprendimą.`;
+                
+        }
         const messages = [
             {
                 role: 'system',
-                content: 'Tu esi AI programavimo asistentas, skirtas padėti 17–18 metų mokiniams mokytis C++ ir Python programavimo kalbų. Tavo paskirtis – atsakyti tik į klausimus, tiesiogiai susijusius su programavimu šiomis kalbomis. Tu neteiki jokios informacijos, kuri nėra susijusi su programavimu – tai apima istoriją, politiką, sveikatą, psichologiją, religiją, naujienas, pramogas ir kitus neprogramavimo dalykus. \n\nJeigu mokinys klausia apie temą, nesusijusią su programavimu, mandagiai atsakyk, kad tu esi tik programavimo asistentas ir negali atsakyti į tokio tipo klausimus.\n\nJeigu mokinys naudoja įžeidžiančią, nepagarbią ar neetišką kalbą (įskaitant keiksmažodžius ar neapykantos kalbą), tu ramiai ir profesionaliai atsakai, kad toks bendravimo stilius nepriimtinas, ir grįžti prie programavimo temos, jei įmanoma. \n\nNiekada neatsakinėk į klausimus, kurie gali būti netinkami, pavojingi, ar nesusiję su mokymusi programuoti. Visada būk aiškus, mandagus ir orientuotas į mokymąsi. Tavo atsakymai turi būti aiškūs, edukaciniai ir pritaikyti 17–18 metų mokinių supratimo lygiui.'
+                content: prompt
             },
             ...convoHistory.map(msg => ({
                 role: msg.role,
@@ -86,9 +112,9 @@ export async function saveAIMessage(userId, message) {
     );
 }
 
-export async function processUserMessage(userId, message, convoHist) {
+export async function processUserMessage(userId, message, convoHist, problemContext = null) {
     await saveUserMessage(userId, message);
-    const response = await getResponse(message, convoHist);
+    const response = await getResponse(message, convoHist, problemContext);
     if (response.success) {
         await saveAIMessage(userId, response.message);
     }
@@ -145,7 +171,12 @@ export function setupSocketIO(io) {
                 const hist = convoHist.get(user.id) || [];
                 hist.push({ role: "user", content: data.message });
 
-                const response = await processUserMessage(user.id, data.message, hist);
+                const response = await processUserMessage(
+                    user.id,
+                    data.message,
+                    hist,
+                    data.problemContext
+                );
 
                 if (response.success) {
                     hist.push({ role: "assistant", content: response.message });
