@@ -16,10 +16,13 @@
     "cors": "^2.8.5",
     "google-one-tap": "^1.0.6",
     "js-cookie": "^3.0.5",
+    "katex": "^0.16.22",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.1.5",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
     "router-dom": "^3.0.1",
     "socket.io-client": "^4.8.1"
   },
