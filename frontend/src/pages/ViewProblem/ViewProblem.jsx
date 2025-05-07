@@ -76,13 +76,12 @@ const ProblemDetails = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Klaida atnaujinant problemą");
+        throw new Error(data.message || "Klaida atnaujinant užduotį");
       }
 
-      alert("Problema sėkmingai atnaujinta!");
       setIsEditMode(false);
-      window.location.reload();
       showSuccessMessage("Užduotis sėkmingai atnaujinta");
+      window.location.reload();
     } catch (error) {
       alert(`Klaida: ${error.message}`);
       showErrorMessage("Nepavyko išsaugoti pakeitimų");
@@ -90,7 +89,7 @@ const ProblemDetails = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Ar tikrai norite ištrinti šią problemą?")) return;
+    if (!window.confirm("Ar tikrai norite ištrinti šią užduotį?")) return;
 
     try {
       const response = await fetch(
