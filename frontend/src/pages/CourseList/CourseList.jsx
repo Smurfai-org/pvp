@@ -5,6 +5,11 @@ import "./CourseList.css";
 import CourseProblemTile from "../Course/CourseProblemTile";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import AuthContext from "../../utils/AuthContext";
+import { io } from "socket.io-client";
+import cookies from "js-cookie";
+import { ERROR_NOT_PREMIUM } from "../Problem/Problem";
+
+const tokenCookie = cookies.get("token");
 
 const CourseList = () => {
   const [isLoaded, setIsLoaded] = useState({
@@ -21,6 +26,10 @@ const CourseList = () => {
   const [coursesPerRow, setCoursesPerRow] = useState(4);
   const [problems, setProblems] = useState([]);
   const navigate = useNavigate();
+
+  const [socket, setSocket] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [notPremium, setNotPremium] = useState(false);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -178,6 +187,61 @@ const CourseList = () => {
   const isUserStartedCoursesRightDisabled =
     yourCoursesIndex + coursesPerRow >= userStartedCourses.length;
 
+  const onGenerateProblemClick = () => {
+    console.log("a");
+    socket.emit("generateProblem", {
+      message: "Sukurk problema apie ciklus",
+    });
+  };
+
+  useEffect(() => {
+    if (!loggedIn) return;
+
+    const socketClient = io("http://localhost:5000", {
+      transports: ["websocket"],
+      autoConnect: true,
+    });
+
+    socketClient.on("connect", () => {
+      console.log("Prisijungta prie socket:", socketClient.id);
+      setIsConnected(true);
+
+      socketClient.emit("authenticate", tokenCookie);
+    });
+
+    socketClient.on("authenticated", (data) => {
+      if (data.success) {
+        console.log("Socket authenticated:", data.user);
+      } else if (!data.success) {
+        if (data.code === ERROR_NOT_PREMIUM) {
+          setNotPremium(true);
+          // setChatError(data.message);
+        } else {
+          console.error(data.message || "Klaida autentifikuojant socket");
+          // setChatError(data.message || "Klaida autentifikuojant socket");
+        }
+      }
+    });
+
+    // socketClient.on("error", (error) => {
+    //   setChatError(error.message || "Klaida socket'e");
+    //   showErrorMessage(error.message || "Klaida socket'e");
+    // });
+
+    socketClient.on("disconnect", () => {
+      console.log("Socket disconnected:", socketClient.id);
+      setIsConnected(false);
+    });
+
+    setSocket(socketClient);
+
+    return () => {
+      if (socketClient) {
+        socketClient.disconnect();
+      }
+    };
+  }, [loggedIn, tokenCookie]);
+
   return (
     <div className="full-page-container">
       {loggedIn && userStartedCourses?.length > 0 && (
@@ -266,6 +330,7 @@ const CourseList = () => {
           <AnimatedLoadingText />
         )}
       </div>
+      <div onClick={onGenerateProblemClick}>Generuoti problema</div>
       <div className="page-wrapper">
         <h2>Individualios užduotys</h2>
         {isLoaded.problems ? (

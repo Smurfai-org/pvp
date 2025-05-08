@@ -29,7 +29,7 @@ const languages = [
   { label: "Python", value: "python" },
 ];
 
-const ERROR_NOT_PREMIUM = 111;
+export const ERROR_NOT_PREMIUM = 111;
 
 const Problem = () => {
   const { id } = useParams();
@@ -387,20 +387,25 @@ const Problem = () => {
       ]);
 
       socket.emit("message", {
-         message,
-         problemContext: {
+        message,
+        problemContext: {
           problemId: id,
           problemName: problem?.name,
           problemDescription: problem?.description,
           difficulty: problem?.difficulty,
           language: selectedLanguageValue,
           code: inputCode[selectedLanguageValue],
-          testCases: testCases.length > 0 ? testCases.map(tc => ({
-            input: tc.input[selectedLanguageValue],
-            expected_output: tc.expected_output,
-          })).slice(0, 2) : []
-         }
-        });
+          testCases:
+            testCases.length > 0
+              ? testCases
+                  .map((tc) => ({
+                    input: tc.input[selectedLanguageValue],
+                    expected_output: tc.expected_output,
+                  }))
+                  .slice(0, 2)
+              : [],
+        },
+      });
     } catch (error) {
       console.error("Error using AI chat:", error);
       showErrorMessage("Klaida bendraujant su AI asistentu");
@@ -625,7 +630,7 @@ const Problem = () => {
         console.log("Socket authenticated:", data.user);
       } else if (!data.success) {
         if (data.code === ERROR_NOT_PREMIUM) {
-           setNotPremium(true); 
+          setNotPremium(true);
           setChatError(data.message);
         } else {
           console.error(data.message || "Klaida autentifikuojant socket");
@@ -809,9 +814,7 @@ const Problem = () => {
 
                   {isLoaded && (
                     <div>
-                      <ReactMarkdown>
-                        {problem?.description}
-                      </ReactMarkdown>
+                      <ReactMarkdown>{problem?.description}</ReactMarkdown>
                     </div>
                   )}
 
@@ -984,8 +987,8 @@ const ChatInput = ({ onGenerateHint, onSend, notPremium }) => {
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
             handleSend();
-          }}
-        }
+          }
+        }}
       />
       <div className="chat-input-actions">
         <Button extra="small bright" onClick={() => onGenerateHint?.()}>
@@ -1021,12 +1024,10 @@ const ChatTranscript = ({ messages = [] }) => {
             key={index}
             className={`chat-message ${msg.sender === "user" ? "user" : "ai"}`}
           >
-            {msg.sender === "user" ?(
+            {msg.sender === "user" ? (
               msg.text
             ) : (
-              <ReactMarkdown>
-                {msg.text}
-                </ReactMarkdown>
+              <ReactMarkdown>{msg.text}</ReactMarkdown>
             )}
           </div>
         ))
