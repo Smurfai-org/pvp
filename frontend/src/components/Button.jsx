@@ -1,10 +1,15 @@
-import React from 'react'
-import './styles.css'
+import "./styles.css";
 
-function Button({children, extra, onClick, disabled}) {
+function Button({ children, extra, onClick, disabled }) {
   return (
-        <button disabled={disabled}onClick={onClick}className={`default-button ${extra || ''}`}>{children}</button>
-  )
+    <button
+      disabled={disabled}
+      onClick={onClick}
+      className={`default-button ${extra || ""}`}
+    >
+      {children}
+    </button>
+  );
 }
 
-export default Button
+export default Button;

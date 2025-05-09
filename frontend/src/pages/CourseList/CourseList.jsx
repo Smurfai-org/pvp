@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import Card from "../../components/Card";
 import { useNavigate } from "react-router-dom";
 import "./CourseList.css";
@@ -8,6 +8,7 @@ import AuthContext from "../../utils/AuthContext";
 import { io } from "socket.io-client";
 import cookies from "js-cookie";
 import { ERROR_NOT_PREMIUM } from "../Problem/Problem";
+import Button from "../../components/Button";
 
 const tokenCookie = cookies.get("token");
 
@@ -25,6 +26,8 @@ const CourseList = () => {
   const [yourCoursesIndex, setYourCoursesIndex] = useState(0);
   const [coursesPerRow, setCoursesPerRow] = useState(4);
   const [problems, setProblems] = useState([]);
+  const [showProblemGenerateWindow, setShowProblemGenerateWindow] =
+    useState(false);
   const navigate = useNavigate();
 
   const [socket, setSocket] = useState(null);
@@ -187,10 +190,9 @@ const CourseList = () => {
   const isUserStartedCoursesRightDisabled =
     yourCoursesIndex + coursesPerRow >= userStartedCourses.length;
 
-  const onGenerateProblemClick = () => {
-    console.log("a");
+  const onGenerateProblemClick = (message) => {
     socket.emit("generateProblem", {
-      message: "Sukurk problema apie ciklus",
+      message: message,
     });
   };
 
@@ -222,11 +224,6 @@ const CourseList = () => {
         }
       }
     });
-
-    // socketClient.on("error", (error) => {
-    //   setChatError(error.message || "Klaida socket'e");
-    //   showErrorMessage(error.message || "Klaida socket'e");
-    // });
 
     socketClient.on("disconnect", () => {
       console.log("Socket disconnected:", socketClient.id);
@@ -330,9 +327,22 @@ const CourseList = () => {
           <AnimatedLoadingText />
         )}
       </div>
-      <div onClick={onGenerateProblemClick}>Generuoti problema</div>
+      <div>
+        {!showProblemGenerateWindow ? (
+          <Button
+            extra="bright"
+            onClick={() => setShowProblemGenerateWindow(true)}
+          >
+            Generuoti asmeninę užduotį
+          </Button>
+        ) : (
+          <GenerateProblemWindow
+            handleSend={(message) => onGenerateProblemClick(message)}
+          />
+        )}
+      </div>
       <div className="page-wrapper">
-        <h2>Individualios užduotys</h2>
+        <h2>Užduotys</h2>
         {isLoaded.problems ? (
           <div className="problems-container">
             {problems.map((problem, index, array) => (
@@ -351,3 +361,38 @@ const CourseList = () => {
 };
 
 export default CourseList;
+
+const GenerateProblemWindow = ({ handleSend }) => {
+  const [message, setMessage] = useState("");
+  const textareaRef = useRef(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height =
+        textareaRef.current.scrollHeight + "px";
+    }
+  }, [message]);
+  return (
+    <div className="page-wrapper">
+      <h2>Individualios užduotys</h2>
+      <textarea
+        ref={textareaRef}
+        className="chat-textarea"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="Apibūdinkite norimą užduotį..."
+        rows={1}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSend(message);
+          }
+        }}
+      />
+      <Button extra="small bright" onClick={() => handleSend(message)}>
+        Generuoti
+      </Button>
+    </div>
+  );
+};

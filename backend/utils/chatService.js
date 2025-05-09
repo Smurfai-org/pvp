@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import pool from "./db.js";
 import { processUserMessageProblemGeneration } from "./problemGenerationService.js";
 
-const ERROR_NOT_PREMIUM = 111;
+export const ERROR_NOT_PREMIUM = 111;
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -129,6 +129,54 @@ export async function saveAIMessage(userId, message) {
   );
 }
 
+export async function saveGeneratedProblemWithDetails(
+  userId,
+  problemData,
+  hints,
+  testCases
+) {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // Insert into problems table
+    const [problemResult] = await connection.execute(
+      `INSERT INTO problems 
+        (name, description, \`generated\`, difficulty, fk_USERid) 
+        VALUES (?, ?, ?, ?, ?)`,
+      [problemData.name, problemData.description, 1, "hard", userId]
+    );
+
+    const problemId = problemResult.insertId;
+
+    // Insert each hint
+    for (const hint of hints) {
+      await connection.execute(
+        "INSERT INTO hints (fk_PROBLEMid, hint) VALUES (?, ?)",
+        [problemId, hint]
+      );
+    }
+
+    // Insert each test case
+    for (const testCase of testCases) {
+      console.log("testCase", testCase);
+      await connection.execute(
+        "INSERT INTO test_cases (fk_PROBLEMid, input, expected_output) VALUES (?, ?, ?)",
+        [problemId, testCase.input, testCase.expected_output]
+      );
+    }
+
+    await connection.commit();
+    return { success: true, problemId };
+  } catch (err) {
+    await connection.rollback();
+    console.error("Transaction failed:", err);
+    return { success: false, error: err };
+  } finally {
+    connection.release();
+  }
+}
+
 export async function processUserMessage(
   userId,
   message,
@@ -231,15 +279,14 @@ export function setupSocketIO(io) {
     });
 
     socket.on("generateProblem", async (data) => {
-      // if (!user) {
-      //   console.log(user);
-      //   socket.emit("error", {
-      //     message: "Neturite prieigos prie problemos generavimo funkcijos.",
-      //   });
-      //   return;
-      // }
+      if (!user) {
+        console.log(user);
+        socket.emit("error", {
+          message: "Neturite prieigos prie problemos generavimo funkcijos.",
+        });
+        return;
+      }
 
-      console.log("begin");
       try {
         const response = await processUserMessageProblemGeneration(
           user.id,
@@ -261,7 +308,6 @@ export function setupSocketIO(io) {
         console.error("Message processing error:", error);
         socket.emit("error", { message: error.message });
       }
-      console.log("end");
     });
 
     socket.on("disconnect", () => {

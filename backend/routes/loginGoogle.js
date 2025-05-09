@@ -69,6 +69,7 @@ router.post("/", async (req, res) => {
         user: {
           id: user[0].id,
           role: user[0].role,
+          premium: user[0].premium,
           profile_pic: user[0].profile_pic,
           email: user[0].email,
           username: user[0].username,

@@ -955,6 +955,7 @@ const Problem = () => {
 };
 
 export default Problem;
+
 const ChatInput = ({ onGenerateHint, onSend, notPremium }) => {
   const [message, setMessage] = useState("");
   const textareaRef = useRef(null);
