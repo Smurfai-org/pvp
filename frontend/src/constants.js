@@ -7,5 +7,6 @@ export const difficulty_dictionary = {
 export const progress_dictionary = {
   "not started": "Nepradėta",
   "in progress": "Pradėta",
+  "ai solved": "Išspręsta AI",
   finished: "Baigta",
 };
