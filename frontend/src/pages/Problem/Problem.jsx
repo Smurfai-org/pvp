@@ -333,6 +333,9 @@ const Problem = () => {
       setShowLoginPrompt(true);
       return;
     }
+    if (isSolvedByAI) {
+      showErrorMessage("Užduotis jau išspręsta AI");
+    }
     try {
       const response = await fetch("http://localhost:5000/generate/hint", {
         method: "POST",
