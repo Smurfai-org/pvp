@@ -165,9 +165,9 @@ router.post('/solution', async (req, res) => {
 
     const aiSolution = response.output_text;
     codeObj[language] = aiSolution;
-    console.log(userId, problemId, JSON.stringify(codeObj), 0
-    , "ai solved"
-)
+//     console.log(userId, problemId, JSON.stringify(codeObj), 0
+//     , "ai solved"
+// )
 
     if (!progress) {
         const [saveProgress] = await pool.execute(
