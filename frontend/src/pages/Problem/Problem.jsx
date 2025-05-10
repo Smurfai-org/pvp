@@ -62,6 +62,10 @@ const Problem = () => {
   const [chatError, setChatError] = useState(null);
   const [notPremium, setNotPremium] = useState(false);
 
+  const [showGiveUpModal, setShowGiveUpModal] = useState(false);
+  const [isGeneratingSolution, setIsGeneratingSolution] = useState(false);
+  const [isSolvedByAI, setIsSolvedByAI] = useState(false);
+
   // SĄRAŠAS testavimo atveju. Vieno jų tipas pvz toks:
   // {id: 1, input: {cpp: 'const int num1 = 5;\nconst int num2 = 10;', python: 'num1 = 5\nnum2 = 10'}, expected_output: '15', fk_PROBLEMid: 18}
   const [testCases, setTestCases] = useState([]);
@@ -329,6 +333,9 @@ const Problem = () => {
       setShowLoginPrompt(true);
       return;
     }
+    if (isSolvedByAI) {
+      showErrorMessage("Užduotis jau išspręsta AI");
+    }
     try {
       const response = await fetch("http://localhost:5000/generate/hint", {
         method: "POST",
@@ -447,6 +454,10 @@ const Problem = () => {
         if (loggedIn && userCodeRes?.ok) {
           const userData = await userCodeRes.json();
           if (userData[0]?.score) setPassScore(userData[0]?.score);
+
+          if (userData[0]?.status === "ai solved") {
+            setIsSolvedByAI(true);
+          }
 
           const parsedUserCode = JSON.parse(userData[0]?.code || "{}");
 
@@ -587,6 +598,86 @@ const Problem = () => {
     setIsOutputWindowMaximised(false);
   }, [id, courseProblemsOrder]);
 
+  const handleGiveUpClick = () => {
+    if (!loggedIn) {
+      setShowLoginPrompt(true);
+      return;
+    }
+    if (isSolvedByAI) {
+      showErrorMessage("Užduotis jau išspręsta AI");
+    } else {
+      setShowGiveUpModal(true);
+    }
+  };
+
+  const handleConfirmGiveUp = async () => {
+    try {
+      setIsGeneratingSolution(true);
+
+      const response = await fetch("http://localhost:5000/generate/solution", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user?.id,
+          problemId: id,
+          language: selectedLanguageValue,
+        }),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP klaida: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.solution) {
+        setInputCode({
+          ...inputCode,
+          [selectedLanguageValue]: data.solution,
+        });
+
+        setIsSolvedByAI(true);
+        showSuccessMessage("Sprendimas sugeneruotas sėkmingai");
+      } else {
+        showErrorMessage("Sprendimo sugeneruoti nepavyko");
+      }
+    } catch (error) {
+      console.error("Klaida generuojant sprendimą:", error);
+      showErrorMessage("Klaida generuojant sprendimą");
+    } finally {
+      setIsGeneratingSolution(false);
+      setShowGiveUpModal(false);
+    }
+  };
+
+  const ConfirmGiveUpModal = ({ onClose, onConfirm, isLoading }) => {
+    return (
+      <div className="modal-overlay">
+        <div className="modal-content">
+          <h2>Pasiduoti užduočiai</h2>
+          <p>
+            AI sugeneruos jums pilną sprendimą, tačiau Jums rekomenduojama
+            savarankiškai pasimokinti iš AI sugeneruoto kodo. Užduotis bus
+            įvertinta 0 taškų ir pažymėta kaip &quot;Išspręsta AI&quot;.
+          </p>
+          <p style={{ fontWeight: "bold", marginTop: "15px" }}>
+            Ar tikrai norite pasiduoti?
+          </p>
+          <div className="modal-actions">
+            <Button onClick={onConfirm} disabled={isLoading}>
+              {isLoading ? "Generuojama..." : "Taip, pasiduodu"}
+            </Button>
+            <Button onClick={onClose} disabled={isLoading} extra="secondary">
+              Ne, aš dar galiu!
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   useEffect(() => {
     if (!problem) return;
     const fetchCourse = async () => {
@@ -604,10 +695,16 @@ const Problem = () => {
       } catch (error) {
         console.error("Error fetching course:", error);
       }
+    };
+
+    const loadData = async () => {
+      if (problem?.generated !== 1) {
+        await fetchCourse();
+      }
       setIsLoaded(true);
     };
 
-    fetchCourse();
+    loadData();
   }, [problem]);
 
   useEffect(() => {
@@ -680,6 +777,13 @@ const Problem = () => {
 
   return (
     <div className="relative">
+      {showGiveUpModal && (
+        <ConfirmGiveUpModal
+          onClose={() => setShowGiveUpModal(false)}
+          onConfirm={handleConfirmGiveUp}
+          isLoading={isGeneratingSolution}
+        />
+      )}
       <>
         {showLoginPrompt ? (
           <LoginPrompt onClose={() => setShowLoginPrompt(false)} />
@@ -887,6 +991,7 @@ const Problem = () => {
                       onGenerateHint={handleGenerateHintClick}
                       onSend={(message) => handleSendAiMessageClick(message)}
                       notPremium={notPremium}
+                      onGiveUp={handleGiveUpClick}
                     />
                   </div>
                 </div>
@@ -899,7 +1004,11 @@ const Problem = () => {
               <Button extra="small" onClick={handleRunButtonClick}>
                 Leisti programą
               </Button>
-              <Button extra="small bright" onClick={handleCheckclick}>
+              <Button
+                extra="small bright"
+                onClick={handleCheckclick}
+                disabled={isSolvedByAI}
+              >
                 Tikrinti
               </Button>
               <Dropdown
@@ -955,8 +1064,7 @@ const Problem = () => {
 };
 
 export default Problem;
-
-const ChatInput = ({ onGenerateHint, onSend, notPremium }) => {
+const ChatInput = ({ onGenerateHint, onSend, notPremium, onGiveUp }) => {
   const [message, setMessage] = useState("");
   const textareaRef = useRef(null);
 
@@ -994,6 +1102,13 @@ const ChatInput = ({ onGenerateHint, onSend, notPremium }) => {
       <div className="chat-input-actions">
         <Button extra="small bright" onClick={() => onGenerateHint?.()}>
           Generuoti užuominą užduočiai
+        </Button>
+        <Button
+          extra="small bright"
+          onClick={() => onGiveUp?.()}
+          disabled={notPremium}
+        >
+          Pasiduoti
         </Button>
         <Button extra="small" onClick={handleSend} disabled={!message}>
           Klausti

@@ -1,6 +1,7 @@
 import express from "express";
 import pool from "../utils/db.js";
 import OpenAI from "openai";
+import jwt from "jsonwebtoken";
 import { processUserMessageProblemGeneration } from "../utils/problemGenerationService.js";
 const router = express.Router();
 
@@ -127,4 +128,107 @@ router.post("/problem", async (req, res) => {
   }
 });
 
+router.post("/solution", async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).json();
+  }
+  const decToken = jwt.verify(token, process.env.JWT_SECRET);
+  if (decToken.user.premium === 0) {
+    return res
+      .status(403)
+      .json({ message: "Paslauga skirta tik premium vartotojams" });
+  }
+
+  const { userId, problemId, language } = req.body;
+
+  const [[problem]] = await pool.execute(
+    "SELECT description FROM problems WHERE id = ?",
+    [problemId]
+  );
+  const [[test_cases]] = await pool.execute(
+    "SELECT input, expected_output FROM test_cases WHERE fk_PROBLEMid = ? LIMIT 2",
+    [problemId]
+  );
+  const [[progress]] = await pool.execute(
+    "SELECT code, score FROM progress WHERE fk_USERid = ? AND fk_PROBLEMid = ?",
+    [userId, problemId]
+  );
+  if (!problem || !language) {
+    return res.status(400).json({ message: "Trūksta duomenų" });
+  }
+
+  if (progress && progress.status === "finished") {
+    const noHint = {
+      hint: "Užduotis jau išspręsta, tad sprendimo nereikės.",
+      problemId,
+      userId,
+    };
+    return res.status(200).json(noHint);
+  }
+
+  const codeObj = progress ? JSON.parse(progress.code) : {};
+  const inputObj = JSON.parse(test_cases.input);
+
+  const userInput = {
+    description: problem.description,
+    language,
+    test_cases: [
+      {
+        ivestis: inputObj[language] || "",
+        norimas_rezultatas: inputObj.expected_output,
+      },
+    ],
+  };
+  const response = await client.responses.create({
+    model: "gpt-4o-2024-08-06",
+    input: [
+      {
+        role: "system",
+        content:
+          'Tu esi pažangus programavimo asistentas, padedantis 17–18 metų mokiniams mokytis programuoti C++ arba Python kalbomis. Tavo užduotis – pagal pateiktą užduoties aprašymą parašyti veikiančią funkciją, kuri atitiktų visus reikalavimus ir veiktų pagal testų atvejus. Vadovaukis šiomis taisyklėmis:\n\n1. Programavimo kalba bus nurodyta įvestyje. Naudok tik tą kalbą.\n2. Funkcijos pavadinimas turi būti "Sprendimas".\n3. Funkcijos argumentų tipus nustatyk iš užduoties aprašymo bei testinių atvejų.\n4. Funkcijos grąžinimo tipas taip pat turi būti nustatomas pagal užduoties aprašymą bei testinius atvejus.\n5. Funkcija turi visiškai atitikti aprašytą užduoties logiką.\n6. Jei sprendimas sudėtingas, pridėk tik vieną arba dvi komentaro eilutes, paaiškinančias sunkiau suprantamas kodo vietas. Komentarai turi būti trumpi ir aiškūs pradedančiajam.\n7. Nerašyk jokio paaiškinimo ar įžanginio teksto – pateik tik kodą su reikiamais komentarais (jei reikia).\n8. NENAUDOK jokių „Markdown“ formatavimo simbolių, tokių kaip ``` arba **. Grąžink tik paprastą, gryną kodą be jokio papildomo formatavimo.',
+      },
+      {
+        role: "user",
+        content:
+          "Parinkta programavimo kalba: " +
+          language +
+          ".\n\n" +
+          "Užduoties aprašymas: " +
+          problem.description +
+          "\n\n" +
+          "Testų atvejai: " +
+          JSON.stringify(userInput.test_cases) +
+          "\n\n",
+      },
+    ],
+  });
+
+  const aiSolution = response.output_text;
+  codeObj[language] = aiSolution;
+  //     console.log(userId, problemId, JSON.stringify(codeObj), 0
+  //     , "ai solved"
+  // )
+
+  if (!progress) {
+    const [saveProgress] = await pool.execute(
+      'INSERT INTO progress (fk_USERid, fk_PROBLEMid, code, score, status) VALUES (?, ?, ?, 0, "ai solved")',
+      [userId, problemId, JSON.stringify(codeObj)]
+    );
+    if (!saveProgress) {
+      return res.status(500).json({ message: "Nepavyko išsaugoti progreso" });
+    }
+  } else {
+    const [updateProgress] = await pool.execute(
+      'UPDATE progress SET code = ?, score = 0, status = "ai solved" WHERE fk_USERid = ? AND fk_PROBLEMid = ?',
+      [JSON.stringify(codeObj), userId, problemId]
+    );
+    if (!updateProgress) {
+      return res.status(500).json({ message: "Nepavyko atnaujinti progreso" });
+    }
+  }
+  return res
+    .status(200)
+    .json({ message: "Sprendimas gautas", solution: aiSolution });
+});
 export default router;

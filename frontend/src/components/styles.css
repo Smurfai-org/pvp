@@ -15,6 +15,7 @@
   --difficulty-easy: #00db1a;
   --difficulty-medium: #ffa600;
   --difficulty-hard: #fc0303;
+  --difficulty-generated: #303036;
 }
 
 body {
@@ -49,6 +50,10 @@ code {
 
 .hard {
   color: var(--difficulty-hard);
+}
+
+.generated {
+  color: var(--difficulty-generated);
 }
 
 .default-button {

@@ -144,7 +144,7 @@ export async function saveGeneratedProblemWithDetails(
       `INSERT INTO problems 
         (name, description, \`generated\`, difficulty, fk_USERid) 
         VALUES (?, ?, ?, ?, ?)`,
-      [problemData.name, problemData.description, 1, "hard", userId]
+      [problemData.name, problemData.description, 1, "generated", userId]
     );
 
     const problemId = problemResult.insertId;
