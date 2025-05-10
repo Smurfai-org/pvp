@@ -46,6 +46,7 @@ export async function validateToken(token) {
         profile_pic: decoded.user.profile_pic,
         email: decoded.user.email,
         username: decoded.user.username,
+        premium: decoded.user.premium,
       },
       expiresAt: new Date(decoded.exp * 1000).toISOString(),
     };

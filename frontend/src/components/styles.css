@@ -52,6 +52,7 @@ code {
 }
 
 .default-button {
+  position: relative;
   background-color: var(--dark);
   font-size: var(--body);
   color: var(--light);
@@ -323,6 +324,12 @@ code {
 
 .flip-vertically {
   transform: rotate(180deg);
+}
+
+.inline-elements {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
 }
 
 .dropdown {

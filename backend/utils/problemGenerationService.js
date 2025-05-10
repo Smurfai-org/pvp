@@ -44,7 +44,7 @@ export async function processUserMessageProblemGeneration(userId, message) {
     console.log(response);
     try {
       const problemJSON = JSON.parse(response.message);
-      await saveGeneratedProblemWithDetails(
+      const { problemId } = await saveGeneratedProblemWithDetails(
         userId,
         problemJSON,
         problemJSON.hints,
@@ -52,6 +52,7 @@ export async function processUserMessageProblemGeneration(userId, message) {
       );
       return {
         success: response.success,
+        problemId: problemId,
         message: problemJSON,
         timestamp: response.timestamp,
       };

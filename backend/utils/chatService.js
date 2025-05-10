@@ -278,38 +278,6 @@ export function setupSocketIO(io) {
       }
     });
 
-    socket.on("generateProblem", async (data) => {
-      if (!user) {
-        console.log(user);
-        socket.emit("error", {
-          message: "Neturite prieigos prie problemos generavimo funkcijos.",
-        });
-        return;
-      }
-
-      try {
-        const response = await processUserMessageProblemGeneration(
-          user.id,
-          data.message
-        );
-        console.log(response);
-
-        if (response.success) {
-          socket.emit("response", {
-            message: response.message,
-            timestamp: response.timestamp,
-          });
-        } else {
-          socket.emit("error", {
-            message: response.error || "AI response error",
-          });
-        }
-      } catch (error) {
-        console.error("Message processing error:", error);
-        socket.emit("error", { message: error.message });
-      }
-    });
-
     socket.on("disconnect", () => {
       console.log("Client disconnected", socket.id);
     });
