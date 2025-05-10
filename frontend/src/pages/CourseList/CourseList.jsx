@@ -1,10 +1,15 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import Card from "../../components/Card";
 import { useNavigate } from "react-router-dom";
 import "./CourseList.css";
 import CourseProblemTile from "../Course/CourseProblemTile";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import AuthContext from "../../utils/AuthContext";
+import cookies from "js-cookie";
+import Button from "../../components/Button";
+import { MessageContext } from "../../utils/MessageProvider";
+
+const tokenCookie = cookies.get("token");
 
 const CourseList = () => {
   const [isLoaded, setIsLoaded] = useState({
@@ -20,6 +25,8 @@ const CourseList = () => {
   const [yourCoursesIndex, setYourCoursesIndex] = useState(0);
   const [coursesPerRow, setCoursesPerRow] = useState(4);
   const [problems, setProblems] = useState([]);
+  const [isGeneratingProblem, setIsGeneratingProblem] = useState(false);
+  const { showErrorMessage, showHintMessage } = useContext(MessageContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -178,6 +185,55 @@ const CourseList = () => {
   const isUserStartedCoursesRightDisabled =
     yourCoursesIndex + coursesPerRow >= userStartedCourses.length;
 
+  const onGenerateProblemClick = async (message) => {
+    if (!loggedIn) {
+      showHintMessage(
+        "Užduoties generavimo funkcija pasiekiama tik prisijungusiems vartotojams."
+      );
+      setIsGeneratingProblem(false);
+      return;
+    }
+    if (user.premium !== 1) {
+      showHintMessage(
+        "Užduoties generavimo funkcija pasiekiama tik premium vartotojams."
+      );
+      setIsGeneratingProblem(false);
+      return;
+    }
+    if (!message) {
+      showHintMessage("Nepamirškite apibūdinti norimos užduoties.");
+      setIsGeneratingProblem(false);
+      return;
+    }
+    setIsGeneratingProblem(true);
+    try {
+      const response = await fetch("http://localhost:5000/generate/problem", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${tokenCookie}`,
+        },
+        body: JSON.stringify({
+          userId: user?.id,
+          message: message,
+        }),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+
+      navigate(`/problems/${responseData.problemId}`);
+    } catch (error) {
+      console.error("Error generating hint:", error);
+      showErrorMessage("Klaida generuojant užduotį. Bandykite iš naujo.");
+    }
+    setIsGeneratingProblem(false);
+  };
+
   return (
     <div className="full-page-container">
       {loggedIn && userStartedCourses?.length > 0 && (
@@ -266,8 +322,14 @@ const CourseList = () => {
           <AnimatedLoadingText />
         )}
       </div>
+      <div>
+        <GenerateProblemWindow
+          handleSend={(message) => onGenerateProblemClick(message)}
+          isGeneratingProblem={isGeneratingProblem}
+        />
+      </div>
       <div className="page-wrapper">
-        <h2>Individualios užduotys</h2>
+        <h2>Užduotys</h2>
         {isLoaded.problems ? (
           <div className="problems-container">
             {problems.map((problem, index, array) => (
@@ -286,3 +348,72 @@ const CourseList = () => {
 };
 
 export default CourseList;
+
+const GenerateProblemWindow = ({ handleSend, isGeneratingProblem }) => {
+  const [message, setMessage] = useState("");
+  const textareaRef = useRef(null);
+  const [showProblemGenerateWindow, setShowProblemGenerateWindow] =
+    useState(false);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height =
+        textareaRef.current.scrollHeight + "px";
+    }
+  }, [message]);
+  return (
+    <>
+      {!showProblemGenerateWindow ? (
+        <Button
+          extra="bright"
+          onClick={() => setShowProblemGenerateWindow(true)}
+        >
+          Generuoti asmeninę užduotį
+        </Button>
+      ) : (
+        <div className="page-wrapper">
+          <h2>Generuoti asmeninę užduotį</h2>
+          <p>
+            Čia galite pateikti dirbtiniam intelektui užklausą sukurti užduotį
+            pagal jūsų pasirinktą temą ir aprašymą. Dirbtinis intelektas
+            sugeneruos individualią užduotį, kuri bus automatiškai įtraukta į
+            bendrą užduočių sąrašą. Atkreipkite dėmesį, kad ši konkreti užduotis
+            bus matoma tik jums – kiti vartotojai jos nematys. Tai patogus būdas
+            greitai ir paprastai gauti personalizuotą užduotį, pritaikytą jūsų
+            poreikiams.
+          </p>
+          <textarea
+            ref={textareaRef}
+            className="chat-textarea"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Apibūdinkite norimą užduotį..."
+            rows={1}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend(message);
+              }
+            }}
+          />
+          <div className="inline-elements" style={{ marginTop: "0.5rem" }}>
+            <Button
+              extra="small secondary"
+              onClick={() => setShowProblemGenerateWindow(false)}
+            >
+              Atšaukti
+            </Button>
+            <Button
+              extra="small bright"
+              onClick={() => handleSend(message)}
+              loading={isGeneratingProblem}
+            >
+              Generuoti
+            </Button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};

@@ -1,11 +1,14 @@
 .loading {
-    width: 1em;
+  width: 1em;
+  position: absolute;
+  left: calc(50% - 0.5em);
+  top: calc(50% - 0.5em);
 }
 
 .clicked {
-    background-color: var(--highligth);
+  background-color: var(--highligth);
 }
 
 .clicked:hover {
-    cursor: not-allowed;
+  cursor: not-allowed;
 }

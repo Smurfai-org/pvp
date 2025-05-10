@@ -2,6 +2,7 @@ export const difficulty_dictionary = {
   easy: "Lengva",
   medium: "Vidutinė",
   hard: "Sunki",
+  generated: "Asmeninė",
 };
 
 export const progress_dictionary = {

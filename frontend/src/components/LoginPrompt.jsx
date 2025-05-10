@@ -6,11 +6,9 @@ import { MessageContext } from "../utils/MessageProvider";
 import { useGoogleLogin } from "@react-oauth/google";
 import googleIcon from "../assets/google_icon.svg";
 import Hyperlink from "./Hyperlink";
-import loadingIcon from "../assets/loading-anim.svg";
-import '../pages/Register/Register.css';
-import { useNavigate } from "react-router-dom";
+import "../pages/Register/Register.css";
 
-const LoginPrompt = ( {onClose} ) => {
+const LoginPrompt = ({ onClose }) => {
   const { loggedIn, login } = useContext(AuthContext);
   const [isOpen, setIsOpen] = useState(!loggedIn);
   const [username, setUsername] = useState("");
@@ -61,20 +59,20 @@ const LoginPrompt = ( {onClose} ) => {
         credentials: "include",
       });
 
-      if(response.status === 401) {
-        showErrorMessage('Netinkami prisijungimo duomenys');
-        setUsernameError('Netinkami duomenys');
-        setPasswordError('Netinkami duomenys');
+      if (response.status === 401) {
+        showErrorMessage("Netinkami prisijungimo duomenys");
+        setUsernameError("Netinkami duomenys");
+        setPasswordError("Netinkami duomenys");
         setLoading(false);
       }
 
-      if(response.ok) {
-        showSuccessMessage('Sėkmingai prisijungėte');
+      if (response.ok) {
+        showSuccessMessage("Sėkmingai prisijungėte");
         setLoading(false);
         window.location.reload();
       }
     } catch (error) {
-      showErrorMessage(error.message || 'Nepavyko prisijungti');
+      showErrorMessage(error.message || "Nepavyko prisijungti");
       setLoading(false);
     }
   };
@@ -118,10 +116,12 @@ const LoginPrompt = ( {onClose} ) => {
             errorText={passwordError}
           />
           <div className="inline-centered-buttons-login">
-            <Button extra={loading ? 'login-btn clicked' : 'login-btn'} onClick={() => { if (!loading) handleSubmit(); }}>
-              {loading ?
-                <img src={loadingIcon} alt='Įkeliama...' className="loading"/>
-              : "Log in"}
+            <Button
+              loading={loading}
+              extra={loading ? "login-btn clicked" : "login-btn"}
+              onClick={handleSubmit}
+            >
+              Log in
             </Button>
             <Button extra="secondary login-btn">Registruotis</Button>
           </div>

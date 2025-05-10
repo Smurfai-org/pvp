@@ -6,8 +6,7 @@ import "./login.css";
 import { useGoogleLogin } from "@react-oauth/google";
 import googleIcon from "../../assets/google_icon.svg";
 import { MessageContext } from "../../utils/MessageProvider";
-import loadingIcon from "../../assets/loading-anim.svg";
-import '../Register/Register.css';
+import "../Register/Register.css";
 import AuthContext from "../../utils/AuthContext";
 
 function Login() {
@@ -65,21 +64,21 @@ function Login() {
         credentials: "include",
       });
 
-      if(response.status === 401) {
-        showErrorMessage('Netinkami prisijungimo duomenys');
-        setUsernameError('Netinkami duomenys');
-        setPasswordError('Netinkami duomenys');
+      if (response.status === 401) {
+        showErrorMessage("Netinkami prisijungimo duomenys");
+        setUsernameError("Netinkami duomenys");
+        setPasswordError("Netinkami duomenys");
         setLoading(false);
       }
 
-      if(response.ok) {
-        showSuccessMessage('Sėkmingai prisijungėte');
+      if (response.ok) {
+        showSuccessMessage("Sėkmingai prisijungėte");
         setLoading(false);
         await login();
-        navigate('/');
+        navigate("/");
       }
     } catch (error) {
-      showErrorMessage('Nepavyko prisijungti');
+      showErrorMessage("Nepavyko prisijungti");
       setLoading(false);
     }
   };
@@ -95,9 +94,9 @@ function Login() {
 
       if (response.ok) {
         await login();
-        navigate(from, {replace: true});
+        navigate(from, { replace: true });
       } else {
-        const data = await response.json(); 
+        const data = await response.json();
       }
     },
     onError: () => {},
@@ -105,8 +104,8 @@ function Login() {
   });
 
   const navigateRegister = () => {
-    navigate('/register');
-  }
+    navigate("/register");
+  };
 
   return (
     <div className="full-page-container-login">
@@ -126,12 +125,18 @@ function Login() {
           errorText={passwordError}
         />
         <div className="inline-centered-buttons-login">
-          <Button extra={loading ? 'login-btn clicked' : 'login-btn'} onClick={() => { if (!loading) handleSubmit(); }}>
-            {loading ?
-              <img src={loadingIcon} alt='Įkeliama...' className="loading"/>
-            : "Log in"}
+          <Button
+            loading={loading}
+            extra={loading ? "login-btn clicked" : "login-btn"}
+            onClick={() => {
+              if (!loading) handleSubmit();
+            }}
+          >
+            Log in
           </Button>
-          <Button extra="secondary login-btn" onClick={navigateRegister}>Registruotis</Button>
+          <Button extra="secondary login-btn" onClick={navigateRegister}>
+            Registruotis
+          </Button>
         </div>
         <div className="google-cnt">
           <Button extra="google-button" onClick={googleLoginButton}>

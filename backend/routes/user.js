@@ -25,7 +25,7 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const [result] = await pool.execute(
-      "SELECT id, username, creation_date, role FROM users WHERE deleted = 0 AND id = ?",
+      "SELECT id, username, creation_date, role, premium FROM users WHERE deleted = 0 AND id = ?",
       [req.params.id]
     );
     if (result.length === 0) {
@@ -132,7 +132,7 @@ router.put("/:id", async (req, res) => {
 
     if (result.affectedRows > 0) {
       const [updatedUser] = await pool.execute(
-        "SELECT id, role, profile_pic, email, username FROM users WHERE id = ?", 
+        "SELECT id, role, profile_pic, email, username FROM users WHERE id = ?",
         [userId]
       );
 

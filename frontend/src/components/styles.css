@@ -15,6 +15,7 @@
   --difficulty-easy: #00db1a;
   --difficulty-medium: #ffa600;
   --difficulty-hard: #fc0303;
+  --difficulty-generated: #303036;
 }
 
 body {
@@ -51,7 +52,12 @@ code {
   color: var(--difficulty-hard);
 }
 
+.generated {
+  color: var(--difficulty-generated);
+}
+
 .default-button {
+  position: relative;
   background-color: var(--dark);
   font-size: var(--body);
   color: var(--light);
@@ -323,6 +329,12 @@ code {
 
 .flip-vertically {
   transform: rotate(180deg);
+}
+
+.inline-elements {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
 }
 
 .dropdown {

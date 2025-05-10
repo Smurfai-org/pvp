@@ -29,7 +29,7 @@ const languages = [
   { label: "Python", value: "python" },
 ];
 
-const ERROR_NOT_PREMIUM = 111;
+export const ERROR_NOT_PREMIUM = 111;
 
 const Problem = () => {
   const { id } = useParams();
@@ -394,20 +394,25 @@ const Problem = () => {
       ]);
 
       socket.emit("message", {
-         message,
-         problemContext: {
+        message,
+        problemContext: {
           problemId: id,
           problemName: problem?.name,
           problemDescription: problem?.description,
           difficulty: problem?.difficulty,
           language: selectedLanguageValue,
           code: inputCode[selectedLanguageValue],
-          testCases: testCases.length > 0 ? testCases.map(tc => ({
-            input: tc.input[selectedLanguageValue],
-            expected_output: tc.expected_output,
-          })).slice(0, 2) : []
-         }
-        });
+          testCases:
+            testCases.length > 0
+              ? testCases
+                  .map((tc) => ({
+                    input: tc.input[selectedLanguageValue],
+                    expected_output: tc.expected_output,
+                  }))
+                  .slice(0, 2)
+              : [],
+        },
+      });
     } catch (error) {
       console.error("Error using AI chat:", error);
       showErrorMessage("Klaida bendraujant su AI asistentu");
@@ -449,7 +454,7 @@ const Problem = () => {
         if (loggedIn && userCodeRes?.ok) {
           const userData = await userCodeRes.json();
           if (userData[0]?.score) setPassScore(userData[0]?.score);
-          
+
           if (userData[0]?.status === "ai solved") {
             setIsSolvedByAI(true);
           }
@@ -601,7 +606,7 @@ const Problem = () => {
     if (isSolvedByAI) {
       showErrorMessage("Užduotis jau išspręsta AI");
     } else {
-       setShowGiveUpModal(true);
+      setShowGiveUpModal(true);
     }
   };
 
@@ -612,7 +617,7 @@ const Problem = () => {
       const response = await fetch("http://localhost:5000/generate/solution", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",        
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           userId: user?.id,
@@ -622,11 +627,10 @@ const Problem = () => {
         credentials: "include",
       });
 
-
       if (!response.ok) {
         throw new Error(`HTTP klaida: ${response.status}`);
       }
-      
+
       const data = await response.json();
       if (data.solution) {
         setInputCode({
@@ -639,7 +643,7 @@ const Problem = () => {
       } else {
         showErrorMessage("Sprendimo sugeneruoti nepavyko");
       }
-  } catch (error) {
+    } catch (error) {
       console.error("Klaida generuojant sprendimą:", error);
       showErrorMessage("Klaida generuojant sprendimą");
     } finally {
@@ -654,23 +658,18 @@ const Problem = () => {
         <div className="modal-content">
           <h2>Pasiduoti užduočiai</h2>
           <p>
-            AI sugeneruos jums pilną sprendimą, tačiau Jums rekomenduojama savarankiškai pasimokinti iš AI sugeneruoto kodo. Užduotis bus įvertinta 0 taškų ir pažymėta kaip "Išspręsta AI".
+            AI sugeneruos jums pilną sprendimą, tačiau Jums rekomenduojama
+            savarankiškai pasimokinti iš AI sugeneruoto kodo. Užduotis bus
+            įvertinta 0 taškų ir pažymėta kaip &quot;Išspręsta AI&quot;.
           </p>
           <p style={{ fontWeight: "bold", marginTop: "15px" }}>
             Ar tikrai norite pasiduoti?
           </p>
           <div className="modal-actions">
-            <Button 
-              onClick={onConfirm} 
-              disabled={isLoading}
-            >
+            <Button onClick={onConfirm} disabled={isLoading}>
               {isLoading ? "Generuojama..." : "Taip, pasiduodu"}
             </Button>
-            <Button 
-              onClick={onClose} 
-              disabled={isLoading} 
-              extra="secondary"
-            >
+            <Button onClick={onClose} disabled={isLoading} extra="secondary">
               Ne, aš dar galiu!
             </Button>
           </div>
@@ -678,8 +677,6 @@ const Problem = () => {
       </div>
     );
   };
-
-
 
   useEffect(() => {
     if (!problem) return;
@@ -698,10 +695,16 @@ const Problem = () => {
       } catch (error) {
         console.error("Error fetching course:", error);
       }
+    };
+
+    const loadData = async () => {
+      if (problem?.generated !== 1) {
+        await fetchCourse();
+      }
       setIsLoaded(true);
     };
 
-    fetchCourse();
+    loadData();
   }, [problem]);
 
   useEffect(() => {
@@ -724,7 +727,7 @@ const Problem = () => {
         console.log("Socket authenticated:", data.user);
       } else if (!data.success) {
         if (data.code === ERROR_NOT_PREMIUM) {
-           setNotPremium(true); 
+          setNotPremium(true);
           setChatError(data.message);
         } else {
           console.error(data.message || "Klaida autentifikuojant socket");
@@ -775,13 +778,12 @@ const Problem = () => {
   return (
     <div className="relative">
       {showGiveUpModal && (
-      <ConfirmGiveUpModal
-        onClose={() => setShowGiveUpModal(false)}
-        onConfirm={handleConfirmGiveUp}
-        isLoading={isGeneratingSolution}
-      />
-    )
-    }
+        <ConfirmGiveUpModal
+          onClose={() => setShowGiveUpModal(false)}
+          onConfirm={handleConfirmGiveUp}
+          isLoading={isGeneratingSolution}
+        />
+      )}
       <>
         {showLoginPrompt ? (
           <LoginPrompt onClose={() => setShowLoginPrompt(false)} />
@@ -916,9 +918,7 @@ const Problem = () => {
 
                   {isLoaded && (
                     <div>
-                      <ReactMarkdown>
-                        {problem?.description}
-                      </ReactMarkdown>
+                      <ReactMarkdown>{problem?.description}</ReactMarkdown>
                     </div>
                   )}
 
@@ -1004,7 +1004,11 @@ const Problem = () => {
               <Button extra="small" onClick={handleRunButtonClick}>
                 Leisti programą
               </Button>
-              <Button extra="small bright" onClick={handleCheckclick} disabled={isSolvedByAI}>
+              <Button
+                extra="small bright"
+                onClick={handleCheckclick}
+                disabled={isSolvedByAI}
+              >
                 Tikrinti
               </Button>
               <Dropdown
@@ -1092,17 +1096,18 @@ const ChatInput = ({ onGenerateHint, onSend, notPremium, onGiveUp }) => {
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
             handleSend();
-          }}
-        }
+          }
+        }}
       />
       <div className="chat-input-actions">
         <Button extra="small bright" onClick={() => onGenerateHint?.()}>
           Generuoti užuominą užduočiai
         </Button>
-        <Button 
-        extra="small bright" 
-        onClick={() => onGiveUp?.()}
-        disabled={notPremium}>
+        <Button
+          extra="small bright"
+          onClick={() => onGiveUp?.()}
+          disabled={notPremium}
+        >
           Pasiduoti
         </Button>
         <Button extra="small" onClick={handleSend} disabled={!message}>
@@ -1135,12 +1140,10 @@ const ChatTranscript = ({ messages = [] }) => {
             key={index}
             className={`chat-message ${msg.sender === "user" ? "user" : "ai"}`}
           >
-            {msg.sender === "user" ?(
+            {msg.sender === "user" ? (
               msg.text
             ) : (
-              <ReactMarkdown>
-                {msg.text}
-                </ReactMarkdown>
+              <ReactMarkdown>{msg.text}</ReactMarkdown>
             )}
           </div>
         ))

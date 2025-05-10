@@ -2,7 +2,7 @@ import express from "express";
 import fetch from "node-fetch";
 import db from "../utils/db.js";
 import jwt, { decode } from "jsonwebtoken";
-import bcrypt from 'bcrypt';
+import bcrypt from "bcrypt";
 
 const router = express.Router();
 
@@ -46,6 +46,7 @@ export async function validateToken(token) {
         profile_pic: decoded.user.profile_pic,
         email: decoded.user.email,
         username: decoded.user.username,
+        premium: decoded.user.premium,
       },
       expiresAt: new Date(decoded.exp * 1000).toISOString(),
     };
@@ -94,72 +95,80 @@ const validateGoogle = async (decodedToken) => {
   return user.length > 0 && user[0].id === decodedToken.id;
 };
 
-router.post('/register', async (req, res) => {
+router.post("/register", async (req, res) => {
   const { username, password, email } = req.body;
 
   if (!username || !password || !email) {
-      return res.status(400).json({ message: 'Username, password, and email are required' });
+    return res
+      .status(400)
+      .json({ message: "Username, password, and email are required" });
   }
 
   const emailRegex = /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/;
   if (!emailRegex.test(email)) {
-    return res.status(400).json({ message: 'Netinkamas paštas' });
+    return res.status(400).json({ message: "Netinkamas paštas" });
   }
 
   try {
-      const saltRounds = 10;
-      const salt = await bcrypt.genSalt(saltRounds);
-      const hashedPassword = await bcrypt.hash(password, salt);
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-      const [check] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
+    const [check] = await db.execute("SELECT * FROM users WHERE email = ?", [
+      email,
+    ]);
 
-      if(check.length != 0) {
-        return res.status(400).json({ message: 'Toks naudotojas jau egzistuoja' });
-      }
-      
-      const sql = 'INSERT INTO users (username, password, email, creation_date, deleted) VALUES (?, ?, ?, NOW(), 0)';
-      const values = [username, hashedPassword, email];
+    if (check.length != 0) {
+      return res
+        .status(400)
+        .json({ message: "Toks naudotojas jau egzistuoja" });
+    }
 
-      const [result] = await db.execute(sql, values);
+    const sql =
+      "INSERT INTO users (username, password, email, creation_date, deleted) VALUES (?, ?, ?, NOW(), 0)";
+    const values = [username, hashedPassword, email];
 
-      if(result.affectedRows === 0) {
-        return res.status(401).json({ message: 'Nepavyko prisiregistruoti' });
-      }
+    const [result] = await db.execute(sql, values);
 
-      return res.status(200).json({ message: 'Registracija sėkminga' });
+    if (result.affectedRows === 0) {
+      return res.status(401).json({ message: "Nepavyko prisiregistruoti" });
+    }
 
+    return res.status(200).json({ message: "Registracija sėkminga" });
   } catch (error) {
-      console.error('Error during registration:', error);
-      res.status(500).json({ error: 'Server error, please try again later.' });
+    console.error("Error during registration:", error);
+    res.status(500).json({ error: "Server error, please try again later." });
   }
 });
 
-router.post('/login', async (req, res) => {
+router.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res.status(400).json({ message: 'Username and password are required' });
+    return res
+      .status(400)
+      .json({ message: "Username and password are required" });
   }
 
-  const sql = 'SELECT * FROM users WHERE username = ?';
+  const sql = "SELECT * FROM users WHERE username = ?";
 
   try {
     const [results] = await db.execute(sql, [username]);
 
     if (results.length === 0) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const user = results[0];
 
     if (!user.password) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const token = jwt.sign(
@@ -173,26 +182,24 @@ router.post('/login', async (req, res) => {
           username: user.username,
         },
         id: user.id,
-        loginType: 'password',
+        loginType: "password",
       },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: "7d" }
     );
 
-    res.cookie('token', token, {
+    res.cookie("token", token, {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'None',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
       maxAge: 604800000,
     });
 
-    res.status(200).json({ message: 'Login successful', token });
+    res.status(200).json({ message: "Login successful", token });
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Server error, please try again later.' });
+    console.error("Error:", error);
+    res.status(500).json({ error: "Server error, please try again later." });
   }
 });
-
-
 
 export default router;
