@@ -374,7 +374,7 @@ const GenerateProblemWindow = ({ handleSend, isGeneratingProblem }) => {
       ) : (
         <div className="page-wrapper">
           <h2>Generuoti asmeninę užduotį</h2>
-          <p>
+          <p style={{ textAlign: "justify" }}>
             Čia galite pateikti dirbtiniam intelektui užklausą sukurti užduotį
             pagal jūsų pasirinktą temą ir aprašymą. Dirbtinis intelektas
             sugeneruos individualią užduotį, kuri bus automatiškai įtraukta į

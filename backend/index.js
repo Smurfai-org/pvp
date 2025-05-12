@@ -17,7 +17,7 @@ const io = new Server(server, {
   cors: {
     methods: ["GET", "POST"],
     credentials: true,
-  }
+  },
 });
 const port = 5000;
 

@@ -34,7 +34,8 @@ const CourseProblemTile = ({
         {loggedIn && (
           <strong
             className={
-              problem?.progress?.status === "finished"
+              problem?.progress?.status === "finished" ||
+              problem?.progress?.status === "ai solved"
                 ? "course-finished"
                 : problem?.progress?.status === "in progress"
                 ? "course-in-progress"
