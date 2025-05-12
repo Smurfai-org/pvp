@@ -1,8 +1,8 @@
 import React from 'react'
 
-function Hyperlink({children, href, onClick}) {
+function Hyperlink({children, href, onClick, className}) {
   return (
-    <a href={href} className='hyperlink' onClick={onClick}>{children}</a>
+    <a href={href} className={`hyperlink ${className}`} onClick={onClick}>{children}</a>
   )
 }
 
