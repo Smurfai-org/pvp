@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   const { id } = req.query;
+  console.log("result");
 
   try {
     let query = "SELECT * FROM test_cases";
@@ -39,7 +40,10 @@ router.post("/", async (req, res) => {
     if (!problemId || !input || !output) {
       return res.status(400).json({ message: "Trūksta duomenų" });
     }
-    const [problem] = await pool.execute("SELECT * FROM problems WHERE id = ?", [problemId]);
+    const [problem] = await pool.execute(
+      "SELECT * FROM problems WHERE id = ?",
+      [problemId]
+    );
     if (problem.length === 0) {
       return res.status(404).json({ message: "Užduotis nerasta" });
     }
@@ -113,7 +117,9 @@ router.delete("/:id", async (req, res) => {
   }
   const { id } = req.params;
   try {
-    const [result] = await pool.execute("DELETE FROM test_cases WHERE id = ?", [id]);
+    const [result] = await pool.execute("DELETE FROM test_cases WHERE id = ?", [
+      id,
+    ]);
     if (result.affectedRows > 0) {
       res.status(200).json({ message: "Testas ištrintas" });
     } else {

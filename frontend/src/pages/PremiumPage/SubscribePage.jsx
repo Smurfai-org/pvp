@@ -3,7 +3,9 @@ import { loadStripe } from '@stripe/stripe-js';
 import AuthContext from '../../utils/AuthContext';
 import Button from '../../components/Button';
 
-const stripePromise = loadStripe('pk_test_51RO242E2ccvohllaeOkX2bD0j9y8JOSG0Ho5ZOffrkEa5OqWa9Gl6UnXijy0tPEK835d5XWTKNwNzXpxA1OXBuvb00IgvLKz4v');
+const stripePromise = loadStripe(
+  "pk_test_51RO242E2ccvohllaeOkX2bD0j9y8JOSG0Ho5ZOffrkEa5OqWa9Gl6UnXijy0tPEK835d5XWTKNwNzXpxA1OXBuvb00IgvLKz4v"
+);
 
 const SubscribePage = () => {
     const { user } = useContext(AuthContext);
@@ -26,13 +28,13 @@ const SubscribePage = () => {
     }
 
     const result = await stripe.redirectToCheckout({
-        sessionId: data.id,
+      sessionId: data.id,
     });
 
     if (result.error) {
-        alert(result.error.message);
+      alert(result.error.message);
     }
-    };
+  };
 
   return (
     <div className="subscribe-page">

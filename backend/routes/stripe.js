@@ -9,13 +9,13 @@ dotenv.config();
 const router = express.Router();
 const stripe = new Stripe(process.env.STRIPE_SECRET);
 
+
 router.post('/create-checkout-session', async (req, res) => {
   const { id } = req.body;
-
   try {
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'subscription',
+      payment_method_types: ["card"],
+      mode: "subscription",
       line_items: [
         {
           price: 'price_1RO26xE2ccvohllamkHn8zzu',
@@ -31,8 +31,8 @@ router.post('/create-checkout-session', async (req, res) => {
 
     res.json({ id: session.id });
   } catch (error) {
-    console.error('❌ Stripe error:', error.message);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Stripe error:", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
