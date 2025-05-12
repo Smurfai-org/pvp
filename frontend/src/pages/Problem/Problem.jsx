@@ -527,6 +527,8 @@ const Problem = () => {
           headers: { "Content-Type": "application/json" },
         });
 
+        console.log(res);
+
         if (!res.ok) {
           return {
             cpp: starting_code_empty?.cpp,
