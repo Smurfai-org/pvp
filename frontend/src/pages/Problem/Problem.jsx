@@ -64,10 +64,15 @@ const Problem = () => {
   const [notPremium, setNotPremium] = useState(false);
 
   const [showGiveUpModal, setShowGiveUpModal] = useState(false);
+  const [isRunningCode, setIsRunningCode] = useState(false);
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  const [isRunningTestCase, setIsRunningTestCase] = useState({});
   const [isGeneratingSolution, setIsGeneratingSolution] = useState(false);
+  const [isGeneratingHint, setIsGeneratingHint] = useState(false);
+  const [isGeneratingChatAnswer, setIsGeneratingChatAnswer] = useState(false);
   const [isSolvedByAI, setIsSolvedByAI] = useState(false);
 
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const textareaRef = useRef(null);
 
   // SĄRAŠAS testavimo atveju. Vieno jų tipas pvz toks:
@@ -142,6 +147,9 @@ const Problem = () => {
     dontPrint = false,
     skipEvaluation = false
   ) => {
+    if (index !== null && !dontPrint && !skipEvaluation) {
+      setIsRunningTestCase({ ...isRunningTestCase, [index]: true });
+    }
     const sourceCode =
       selectedLanguageValue === "cpp"
         ? problemCodeFullCpp(
@@ -184,10 +192,18 @@ const Problem = () => {
 
         if (!dontPrint) setOutputText(result);
         setIsOutputWindowMaximised(true);
+
+        if (index !== null && !dontPrint && !skipEvaluation) {
+          setIsRunningTestCase({});
+        }
+
         return { result, didPass };
       } catch (error) {
         console.error("Error running test case:", error);
         setOutputText(error.message);
+        if (index !== null && !dontPrint && !skipEvaluation) {
+          setIsRunningTestCase({});
+        }
       }
     }
   };
@@ -202,7 +218,9 @@ const Problem = () => {
       return;
     }
 
+    setIsRunningCode(true);
     const { result } = await handleTestButtonClick(0, true, true);
+    setIsRunningCode(false);
     setOutputText(result);
   };
 
@@ -243,6 +261,8 @@ const Problem = () => {
       setShowLoginPrompt(true);
       return;
     }
+    setIsEvaluating(true);
+
     //Paleisti, kad praeitu testus
     const score = await handleRunTestCases();
 
@@ -275,6 +295,8 @@ const Problem = () => {
       showSuccessMessage("Kodas sėkmingai įvertintas");
     } catch {
       showErrorMessage("Klaida įkeliant sprendimą");
+    } finally {
+      setIsEvaluating(false);
     }
 
     try {
@@ -341,6 +363,7 @@ const Problem = () => {
       showErrorMessage("Užduotis jau išspręsta AI");
     }
     try {
+      setIsGeneratingHint(true);
       const response = await fetch("http://localhost:5000/generate/hint", {
         method: "POST",
         headers: {
@@ -370,6 +393,7 @@ const Problem = () => {
       console.error("Error generating hint:", error);
       showErrorMessage("Klaida generuojant užuominą");
     }
+    setIsGeneratingHint(false);
   };
 
   const handleSendAiMessageClick = async (message) => {
@@ -388,6 +412,7 @@ const Problem = () => {
     }
 
     try {
+      setIsGeneratingChatAnswer(true);
       setChatMessages((prevMessages) => [
         ...prevMessages,
         {
@@ -420,6 +445,7 @@ const Problem = () => {
     } catch (error) {
       console.error("Error using AI chat:", error);
       showErrorMessage("Klaida bendraujant su AI asistentu");
+      setIsGeneratingChatAnswer(false);
     }
   };
 
@@ -670,8 +696,8 @@ const Problem = () => {
             Ar tikrai norite pasiduoti?
           </p>
           <div className="modal-actions">
-            <Button onClick={onConfirm} disabled={isLoading}>
-              {isLoading ? "Generuojama..." : "Taip, pasiduodu"}
+            <Button onClick={onConfirm} loading={isLoading}>
+              Taip, pasiduodu
             </Button>
             <Button onClick={onClose} disabled={isLoading} extra="secondary">
               Ne, aš dar galiu!
@@ -747,6 +773,7 @@ const Problem = () => {
         timestamp: msg.timestamp,
       }));
       setChatMessages(parsedHistory);
+      setIsGeneratingChatAnswer(false);
     });
 
     socketClient.on("response", (data) => {
@@ -758,6 +785,7 @@ const Problem = () => {
           timestamp: data.timestamp,
         },
       ]);
+      setIsGeneratingChatAnswer(false);
     });
 
     socketClient.on("error", (error) => {
@@ -937,6 +965,12 @@ const Problem = () => {
                             <Button
                               extra="small"
                               onClick={() => handleTestButtonClick(index)}
+                              loading={isRunningTestCase[index]}
+                              disabled={
+                                Object.keys(isRunningTestCase).length !== 0 ||
+                                isRunningCode ||
+                                isEvaluating
+                              }
                             >
                               Testuoti
                             </Button>
@@ -996,6 +1030,8 @@ const Problem = () => {
                       onSend={(message) => handleSendAiMessageClick(message)}
                       notPremium={notPremium}
                       onGiveUp={handleGiveUpClick}
+                      isGeneratingHint={isGeneratingHint}
+                      isGeneratingChatAnswer={isGeneratingChatAnswer}
                     />
                   </div>
                 </div>
@@ -1005,13 +1041,25 @@ const Problem = () => {
 
           <div className="problem-page-right">
             <div style={{ display: "flex", gap: "1rem" }}>
-              <Button extra="small" onClick={handleRunButtonClick}>
+              <Button
+                extra="small"
+                onClick={handleRunButtonClick}
+                loading={isRunningCode}
+                disabled={
+                  isEvaluating || Object.keys(isRunningTestCase).length !== 0
+                }
+              >
                 Leisti programą
               </Button>
               <Button
                 extra="small bright"
                 onClick={handleCheckclick}
-                disabled={isSolvedByAI}
+                disabled={
+                  isSolvedByAI ||
+                  isRunningCode ||
+                  Object.keys(isRunningTestCase).length !== 0
+                }
+                loading={isEvaluating}
               >
                 Tikrinti
               </Button>
@@ -1068,7 +1116,15 @@ const Problem = () => {
 };
 
 export default Problem;
-const ChatInput = ({ onGenerateHint, onSend, notPremium, onGiveUp }) => {
+
+const ChatInput = ({
+  onGenerateHint,
+  onSend,
+  notPremium,
+  onGiveUp,
+  isGeneratingHint,
+  isGeneratingChatAnswer,
+}) => {
   const [message, setMessage] = useState("");
   const textareaRef = useRef(null);
 
@@ -1104,16 +1160,31 @@ const ChatInput = ({ onGenerateHint, onSend, notPremium, onGiveUp }) => {
             }
           }}
         />
-        <VoiceToText setMessage={setMessage} className='chat-voice-input'/>
+        <VoiceToText setMessage={setMessage} className="chat-voice-input" />
       </div>
       <div className="chat-input-actions">
-        <Button extra="small bright" onClick={() => onGenerateHint?.()}>
-          Generuoti užuominą užduočiai
-        </Button>
-        <Button extra="small bright" onClick={() => onGiveUp?.()} disabled={notPremium}>
-          Pasiduoti
-        </Button>
-        <Button extra="small" onClick={handleSend} disabled={!message}>
+        <div className="inline-elements">
+          <Button
+            loading={isGeneratingHint}
+            extra="small bright"
+            onClick={() => onGenerateHint?.()}
+          >
+            Generuoti užuominą
+          </Button>
+          <Button
+            extra="small bright"
+            onClick={() => onGiveUp?.()}
+            disabled={notPremium}
+          >
+            Pasiduoti
+          </Button>
+        </div>
+        <Button
+          extra="small"
+          onClick={handleSend}
+          disabled={!message}
+          loading={isGeneratingChatAnswer}
+        >
           Klausti
         </Button>
       </div>
