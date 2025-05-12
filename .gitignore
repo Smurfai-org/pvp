@@ -27,3 +27,4 @@ node_modules
 
 # Sensitive data
 .env
+google-creds.json
