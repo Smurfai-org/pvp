@@ -42,6 +42,7 @@ const Navbar = () => {
       </div>
 
       <div className="nav-links">
+        <Hyperlink href='/premium' className='premium-link'>🌟Premium🌟</Hyperlink>
         <Hyperlink href="/courses">Kursai</Hyperlink>
         <Hyperlink href="/discussion">Diskusija</Hyperlink>
         {loggedIn && (

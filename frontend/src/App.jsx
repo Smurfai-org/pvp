@@ -26,6 +26,9 @@ import ViewProfile from "./pages/ViewProfile/ViewProfile";
 import Register from "./pages/Register/Register";
 import ViewTC from "./pages/ViewTC/ViewTC";
 import ViewHints from "./pages/viewHints/ViewHints";
+import PremiumSelection from "./pages/PremiumPage/PremiumPage";
+import PremiumArea from "./pages/PremiumPage/PremiumArea";
+import SubscribePage from "./pages/PremiumPage/SubscribePage";
 
 function AppRoutes() {
   const location = useLocation();
@@ -56,6 +59,9 @@ function AppRoutes() {
               <Route path="/view_problem/:id/testcases/" element={<ViewTC />} />
               <Route path="/view_problem/:id/hints/" element={<ViewHints />} />
               <Route path="/courses" element={<CourseList />} />
+              <Route path="/premium" element={<PremiumSelection />} />
+              <Route path="/premium-area" element={<PremiumArea />} />
+              <Route path="/subscribe" element={<SubscribePage />} />
               <Route
                 path="/generate_problem/:id"
                 element={<GenerateProblem />}
