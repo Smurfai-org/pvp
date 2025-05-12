@@ -18,10 +18,10 @@ router.get("/u=:userId", async (req, res) => {
   const userId = req.params.userId;
   try {
     const [rows] = await pool.execute(
-      "SELECT * FROM progress WHERE fk_USERid = ?",
+      "SELECT progress.*, problems.difficulty FROM progress LEFT JOIN problems ON progress.fk_PROBLEMid = problems.id WHERE progress.fk_USERid = ?;",
       [userId]
     );
-      res.status(200).json(rows);
+    res.status(200).json(rows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Serverio klaida" });
@@ -52,7 +52,7 @@ router.get("/:userId/:problemId", async (req, res) => {
       "SELECT * FROM progress WHERE fk_USERid = ? AND fk_PROBLEMid = ?",
       [userId, problemId]
     );
-      res.status(200).json(rows);
+    res.status(200).json(rows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Serverio klaida" });
