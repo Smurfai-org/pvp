@@ -1110,11 +1110,7 @@ const ChatInput = ({ onGenerateHint, onSend, notPremium, onGiveUp }) => {
         <Button extra="small bright" onClick={() => onGenerateHint?.()}>
           Generuoti užuominą užduočiai
         </Button>
-        <Button
-          extra="small bright"
-          onClick={() => onGiveUp?.()}
-          disabled={notPremium}
-        >
+        <Button extra="small bright" onClick={() => onGiveUp?.()} disabled={notPremium}>
           Pasiduoti
         </Button>
         <Button extra="small" onClick={handleSend} disabled={!message}>

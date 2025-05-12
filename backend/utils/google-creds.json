@@ -1,0 +1,13 @@
+{
+    "type": "service_account",
+    "project_id": "river-portfolio-364619",
+    "private_key_id": "204c5ab30e701ffea023de8cc17ff205f149115f",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQChGSwJ1e4sjjp9\npIY2e1lqclEIAXhtW0sWAw1T/iP/cC1uqsPhgEcaZwJDd6Eu66NrnawZ2RiUvGeI\nNtJZoh+jYlN3D6A6fQyY27/lngivFodV8gHJRnuSg76K99tQqfOf8GAnUrxEB188\nG+gVoUnvWUYpbx4JTcmTd1mPE/HNflOgfhXJ6/dk+SA3UbxdyevFY+dGes2L7Jg/\nMZZo+6gOSZra0fejaSFz2ggfCOhjRUJwr7ipMXl8RRfvKnEXDGqQ08N0UQSBN4i1\natWBlNCyCbS0eqzE/oTbe5nvG/nRYkcT04w1wBTiW5e5VuUodki/jKylPa4WpNnR\nU/h2o1LTAgMBAAECggEAAaUNPyZ15L+PY+pl/zCZzgC2LuCkKmp05Rfv4jK+8SP9\nWsFkkZNRM1K06IJt3PN4uvSkcqxPcdYaMOWHMHVIYTWNe5kA8XsgW0xddH2W27Uq\nEyiod89/6HpVQi71bsJL1sJKAQZft+QWLVNtnN1SMQVJnMrh7oXJFpFwrFZisOhJ\nACDQsHjB8yLuFqy1hNCpq2Wugi6Wx5VhlxojwhNpy8apjqL5rsW2xaPkdoDYVGEK\n9g7H2SSndk3uX6qGSc6fLbIrLEDvWpjua7yff7S224mll5g6Ore47t9l4OGC8M2u\nUl4v6wWNiKJh6pvUc4yN2omiqiLmOawLxJ7Un0lq3QKBgQDhBvgiiSjKmIKFKBQr\nuwbkkDFFdBq2rLkFyKD70gdPKZ445mI4Lqj1IRIakpAWd5OCF3SKahgCZP3OPqr2\nD+B3tLeF95uFm7bQi8PVZkUZ+CWqvSAtfCzFf3LSUzKwWxeEvdh7XHXZc+dh0sOh\nZ7SGCgR6EGDjlMA+sJ5vv1/u3QKBgQC3RZy/JbuNj7aupaSQeTfXx8DrkDliclPV\n7Cps+jZ4znTFvPweIdd+tybGLjIGmJCt1JEI22RgfrLiYzZ1gaOh7q/SgK9fA2PJ\nnyISAF7+Xi3U6+f5jBl3Wv1INcxamNU2tITFKpq18i2ZzUR2r3/WQ2fUFtjACPaI\n4/PEbwM1bwKBgBae2LrABvW2twgjq0NqHZtEU2+j6DuMyVynemdWCZ4PlPQrVJxJ\nNHrPxD4flZRsmMtvCCwR1jAHbuwYqJ7roajm5bv11BBuQsZcBmehTDj8FO1A7cck\nwGtqEGTMMEBCJ+8UFnrwJHijihLvWPMUtbTztNeAZfz6qwiiQIsDNeWRAoGAMaMi\n/wpjL8YavlaSqaaLH2A0uhhH0ogQeMIMA5QJKNMSAXRb/HVB/knwsIBWgD7WAJ6v\n4Ww6VYA7RuGEIHNKNFOHP0YnOV6bqkH1YlbDY7VySFbUb1wokZENRH99p5P5O2XN\nB/GwEVNUUnGr91E1GH0NI/5EGk7TJuRGY4+FmPUCgYBySwdHOF9n9oE4yljIkZiP\ndCI+q0LQACrGYXGIDwI0DZGDsBB442chUiZDPTcKF28JxV6tp1gbfED1Qw5iPVx/\nbVOt+owmYQNS05ZF364RubY1lp+QXpy6HPDI741UUyIEBOVqcgv5l9AHUBoekoQs\nER+TIcLlc2x3lklX0ERcRA==\n-----END PRIVATE KEY-----\n",
+    "client_email": "learncode@river-portfolio-364619.iam.gserviceaccount.com",
+    "client_id": "102272760657941327189",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/learncode%40river-portfolio-364619.iam.gserviceaccount.com",
+    "universe_domain": "googleapis.com"
+  }
