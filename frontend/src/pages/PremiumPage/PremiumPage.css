@@ -1,11 +1,9 @@
-/* Container for center alignment */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 30px;
 }
 
-/* Section Styling */
 .premium-selection {
   background-color: #fff;
   padding: 50px 0;
@@ -100,7 +98,6 @@ header p {
   width: 5rem;
 }
 
-/* Comparison Table Styling */
 .comparison {
   margin-top: 50px;
   background-color: #fff;
@@ -145,17 +142,17 @@ header p {
   font-weight: bold;
 }
 
-h1 {
+.subscribe-page h1, .premium-page h1 {
   font-size: 2rem;
   margin-bottom: 20px;
 }
 
-p {
+.subscribe-page p, .premium-page p {
   font-size: 1.2rem;
   margin-bottom: 30px;
 }
 
-ul {
+.subscribe-page ul, .premium-page ul {
   text-align: left;
   margin-bottom: 30px;
   font-size: 1.1rem;

@@ -180,6 +180,7 @@ router.post("/login", async (req, res) => {
           profile_pic: user.profile_pic,
           email: user.email,
           username: user.username,
+          premium: user.premium,
         },
         id: user.id,
         loginType: "password",
@@ -201,5 +202,62 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ error: "Server error, please try again later." });
   }
 });
+
+router.get("/refresh", async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).json({ message: "No token found" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const [result] = await db.execute("SELECT * FROM users WHERE id = ?", [decoded.user.id]);
+    const user = result[0];
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const newToken = jwt.sign(
+      {
+        user: {
+          id: user.id,
+          role: user.role,
+          profile_pic: user.profile_pic,
+          email: user.email,
+          username: user.username,
+          premium: user.premium,
+        },
+        id: user.id,
+        loginType: decoded.loginType,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.cookie("token", newToken, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+      maxAge: 604800000,
+    });
+
+    res.status(200).json({
+      message: "Token refreshed",
+      user: {
+        id: user.id,
+        role: user.role,
+        profile_pic: user.profile_pic,
+        email: user.email,
+        username: user.username,
+        premium: user.premium,
+      },
+    });
+  } catch (err) {
+    console.error("Error refreshing token:", err);
+    return res.status(401).json({ message: "Invalid token" });
+  }
+});
+
 
 export default router;

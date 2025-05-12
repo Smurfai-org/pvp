@@ -29,6 +29,7 @@ import ViewHints from "./pages/viewHints/ViewHints";
 import PremiumSelection from "./pages/PremiumPage/PremiumPage";
 import PremiumArea from "./pages/PremiumPage/PremiumArea";
 import SubscribePage from "./pages/PremiumPage/SubscribePage";
+import SubscribeSuccessPage from "./pages/PremiumPage/SubscribeSuccess";
 
 function AppRoutes() {
   const location = useLocation();
@@ -62,6 +63,7 @@ function AppRoutes() {
               <Route path="/premium" element={<PremiumSelection />} />
               <Route path="/premium-area" element={<PremiumArea />} />
               <Route path="/subscribe" element={<SubscribePage />} />
+              <Route path="/subscribe-success" element={<SubscribeSuccessPage />} />
               <Route
                 path="/generate_problem/:id"
                 element={<GenerateProblem />}
