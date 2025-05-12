@@ -90,7 +90,6 @@ export default function UserProgressChart({
     fetchProgress();
   }, [user?.id, accountCreationDate]);
 
-  console.log(graphData);
   if (!loggedIn) return null;
 
   return (
