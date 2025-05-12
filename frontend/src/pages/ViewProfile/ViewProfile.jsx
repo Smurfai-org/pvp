@@ -7,25 +7,34 @@ import defaultProfilePic from "../../assets/profile-default.svg";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import LoginPrompt from "../../components/LoginPrompt";
 import cookies from "js-cookie";
+import UserProgressChart from "./UserProgressChart";
+
+export const formatDate = (dateString, shorten = false) => {
+  if (!dateString) return "N/A";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("lt-LT", {
+    year: "numeric",
+    month: shorten ? "numeric" : "long",
+    day: "numeric",
+  });
+};
 
 function ViewProfile() {
   const { loggedIn, user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [userDetails, setUserDetails] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
-  
+
   const [formUsername, setFormUsername] = useState("");
   const [formEmail, setFormEmail] = useState("");
   const [formPassword, setFormPassword] = useState("");
   const [formConfirmPassword, setFormConfirmPassword] = useState("");
   const [updateMessage, setUpdateMessage] = useState("");
 
-  if (!loggedIn) {
-    return (<LoginPrompt />);
-  }
+  const [averageRating, setAverageRating] = useState(0);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -51,16 +60,6 @@ function ViewProfile() {
 
     fetchUserDetails();
   }, [loggedIn, user, navigate]);
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("lt-LT", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
 
   const handleEditProfile = () => {
     setIsEditingProfile(true);
@@ -88,26 +87,26 @@ function ViewProfile() {
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       const response = await fetch(`http://localhost:5000/user/${user.id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${cookies.get('token')}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${cookies.get("token")}`,
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify({
           username: formUsername ? formUsername : null,
-          email: formEmail? formEmail : null,
-        })
+          email: formEmail ? formEmail : null,
+        }),
       });
 
       if (response.ok) {
         const data = response.json();
 
         if (data.token) {
-          cookies.set('token', data.token, { expires: 7, path: '/' });
+          cookies.set("token", data.token, { expires: 7, path: "/" });
         }
 
         setUpdateMessage("Profilis sėkmingai atnaujintas");
@@ -117,7 +116,7 @@ function ViewProfile() {
       } else {
         const errorData = await response.json();
         console.error("Nepavyko gauti atsakymo iš /users/id:", errorData);
-        setUpdateMessage('Nepavyko atnaujinti profilio');
+        setUpdateMessage("Nepavyko atnaujinti profilio");
       }
     } catch (error) {
       console.error("Klaida atnaujinant profilį:", error);
@@ -127,29 +126,29 @@ function ViewProfile() {
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (formPassword !== formConfirmPassword) {
       setUpdateMessage("Slaptažodžiai nesutampa");
       return;
     }
-    
+
     try {
       const response = await fetch(`http://localhost:5000/user/${user.id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${cookies.get('token')}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${cookies.get("token")}`,
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify({
-          password: formPassword
-        })
+          password: formPassword,
+        }),
       });
 
       if (response.ok) {
         const data = await response.json();
         if (data.token) {
-          cookies.set('token', data.token, { expires: 7, path: '/' });
+          cookies.set("token", data.token, { expires: 7, path: "/" });
         }
 
         setUpdateMessage("Slaptažodis sėkmingai pakeistas");
@@ -161,13 +160,19 @@ function ViewProfile() {
         }, 350);
       } else {
         const errorData = await response.json();
-        setUpdateMessage(`Klaida: ${errorData.message || 'Nepavyko pakeisti slaptažodžio'}`);
+        setUpdateMessage(
+          `Klaida: ${errorData.message || "Nepavyko pakeisti slaptažodžio"}`
+        );
       }
     } catch (error) {
       console.error("Klaida keičiant slaptažodį:", error);
       setUpdateMessage("Klaida keičiant slaptažodį");
     }
   };
+
+  if (!loggedIn) {
+    return <LoginPrompt />;
+  }
 
   if (loading) {
     return (
@@ -205,7 +210,7 @@ function ViewProfile() {
                   required
                 />
               </div>
-              
+
               <div className="profile-form-group">
                 <label htmlFor="email">El. paštas:</label>
                 <input
@@ -216,12 +221,16 @@ function ViewProfile() {
                   required
                 />
               </div>
-              
-              {updateMessage && <div className="update-message">{updateMessage}</div>}
-              
+
+              {updateMessage && (
+                <div className="update-message">{updateMessage}</div>
+              )}
+
               <div className="profile-form-actions">
                 <Button type="submit">Išsaugoti</Button>
-                <Button type="button" extra="secondary" onClick={handleCancel}>Atšaukti</Button>
+                <Button type="button" extra="secondary" onClick={handleCancel}>
+                  Atšaukti
+                </Button>
               </div>
             </form>
           ) : isEditingPassword ? (
@@ -236,7 +245,7 @@ function ViewProfile() {
                   required
                 />
               </div>
-              
+
               <div className="profile-form-group">
                 <label htmlFor="confirmPassword">Pakartokite slaptažodį:</label>
                 <input
@@ -247,12 +256,16 @@ function ViewProfile() {
                   required
                 />
               </div>
-              
-              {updateMessage && <div className="update-message">{updateMessage}</div>}
-              
+
+              {updateMessage && (
+                <div className="update-message">{updateMessage}</div>
+              )}
+
               <div className="profile-form-actions">
                 <Button type="submit">Išsaugoti</Button>
-                <Button type="button" extra="secondary" onClick={handleCancel}>Atšaukti</Button>
+                <Button type="button" extra="secondary" onClick={handleCancel}>
+                  Atšaukti
+                </Button>
               </div>
             </form>
           ) : (
@@ -273,8 +286,27 @@ function ViewProfile() {
                   {userDetails ? formatDate(userDetails.creation_date) : "N/A"}
                 </span>
               </div>
-              
-              {updateMessage && <div className="update-message">{updateMessage}</div>}
+
+              <div className="profile-info-row">
+                <span className="profile-label">Vidutinis įvertinimas:</span>
+                <span className="profile-value">
+                  {averageRating !== 0 ? averageRating : "N/A"}
+                </span>
+              </div>
+
+              <span className="profile-label">Jūsų progresas:</span>
+
+              <UserProgressChart
+                accountCreationDate={formatDate(
+                  userDetails.creation_date,
+                  true
+                )}
+                setAverageRating={(item) => setAverageRating(item)}
+              />
+
+              {updateMessage && (
+                <div className="update-message">{updateMessage}</div>
+              )}
             </div>
           )}
         </div>
@@ -282,7 +314,9 @@ function ViewProfile() {
         <div className="profile-actions">
           {!isEditingProfile && !isEditingPassword ? (
             <>
-              <Button onClick={handleEditProfile} extra="secondary">Redaguoti profilį</Button>
+              <Button onClick={handleEditProfile} extra="secondary">
+                Redaguoti profilį
+              </Button>
               <Button onClick={handleEditPassword}>Redaguoti slaptažodį</Button>
             </>
           ) : null}
