@@ -21,7 +21,6 @@ import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import LoginPrompt from "../../components/LoginPrompt";
 import io from "socket.io-client";
 import ReactMarkdown from "react-markdown";
-import VoiceToText from "../../components/VoiceToText";
 
 const tokenCookie = cookies.get("token");
 
@@ -66,9 +65,6 @@ const Problem = () => {
   const [showGiveUpModal, setShowGiveUpModal] = useState(false);
   const [isGeneratingSolution, setIsGeneratingSolution] = useState(false);
   const [isSolvedByAI, setIsSolvedByAI] = useState(false);
-
-  const [message, setMessage] = useState('');
-  const textareaRef = useRef(null);
 
   // SĄRAŠAS testavimo atveju. Vieno jų tipas pvz toks:
   // {id: 1, input: {cpp: 'const int num1 = 5;\nconst int num2 = 10;', python: 'num1 = 5\nnum2 = 10'}, expected_output: '15', fk_PROBLEMid: 18}
@@ -1088,29 +1084,30 @@ const ChatInput = ({ onGenerateHint, onSend, notPremium, onGiveUp }) => {
 
   return (
     <div className="chat-input-container">
-      <div className="chat-input">
-        <textarea
-          ref={textareaRef}
-          className="chat-textarea"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Klauskite dirbtinio intelekto..."
-          rows={1}
-          disabled={notPremium}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleSend();
-            }
-          }}
-        />
-        <VoiceToText setMessage={setMessage} className='chat-voice-input'/>
-      </div>
+      <textarea
+        ref={textareaRef}
+        className="chat-textarea"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="Klauskite dirbtinio intelekto..."
+        rows={1}
+        disabled={notPremium}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+          }
+        }}
+      />
       <div className="chat-input-actions">
         <Button extra="small bright" onClick={() => onGenerateHint?.()}>
           Generuoti užuominą užduočiai
         </Button>
-        <Button extra="small bright" onClick={() => onGiveUp?.()} disabled={notPremium}>
+        <Button
+          extra="small bright"
+          onClick={() => onGiveUp?.()}
+          disabled={notPremium}
+        >
           Pasiduoti
         </Button>
         <Button extra="small" onClick={handleSend} disabled={!message}>
