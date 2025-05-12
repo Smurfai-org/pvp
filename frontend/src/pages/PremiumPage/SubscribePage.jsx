@@ -1,27 +1,30 @@
-import React from "react";
-import { loadStripe } from "@stripe/stripe-js";
+import React, { useContext } from 'react';
+import { loadStripe } from '@stripe/stripe-js';
+import AuthContext from '../../utils/AuthContext';
+import Button from '../../components/Button';
 
 const stripePromise = loadStripe(
   "pk_test_51RO242E2ccvohllaeOkX2bD0j9y8JOSG0Ho5ZOffrkEa5OqWa9Gl6UnXijy0tPEK835d5XWTKNwNzXpxA1OXBuvb00IgvLKz4v"
 );
 
 const SubscribePage = () => {
-  const handleSubscribe = async () => {
+    const { user } = useContext(AuthContext);
+
+    const handleSubscribe = async () => {
     const stripe = await stripePromise;
 
-    const response = await fetch(
-      "http://localhost:5000/stripe/create-checkout-session",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    const response = await fetch('http://localhost:5000/stripe/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: "include",
+        body: JSON.stringify({ id: user.id }),
+    });
 
     const data = await response.json();
 
     if (!data.id) {
-      alert("Session ID not returned from server.");
-      return;
+        alert("Klaida apmokant prenumeratą");
+        return;
     }
 
     const result = await stripe.redirectToCheckout({
@@ -44,7 +47,7 @@ const SubscribePage = () => {
         <li>🔒 Be reklamų</li>
       </ul>
 
-      <button onClick={handleSubscribe}>Prenumeruoti už 19.99€/mėn</button>
+      <Button onClick={handleSubscribe}>Prenumeruoti už 4.99€/mėn</Button>
     </div>
   );
 };

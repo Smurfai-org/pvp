@@ -6,8 +6,9 @@ import { useNavigate } from 'react-router-dom';
 
 const PremiumSelection = () => {
 
-  const { premium } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const premium = user.premium;
 
   const free = [
     "Jokio pokalbio su DI asistentu",
@@ -41,7 +42,7 @@ const PremiumSelection = () => {
 
           <div className="plans">
             <div className="plan-card">
-              <h2>{premium ? 'Nemokamas Planas' : 'Dabartinis planas'}</h2>
+              <h2>{premium ? 'Nemokamas Planas' : (<>Dabartinis<br />Planas</>)}</h2>
               <p className="price">Nemokamas</p>
               <ul className="benefits-list-x">
                 {free.map((benefit, index) => (
@@ -55,8 +56,8 @@ const PremiumSelection = () => {
               }
             </div>
             <div className="plan-card">
-              <h2>{premium ? 'Dabartinis planas' : 'Premium Planas'}</h2>
-              <p className="price">5€/mėn</p>
+              <h2>{premium ? (<>Dabartinis<br />Planas</>) : (<>Premium<br />Planas</>)}</h2>
+              <p className="price">4.99€/mėn</p>
               <ul className="benefits-list">
                 {benefits.map((benefit, index) => (
                   <li key={index}>{benefit}</li>
