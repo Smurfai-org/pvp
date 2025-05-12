@@ -642,3 +642,66 @@ code {
 .close-btn:hover {
   background: #e60000;
 }
+
+.chat-input-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chat-textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: none;
+  font-size: 14px;
+  margin-bottom: 10px;
+  height: 2rem;
+}
+
+.chat-textarea:disabled {
+  background-color: #eaeaea;
+  cursor: not-allowed;
+}
+
+.chat-input-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.chat-button.small {
+  padding: 6px 12px;
+}
+
+.voice-to-text-container {
+  margin-top: 10px;
+}
+
+.voice-input-logo {
+  width: 2rem;
+  margin: 0;
+}
+
+.voice-button {
+  height: 100%;
+  padding: 0.5rem;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: none;
+}
+
+.voice-button.recording {
+  background-color: var(--bright);
+  color: white;
+}
