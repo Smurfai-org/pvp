@@ -14,6 +14,10 @@ router.get("/", async (req, res) => {
       query += " AND id = ?";
       params.push(id);
     }
+    if (userId) {
+      query += " AND fk_USERid IS NULL OR fk_USERid = ?";
+      params.push(userId);
+    }
 
     const [problems] = await pool.execute(query, params);
 
