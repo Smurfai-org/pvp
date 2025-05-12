@@ -520,6 +520,7 @@ const Problem = () => {
         cpp: starting_code_empty?.cpp,
         python: starting_code_empty?.python,
       });
+
       try {
         const res = await fetch(`http://localhost:5000/test_cases?id=${id}`, {
           method: "GET",
