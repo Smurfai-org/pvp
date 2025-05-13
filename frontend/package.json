@@ -16,6 +16,7 @@
     "@mui/material": "^7.1.0",
     "@mui/x-charts": "^8.3.0",
     "@react-oauth/google": "^0.12.1",
+    "@stripe/stripe-js": "^7.3.0",
     "axios": "^1.8.1",
     "cors": "^2.8.5",
     "google-one-tap": "^1.0.6",

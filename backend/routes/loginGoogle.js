@@ -47,9 +47,11 @@ router.post("/", async (req, res) => {
     const tokenData = await response.json();
     const googleToken = tokenData.access_token;
 
-    const userDataResponse = await fetch(
-      `https://oauth2.googleapis.com/tokeninfo?accessToken=${googleToken}`
-    );
+    const userDataResponse = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+      headers: {
+        Authorization: `Bearer ${googleToken}`,
+      },
+    });
     const userData = await userDataResponse.json();
 
     let dbid;
@@ -73,6 +75,7 @@ router.post("/", async (req, res) => {
           profile_pic: user[0].profile_pic,
           email: user[0].email,
           username: user[0].username,
+          premium: user[0].premium,
         },
         accessToken: tokenData.access_token,
         id: user[0].id,

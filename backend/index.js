@@ -8,16 +8,22 @@ import cookieParser from "cookie-parser";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { setupSocketIO } from "./utils/chatService.js";
+import stripeWebhook from "./routes/stripeWebHook.js";
 
 dotenv.config();
 
 const app = express();
+app.use(
+  "/stripe/webhook",
+  express.raw({ type: "application/json" }),
+  stripeWebhook
+);
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
     methods: ["GET", "POST"],
     credentials: true,
-  }
+  },
 });
 const port = 5000;
 

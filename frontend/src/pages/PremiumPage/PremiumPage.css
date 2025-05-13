@@ -1,0 +1,172 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px;
+}
+
+.premium-selection {
+  background-color: #fff;
+  padding: 50px 0;
+  text-align: center;
+}
+
+header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  color: #222;
+}
+
+header p {
+  font-size: 1.2rem;
+  color: #555;
+  margin-bottom: 40px;
+}
+
+.plans {
+  display: flex;
+  justify-content: center;
+}
+
+.plan-card {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  padding: 30px;
+  margin: 20px;
+  text-align: center;
+}
+
+.plan-card h2 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.price {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--bright);
+  margin-bottom: 30px;
+}
+
+.benefits-list {
+  list-style-type: none;
+  font-size: 1.1rem;
+  color: #999;
+  padding-left: 0;
+  margin-bottom: 30px;
+}
+
+.benefits-list li {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.benefits-list li::before {
+  content: "✔";
+  margin-right: 10px;
+  color: #27ae60;
+}
+
+.benefits-list-x {
+  list-style-type: none;
+  font-size: 1.1rem;
+  color: #999;
+  padding-left: 0;
+  margin-bottom: 30px;
+}
+
+.benefits-list-x li {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.benefits-list-x li::before {
+  content: "✖";
+  margin-right: 10px;
+  color: #e74c3c;
+}
+
+.btn {
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  width: 5rem;
+}
+
+.comparison {
+  margin-top: 50px;
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.comparison h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.comparison-table th,
+.comparison-table td {
+  padding: 15px;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+.comparison-table th {
+  background-color: var(--bright);
+  color: #fff;
+  font-size: 1.2rem;
+}
+
+.comparison-table td {
+  font-size: 1.1rem;
+}
+
+.comparison-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.comparison-table td:first-child {
+  font-weight: bold;
+}
+
+.subscribe-page h1, .premium-page h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.subscribe-page p, .premium-page p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+}
+
+.subscribe-page ul, .premium-page ul {
+  text-align: left;
+  margin-bottom: 30px;
+  font-size: 1.1rem;
+}
+
+.premium-page,
+.subscribe-page {
+  padding: 40px;
+  max-width: 800px;
+  margin: auto;
+  text-align: center;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  margin-top: 5rem;
+}
