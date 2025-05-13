@@ -202,7 +202,7 @@ export async function deleteMessagesFromId(userId, timestamp) {
     "DELETE FROM chat_messages WHERE fk_USERid = ? AND timestamp >= ?",
     [userId, timestamp]
   );
-  return result.affectedRows; 
+  return result.affectedRows;
 }
 const convoHist = new Map();
 export function setupSocketIO(io) {
@@ -215,7 +215,6 @@ export function setupSocketIO(io) {
         const result = await validateAuth(token);
         if (result.valid) {
           user = result.user;
-          console.log("user:", user);
           socket.emit("authenticated", { success: true, user: user });
           const hist = await getUserChatHistory(user.id);
           convoHist.set(user.id, hist);
@@ -284,31 +283,34 @@ export function setupSocketIO(io) {
       try {
         const { timestamp, userId } = data;
         console.log("deleteMessages called with:", { timestamp, userId });
-    
+
         if (!timestamp || !userId) {
-          return callback({ success: false, message: "Missing messageId or userId" });
+          return callback({
+            success: false,
+            message: "Missing messageId or userId",
+          });
         }
-    
+
         const deletionResult = await deleteMessagesFromId(userId, timestamp);
-    
+
         if (deletionResult === 0) {
           return callback({ success: false, message: "No messages deleted" });
         }
-    
+
         const updatedHistory = await getUserChatHistory(userId);
-    
+
         socket.emit("messagesDeleted", {
           success: true,
           updatedHistory,
         });
-    
+
         callback({ success: true, updatedHistory });
       } catch (error) {
         console.error("Error deleting messages:", error);
         callback({ success: false, message: "Error deleting messages" });
       }
     });
-    
+
     socket.on("disconnect", () => {
       console.log("Client disconnected", socket.id);
     });
