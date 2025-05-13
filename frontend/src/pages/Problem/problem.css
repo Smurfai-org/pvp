@@ -312,6 +312,7 @@
   grid-template-columns: 1fr auto;
   justify-items: stretch;
   align-items: center;
+  gap: 1rem;
 }
 
 .chat-textarea {
@@ -333,6 +334,7 @@
   align-items: stretch;
   height: 100%;
 }
+
 .chat-delete-button {
   background: transparent;
   border: none;
@@ -346,4 +348,3 @@
 .chat-delete-button:hover {
   transform: scale(1.2);
 }
-

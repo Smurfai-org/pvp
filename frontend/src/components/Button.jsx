@@ -1,7 +1,20 @@
 import "./styles.css";
 import loadingIcon from "../assets/loading-anim.svg";
 
-function Button({ children, extra, onClick, disabled, loading = false }) {
+function Button({
+  children,
+  extra,
+  onClick,
+  disabled,
+  loading = false,
+  iconSrc,
+  iconRotationDegrees,
+  iconHeight = "14px",
+  iconInvertColor = false,
+  iconOnTheRight = false,
+  width,
+  height,
+}) {
   return (
     <button
       disabled={loading || disabled}
@@ -11,6 +24,10 @@ function Button({ children, extra, onClick, disabled, loading = false }) {
           ? `default-button ${extra || ""} clicked`
           : `default-button ${extra || ""}`
       }
+      style={{
+        ...(width && { width }),
+        ...(height && { height }),
+      }}
     >
       {loading ? (
         <>
@@ -18,7 +35,32 @@ function Button({ children, extra, onClick, disabled, loading = false }) {
           <div style={{ color: "transparent" }}>{children}</div>
         </>
       ) : (
-        children
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.3rem",
+          }}
+        >
+          {iconOnTheRight && children}
+          {iconSrc && (
+            <img
+              src={iconSrc}
+              alt={typeof children === "string" ? children : "icon"}
+              height={iconHeight}
+              style={{
+                ...(iconRotationDegrees && {
+                  transform: `rotate(${iconRotationDegrees}deg)`,
+                }),
+                ...(iconInvertColor && {
+                  filter: `brightness(0) invert(1)`,
+                }),
+              }}
+            />
+          )}
+          {!iconOnTheRight && children}
+        </div>
       )}
     </button>
   );

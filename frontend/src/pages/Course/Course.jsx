@@ -6,6 +6,7 @@ import { useContext, useEffect, useState } from "react";
 import CourseProblemTile from "./CourseProblemTile";
 import AuthContext from "../../utils/AuthContext";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
+import chevronIcon from "../../assets/Chevron-icon.png";
 
 const Course = () => {
   const { id } = useParams();
@@ -107,10 +108,24 @@ const Course = () => {
         <p className="course-info-description">{courseInfo?.description}</p>
         <br />
         <div className="inline-elements">
-          <Button extra="small secondary" onClick={() => navigate("/courses")}>
+          <Button
+            extra="small secondary"
+            onClick={() => navigate("/courses")}
+            iconSrc={chevronIcon}
+            iconRotationDegrees={90}
+            iconHeight="8px"
+          >
             Atgal į sąrašą
           </Button>
-          <Button extra="small" onClick={onContinueCourseButtonClick}>
+          <Button
+            extra="small"
+            onClick={onContinueCourseButtonClick}
+            iconSrc={chevronIcon}
+            iconRotationDegrees={-90}
+            iconHeight="8px"
+            iconInvertColor={true}
+            iconOnTheRight={true}
+          >
             Pradėti
           </Button>
         </div>

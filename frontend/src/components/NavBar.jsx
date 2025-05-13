@@ -4,14 +4,15 @@ import HyperlinkDropdown from "./HyperlinkDropdown";
 import { useContext, useEffect, useState } from "react";
 import AuthContext from "../utils/AuthContext";
 import { useLocation } from "react-router-dom";
+import logoHorizontal from "../assets/logos/logo-horizontal.svg";
 
 const Navbar = () => {
   const { loggedIn, logout, user } = useContext(AuthContext);
   const [list, setList] = useState([]);
-  const router = useLocation()
-  const fixedRoutes = ['/'];
-  const offRoutes = ['/admin_dash'];
-  const isFixed = fixedRoutes.includes(router.pathname)
+  const router = useLocation();
+  const fixedRoutes = ["/"];
+  const offRoutes = ["/admin_dash"];
+  const isFixed = fixedRoutes.includes(router.pathname);
   const isOff = offRoutes.includes(router.pathname);
 
   useEffect(() => {
@@ -32,8 +33,12 @@ const Navbar = () => {
   }, [loggedIn, logout, user]);
 
   return (
-    <nav className={`navbar ${isFixed ? "fixed" : ""} ${isOff ? "nav-off" : ""}`}>
-      <Hyperlink href="/">Logo</Hyperlink>
+    <nav
+      className={`navbar ${isFixed ? "fixed" : ""} ${isOff ? "nav-off" : ""}`}
+    >
+      <Hyperlink href="/">
+        <img src={logoHorizontal} alt="Logo" className="navbar-icon" />
+      </Hyperlink>
 
       <div className="nav-search">
         <div className="w-full max-w-md">
@@ -42,12 +47,14 @@ const Navbar = () => {
       </div>
 
       <div className="nav-links">
-        <Hyperlink href='/premium' className='premium-link'>🌟Premium🌟</Hyperlink>
+        <Hyperlink href="/premium" className="premium-link">
+          🌟Premium🌟
+        </Hyperlink>
         <Hyperlink href="/courses">Kursai</Hyperlink>
         <Hyperlink href="/discussion">Diskusija</Hyperlink>
         {loggedIn && (
           <HyperlinkDropdown
-            placeholder="Paskyra"
+            placeholder={user.username ? user.username : "Paskyra"}
             showArrow={false}
             links={list}
           />

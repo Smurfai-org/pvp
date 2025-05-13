@@ -6,14 +6,13 @@ import "../login/login.css";
 import { useGoogleLogin } from "@react-oauth/google";
 import googleIcon from "../../assets/google_icon.svg";
 import { MessageContext } from "../../utils/MessageProvider";
-import loadingIcon from "../../assets/loading-anim.svg";
 import "./Register.css";
 
 function Register() {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
-  
+
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -64,7 +63,7 @@ function Register() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, username, password }),
-        credentials: 'include',
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -75,7 +74,9 @@ function Register() {
         navigate("/login");
       } else {
         setLoading(false);
-        showErrorMessage(data.message || "Registracija nepavyko, bandykite dar kartą.");
+        showErrorMessage(
+          data.message || "Registracija nepavyko, bandykite dar kartą."
+        );
       }
     } catch (error) {
       setLoading(false);
@@ -139,12 +140,13 @@ function Register() {
           errorText={confirmPasswordError}
         />
         <div className="inline-centered-buttons-login">
-          <Button extra={loading ? 'login-btn clicked' : 'login-btn'} onClick={() => { if (!loading) handleSubmit(); }}>
-            {loading ?
-              <img src={loadingIcon} alt='Įkeliama...' className="loading"/>
-            : "Sign up"}
+          <Button onClick={handleSubmit} loading={loading}>
+            Registruotis
           </Button>
-          <Button extra="secondary login-btn" onClick={() => navigate('/login')}>
+          <Button
+            extra="secondary login-btn"
+            onClick={() => navigate("/login")}
+          >
             Jau turiu paskyrą
           </Button>
         </div>

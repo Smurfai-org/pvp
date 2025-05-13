@@ -58,11 +58,8 @@ code {
 
 .premium {
   color: var(--premium);
-  text-shadow: 
-    -1px -1px 0 var(--highligth),  
-    1px -1px 0 var(--highligth),
-    -1px 1px 0 var(--highligth),
-    1px 1px 0 var(--highligth);
+  text-shadow: -1px -1px 0 var(--highligth), 1px -1px 0 var(--highligth),
+    -1px 1px 0 var(--highligth), 1px 1px 0 var(--highligth);
 }
 
 .default-button {
@@ -117,6 +114,11 @@ code {
 .default-button.bright:hover {
   background-color: var(--dark);
   color: var(--light);
+}
+
+.default-button.bright:hover img {
+  filter: brightness(0) invert(1);
+  transition: 0.15s ease-in-out;
 }
 
 .default-button:hover {
@@ -233,7 +235,7 @@ code {
   transform: scaleX(0);
 }
 
-.premium-link::after{
+.premium-link::after {
   content: "";
   position: absolute;
   bottom: 0;
@@ -568,6 +570,13 @@ code {
   padding: 0 0.5rem;
 }
 
+.navbar-icon {
+  width: 7.75rem;
+  height: 2rem;
+  object-position: center -2.6rem;
+  object-fit: cover;
+}
+
 .fixed {
   position: fixed;
   top: 0;
@@ -663,10 +672,6 @@ code {
   background: #e60000;
 }
 
-.voice-to-text-container {
-  margin-top: 10px;
-}
-
 .voice-input-logo {
   width: 2rem;
   margin: 0;
@@ -674,7 +679,7 @@ code {
 
 .voice-button {
   height: 100%;
-  padding: 0.5rem;
+  padding: 0 8px;
   background: transparent;
   border: none;
   border-radius: 4px;

@@ -77,7 +77,7 @@ function Login() {
         await login();
         navigate("/");
       }
-    } catch (error) {
+    } catch {
       showErrorMessage("Nepavyko prisijungti");
       setLoading(false);
     }
@@ -95,8 +95,6 @@ function Login() {
       if (response.ok) {
         await login();
         navigate(from, { replace: true });
-      } else {
-        const data = await response.json();
       }
     },
     onError: () => {},
@@ -132,7 +130,7 @@ function Login() {
               if (!loading) handleSubmit();
             }}
           >
-            Log in
+            Prisijungti
           </Button>
           <Button extra="secondary login-btn" onClick={navigateRegister}>
             Registruotis
