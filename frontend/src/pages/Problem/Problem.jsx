@@ -72,9 +72,6 @@ const Problem = () => {
   const [isGeneratingChatAnswer, setIsGeneratingChatAnswer] = useState(false);
   const [isSolvedByAI, setIsSolvedByAI] = useState(false);
 
-  const [message, setMessage] = useState("");
-  const textareaRef = useRef(null);
-
   // SĄRAŠAS testavimo atveju. Vieno jų tipas pvz toks:
   // {id: 1, input: {cpp: 'const int num1 = 5;\nconst int num2 = 10;', python: 'num1 = 5\nnum2 = 10'}, expected_output: '15', fk_PROBLEMid: 18}
   const [testCases, setTestCases] = useState([]);
@@ -454,8 +451,14 @@ const Problem = () => {
       setPassScore(null);
 
       try {
+        const baseProblemFetchUrl = `http://localhost:5000/problem?id=${id}`;
+        const fullProblemFetchUrl =
+          loggedIn && user?.id
+            ? `${baseProblemFetchUrl}&userId=${user.id}`
+            : baseProblemFetchUrl;
+
         const [problemRes, userCodeRes] = await Promise.all([
-          fetch(`http://localhost:5000/problem?id=${id}`, {
+          fetch(fullProblemFetchUrl, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
           }),
@@ -685,20 +688,30 @@ const Problem = () => {
   };
   const handleDeleteMessages = async (timestamp) => {
     console.log("Deleting message with ID:", timestamp);
-    socket.emit("deleteMessages", { timestamp, userId: user.id}, (response) => {
-      if (response.success) {
-        console.log("Updated history after deletion:", response.updatedHistory);
-        const parsedHistory = response.updatedHistory.map((msg) => ({
-          sender: msg.role === "user" ? "user" : "ai",
-          text: msg.content,
-          timestamp: msg.timestamp,
-        }));
-        setChatMessages(parsedHistory); 
-      } else {
-        console.error("Error deleting messages:", response.message || "Unknown error");
-        setChatError(response.message || "Failed to delete messages");
+    socket.emit(
+      "deleteMessages",
+      { timestamp, userId: user.id },
+      (response) => {
+        if (response.success) {
+          console.log(
+            "Updated history after deletion:",
+            response.updatedHistory
+          );
+          const parsedHistory = response.updatedHistory.map((msg) => ({
+            sender: msg.role === "user" ? "user" : "ai",
+            text: msg.content,
+            timestamp: msg.timestamp,
+          }));
+          setChatMessages(parsedHistory);
+        } else {
+          console.error(
+            "Error deleting messages:",
+            response.message || "Unknown error"
+          );
+          setChatError(response.message || "Failed to delete messages");
+        }
       }
-    });
+    );
   };
   const ConfirmGiveUpModal = ({ onClose, onConfirm, isLoading }) => {
     return (

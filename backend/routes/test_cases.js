@@ -6,7 +6,6 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   const { id } = req.query;
-  console.log("result");
 
   try {
     let query = "SELECT * FROM test_cases";
