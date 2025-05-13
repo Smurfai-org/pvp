@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { saveGeneratedProblemWithDetails } from "./chatService.js";
+import pool from "./db.js";
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -39,6 +40,18 @@ export const getProblemGenerationResponse = async (message) => {
 };
 
 export async function processUserMessageProblemGeneration(userId, message) {
+  try {
+    const [[problemCount]] = await pool.execute(
+      "SELECT COUNT(*) as count FROM problems WHERE fk_USERid = ?",
+      [userId]
+    );
+
+  if (problemCount.count >= 1) {
+    return {
+      success: false,
+      message: "Nemokamas planas leidžia generuoti tik vieną užduotį.",
+    };
+  }
   const response = await getProblemGenerationResponse(message);
   if (response.success) {
     console.log(response);
@@ -65,4 +78,11 @@ export async function processUserMessageProblemGeneration(userId, message) {
     }
   }
   return response;
+  } catch (error) {
+    console.error("Klaida generuojant užduotį:", error);
+    return {
+      success: false,
+      message: "Serverio klaida",
+    };
+  }
 }

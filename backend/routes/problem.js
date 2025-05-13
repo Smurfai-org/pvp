@@ -68,6 +68,19 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/generated", async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).json();
+  }
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const [problems] = await pool.execute(
+    "SELECT * FROM problems WHERE deleted = 0 AND fk_USERid = ?",
+    [decoded.user.id]
+  );
+  return res.status(200).json(problems);
+});
+
 router.post("/create", async (req, res) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
