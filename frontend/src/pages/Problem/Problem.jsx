@@ -458,6 +458,7 @@ const Problem = () => {
           fetch(`http://localhost:5000/problem?id=${id}`, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
           }),
           loggedIn
             ? fetch(`http://localhost:5000/progress/${user?.id}/${id}`, {
