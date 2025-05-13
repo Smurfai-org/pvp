@@ -107,7 +107,6 @@ export async function getUserChatHistory(userId) {
     "SELECT * FROM chat_messages WHERE fk_USERid = ? ORDER BY TIMESTAMP ASC LIMIT 20",
     [userId]
   );
-
   return rows.map((row) => ({
     role: row.role,
     content: row.content,
@@ -198,7 +197,13 @@ export async function clearChatHistory(userId) {
     count: result.affectedRows,
   };
 }
-
+export async function deleteMessagesFromId(userId, timestamp) {
+  const [result] = await pool.execute(
+    "DELETE FROM chat_messages WHERE fk_USERid = ? AND timestamp >= ?",
+    [userId, timestamp]
+  );
+  return result.affectedRows; 
+}
 const convoHist = new Map();
 export function setupSocketIO(io) {
   io.on("connection", (socket) => {
@@ -212,7 +217,6 @@ export function setupSocketIO(io) {
           user = result.user;
           console.log("user:", user);
           socket.emit("authenticated", { success: true, user: user });
-
           const hist = await getUserChatHistory(user.id);
           convoHist.set(user.id, hist);
           socket.emit("history", hist);
@@ -246,7 +250,6 @@ export function setupSocketIO(io) {
       try {
         const hist = convoHist.get(user.id) || [];
         hist.push({ role: "user", content: data.message });
-
         const response = await processUserMessage(
           user.id,
           data.message,
@@ -277,7 +280,35 @@ export function setupSocketIO(io) {
         socket.emit("error", { message: error.message });
       }
     });
-
+    socket.on("deleteMessages", async (data, callback) => {
+      try {
+        const { timestamp, userId } = data;
+        console.log("deleteMessages called with:", { timestamp, userId });
+    
+        if (!timestamp || !userId) {
+          return callback({ success: false, message: "Missing messageId or userId" });
+        }
+    
+        const deletionResult = await deleteMessagesFromId(userId, timestamp);
+    
+        if (deletionResult === 0) {
+          return callback({ success: false, message: "No messages deleted" });
+        }
+    
+        const updatedHistory = await getUserChatHistory(userId);
+    
+        socket.emit("messagesDeleted", {
+          success: true,
+          updatedHistory,
+        });
+    
+        callback({ success: true, updatedHistory });
+      } catch (error) {
+        console.error("Error deleting messages:", error);
+        callback({ success: false, message: "Error deleting messages" });
+      }
+    });
+    
     socket.on("disconnect", () => {
       console.log("Client disconnected", socket.id);
     });
