@@ -7,7 +7,7 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   const { id, userId } = req.query;
   try {
-    let query = "SELECT * FROM problems WHERE deleted = 0";
+    let query = "SELECT * FROM problems WHERE deleted = 0 AND fk_USERid IS NULL";
     let params = [];
 
     if (id) {
@@ -15,7 +15,7 @@ router.get("/", async (req, res) => {
       params.push(id);
     }
     if (userId) {
-      query += " AND fk_USERid IS NULL OR fk_USERid = ?";
+      query += " OR fk_USERid = ?";
       params.push(userId);
     }
 
