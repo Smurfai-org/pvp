@@ -258,6 +258,10 @@ const Problem = () => {
       setShowLoginPrompt(true);
       return;
     }
+    if (isSolvedByAI) {
+      showErrorMessage("Užduotis jau išspręsta AI");
+      return;
+    }
     setIsEvaluating(true);
 
     //Paleisti, kad praeitu testus
@@ -358,6 +362,7 @@ const Problem = () => {
     }
     if (isSolvedByAI) {
       showErrorMessage("Užduotis jau išspręsta AI");
+      return;
     }
     try {
       setIsGeneratingHint(true);
@@ -641,6 +646,7 @@ const Problem = () => {
     }
     if (isSolvedByAI) {
       showErrorMessage("Užduotis jau išspręsta AI");
+      return;
     } else {
       setShowGiveUpModal(true);
     }
@@ -1099,7 +1105,6 @@ const Problem = () => {
                 extra="small bright"
                 onClick={handleCheckclick}
                 disabled={
-                  isSolvedByAI ||
                   isRunningCode ||
                   Object.keys(isRunningTestCase).length !== 0
                 }
