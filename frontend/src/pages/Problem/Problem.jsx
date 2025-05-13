@@ -22,6 +22,11 @@ import LoginPrompt from "../../components/LoginPrompt";
 import io from "socket.io-client";
 import ReactMarkdown from "react-markdown";
 import VoiceToText from "../../components/VoiceToText";
+import playIcon from "../../assets/play-icon.svg";
+import evaluateIcon from "../../assets/evaluate-icon.svg";
+import chevronIcon from "../../assets/Chevron-icon.png";
+import hintIconMinimal from "../../assets/hint-icon-minimal.svg";
+import surrenderIcon from "../../assets/surrender-icon.svg";
 
 const tokenCookie = cookies.get("token");
 
@@ -144,6 +149,10 @@ const Problem = () => {
     dontPrint = false,
     skipEvaluation = false
   ) => {
+    if (!loggedIn) {
+      setShowLoginPrompt(true);
+      return;
+    }
     if (index !== null && !dontPrint && !skipEvaluation) {
       setIsRunningTestCase({ ...isRunningTestCase, [index]: true });
     }
@@ -210,12 +219,15 @@ const Problem = () => {
       setShowLoginPrompt(true);
       return;
     }
+
+    setIsRunningCode(true);
+
     if (testCases.length < 1) {
       await handleTestButtonClick(null, true, true);
+      setIsRunningCode(false);
       return;
     }
 
-    setIsRunningCode(true);
     const { result } = await handleTestButtonClick(0, true, true);
     setIsRunningCode(false);
     setOutputText(result);
@@ -535,8 +547,6 @@ const Problem = () => {
           headers: { "Content-Type": "application/json" },
         });
 
-        console.log(res);
-
         if (!res.ok) {
           return {
             cpp: starting_code_empty?.cpp,
@@ -734,11 +744,11 @@ const Problem = () => {
             Ar tikrai norite pasiduoti?
           </p>
           <div className="modal-actions">
-            <Button onClick={onConfirm} loading={isLoading}>
-              Taip, pasiduodu
-            </Button>
             <Button onClick={onClose} disabled={isLoading} extra="secondary">
               Ne, aš dar galiu!
+            </Button>
+            <Button onClick={onConfirm} loading={isLoading}>
+              Taip, pasiduodu
             </Button>
           </div>
         </div>
@@ -886,6 +896,9 @@ const Problem = () => {
                 <Button
                   extra="small secondary"
                   onClick={handleBackToListButtonClick}
+                  iconSrc={chevronIcon}
+                  iconRotationDegrees={90}
+                  iconHeight="8px"
                 >
                   Atgal į sąrašą
                 </Button>
@@ -895,9 +908,10 @@ const Problem = () => {
                     onClick={() =>
                       handleArrowNavigationButtonClick(previousProblemId)
                     }
-                  >
-                    <strong>{"<"}</strong>
-                  </Button>
+                    iconSrc={chevronIcon}
+                    iconRotationDegrees={90}
+                    iconHeight="8px"
+                  ></Button>
                 )}
                 {nextProblemId !== null && (
                   <Button
@@ -905,9 +919,10 @@ const Problem = () => {
                     onClick={() =>
                       handleArrowNavigationButtonClick(nextProblemId)
                     }
-                  >
-                    <strong>{">"}</strong>
-                  </Button>
+                    iconSrc={chevronIcon}
+                    iconRotationDegrees={-90}
+                    iconHeight="8px"
+                  ></Button>
                 )}
               </div>
               {isLoaded && passScore && (
@@ -1018,9 +1033,10 @@ const Problem = () => {
                                 isRunningCode ||
                                 isEvaluating
                               }
-                            >
-                              Testuoti
-                            </Button>
+                              iconSrc={playIcon}
+                              width="50px"
+                              height="35px"
+                            ></Button>
                           </div>
                           <pre>
                             <code
@@ -1098,19 +1114,19 @@ const Problem = () => {
                 disabled={
                   isEvaluating || Object.keys(isRunningTestCase).length !== 0
                 }
-              >
-                Leisti programą
-              </Button>
+                iconSrc={playIcon}
+                width="75px"
+              ></Button>
               <Button
                 extra="small bright"
                 onClick={handleCheckclick}
                 disabled={
-                  isRunningCode ||
-                  Object.keys(isRunningTestCase).length !== 0
+                  isRunningCode || Object.keys(isRunningTestCase).length !== 0
                 }
                 loading={isEvaluating}
+                iconSrc={evaluateIcon}
               >
-                Tikrinti
+                Įvertinti
               </Button>
               <Dropdown
                 options={languages?.map((language) => language?.label)}
@@ -1208,7 +1224,18 @@ const ChatInput = ({
             }
           }}
         />
-        <VoiceToText setMessage={setMessage} className="chat-voice-input" />
+        <Button
+          extra="small"
+          onClick={handleSend}
+          disabled={!message}
+          loading={isGeneratingChatAnswer}
+          iconSrc={chevronIcon}
+          iconRotationDegrees={-90}
+          iconHeight="8px"
+          iconInvertColor={true}
+          height="48px"
+          width="48px"
+        ></Button>
       </div>
       <div className="chat-input-actions">
         <div className="inline-elements">
@@ -1216,6 +1243,8 @@ const ChatInput = ({
             loading={isGeneratingHint}
             extra="small bright"
             onClick={() => onGenerateHint?.()}
+            iconSrc={hintIconMinimal}
+            iconHeight="16px"
           >
             Generuoti užuominą
           </Button>
@@ -1223,18 +1252,12 @@ const ChatInput = ({
             extra="small bright"
             onClick={() => onGiveUp?.()}
             disabled={notPremium}
+            iconSrc={surrenderIcon}
           >
             Pasiduoti
           </Button>
         </div>
-        <Button
-          extra="small"
-          onClick={handleSend}
-          disabled={!message}
-          loading={isGeneratingChatAnswer}
-        >
-          Klausti
-        </Button>
+        <VoiceToText setMessage={setMessage} className="chat-voice-input" />
       </div>
     </div>
   );

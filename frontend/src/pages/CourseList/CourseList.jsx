@@ -8,6 +8,7 @@ import AuthContext from "../../utils/AuthContext";
 import cookies from "js-cookie";
 import Button from "../../components/Button";
 import { MessageContext } from "../../utils/MessageProvider";
+import addProblemIcon from "../../assets/add-problem-icon.svg";
 
 const tokenCookie = cookies.get("token");
 
@@ -238,7 +239,7 @@ const CourseList = () => {
     <div className="full-page-container">
       {loggedIn && userStartedCourses?.length > 0 && (
         <div className="page-wrapper">
-          <h2>Pradėti kursai</h2>
+          <h2>Jūsų pradėti kursai</h2>
           {isLoaded.course ? (
             <div className="course-list-container">
               <button
@@ -272,7 +273,7 @@ const CourseList = () => {
         </div>
       )}
       <div className="page-wrapper">
-        <h2>Paruošti kursai</h2>
+        <h2>Visi kursai</h2>
         {isLoaded.course ? (
           <div className="course-list-container">
             <button
@@ -368,6 +369,7 @@ const GenerateProblemWindow = ({ handleSend, isGeneratingProblem }) => {
         <Button
           extra="bright"
           onClick={() => setShowProblemGenerateWindow(true)}
+          iconSrc={addProblemIcon}
         >
           Generuoti asmeninę užduotį
         </Button>
@@ -397,7 +399,7 @@ const GenerateProblemWindow = ({ handleSend, isGeneratingProblem }) => {
               }
             }}
           />
-          <div className="inline-elements" style={{ marginTop: "0.5rem" }}>
+          <div className="inline-elements" style={{ marginTop: "1rem" }}>
             <Button
               extra="small secondary"
               onClick={() => setShowProblemGenerateWindow(false)}
@@ -408,6 +410,7 @@ const GenerateProblemWindow = ({ handleSend, isGeneratingProblem }) => {
               extra="small bright"
               onClick={() => handleSend(message)}
               loading={isGeneratingProblem}
+              iconSrc={addProblemIcon}
             >
               Generuoti
             </Button>
