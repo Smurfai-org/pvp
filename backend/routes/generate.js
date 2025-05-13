@@ -31,17 +31,55 @@ router.post("/hint", async (req, res) => {
       return res.status(400).json({ message: "Trūksta duomenų" });
     }
 
+    const token = req.cookies.token;
+    const decToken = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decToken.user.premium === 0) {
+      const [[hintCount]] = await pool.execute(
+        `SELECT COUNT(*) as count FROM hints 
+         WHERE fk_USERid = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 1 WEEK)`,
+        [userId]
+      );
+
+
+      if (hintCount.count >= 3) {
+        const remainingTime = await pool.execute(
+          `SELECT TIMESTAMPDIFF(SECOND, NOW(), DATE_ADD(
+            (SELECT MIN(created_at) FROM hints WHERE fk_USERid = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 1 WEEK)),
+            INTERVAL 1 WEEK)) AS remaining_time`,
+          [userId]
+        );
+        const remainingSeconds = remainingTime[0][0].remaining_time;
+        const nextHintTime = new Date(Date.now() + remainingSeconds * 1000);
+        const nextHintTimeFormatted = nextHintTime.toLocaleString("lt-LT", {
+          timeZone: "Europe/Vilnius",
+          year: "numeric",
+          month: "long",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        const msg = "Jau sunaudojote šios savaitės nemokamų užuominų kiekį. Naujas užuominas galėsite gauti " + nextHintTimeFormatted + ".";
+
+        const noHint = {
+          hint: msg,
+          problemId,
+          userId,
+        }
+        return res.status(200).json(noHint);
+      }
+    }
+
     if (!progress) {
       const noHint = {
         hint: "Pirmiausia pabandykite parašyti kažkiek savo kodo, tada paspauskite mygtuką 'Tikrinti'.",
         problemId,
         userId,
-      }
+      };
       return res.status(200).json(noHint);
     }
 
     if (progress.score === 100) {
-      // reikės ateityje pakeist
       const noHint = {
         hint: "Užduotis jau išspręsta, tad patarimo nereikės.",
         problemId,
@@ -58,7 +96,6 @@ router.post("/hint", async (req, res) => {
       problemId,
       userId,
     };
-    //console.log(userInput);
 
     const response = await client.responses.create({
       model: process.env.OPENAI_MODEL,
@@ -77,7 +114,6 @@ router.post("/hint", async (req, res) => {
     });
 
     const aiHint = response.output_text;
-    //console.log(aiHint);
     const parsed = JSON.parse(aiHint);
 
     const [[hintCount]] = await pool.execute(
@@ -93,7 +129,7 @@ router.post("/hint", async (req, res) => {
     }
 
     const [saveHint] = await pool.execute(
-      "INSERT INTO hints (fk_PROBLEMid, hint, fk_USERid) VALUES (?, ?, ?)",
+      "INSERT INTO hints (fk_PROBLEMid, hint, fk_USERid, created_at) VALUES (?, ?, ?, NOW())",
       [problemId, parsed.hint, userId]
     );
     if (!saveHint) {

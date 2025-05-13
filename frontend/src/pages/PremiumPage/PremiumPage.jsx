@@ -119,7 +119,7 @@ const PremiumSelection = () => {
               </tr>
               <tr>
                 <td>Užuominos</td>
-                <td>5 per savaitę</td>
+                <td>3 per savaitę</td>
                 <td>Neribotos</td>
               </tr>
               <tr>
