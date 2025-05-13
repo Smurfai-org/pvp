@@ -72,8 +72,8 @@ router.put("/:id", async (req, res) => {
     return res.status(403).json();
   }
   const { id } = req.params;
-  const { input, output } = req.body;
-  if (!input && !output) {
+  const { input, output, visibility } = req.body;
+  if (!input && !output && visibility === undefined) {
     res.status(400).json({ message: "Nėra ką atnaujinti" });
   } else {
     try {
@@ -86,6 +86,10 @@ router.put("/:id", async (req, res) => {
       if (output) {
         updates.push("expected_output = ?");
         values.push(output);
+      }
+      if(visibility !== undefined){
+        updates.push("visibility = ?");
+        values.push(visibility);
       }
       values.push(id);
       const [result] = await pool.execute(
