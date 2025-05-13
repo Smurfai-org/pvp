@@ -27,8 +27,17 @@ router.post("/hint", async (req, res) => {
       [userId, problemId]
     );
 
-    if (!problem || !progress || !language) {
+    if (!problem || !language) {
       return res.status(400).json({ message: "Trūksta duomenų" });
+    }
+
+    if (!progress) {
+      const noHint = {
+        hint: "Pirmiausia pabandykite parašyti kažkiek savo kodo, tada paspauskite mygtuką 'Tikrinti'.",
+        problemId,
+        userId,
+      }
+      return res.status(200).json(noHint);
     }
 
     if (progress.score === 100) {
