@@ -1,14 +1,13 @@
-import React, { useContext } from 'react';
-import './PremiumPage.css';
-import AuthContext from '../../utils/AuthContext';
-import Button from '../../components/Button';
-import { useNavigate } from 'react-router-dom';
+import { useContext } from "react";
+import "./PremiumPage.css";
+import AuthContext from "../../utils/AuthContext";
+import Button from "../../components/Button";
+import { useNavigate } from "react-router-dom";
 
 const PremiumSelection = () => {
-
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
-  const premium = user.premium;
+  const premium = user?.premium;
 
   const free = [
     "Jokio pokalbio su DI asistentu",
@@ -17,7 +16,7 @@ const PremiumSelection = () => {
     "Be užduočių sprendimo su DI",
   ];
 
-    const benefits = [
+  const benefits = [
     "Pokalbis su DI asistentu",
     "Neribotos užuominos",
     "Neribotos DI kuriamos užduotys",
@@ -25,51 +24,81 @@ const PremiumSelection = () => {
   ];
 
   const handlePremiumClick = () => {
-  if (premium) {
-    navigate('/premium-area');
-  } else {
-    navigate('/subscribe');
-  }
-};
+    if (premium) {
+      navigate("/premium-area");
+    } else {
+      navigate("/subscribe");
+    }
+  };
 
   return (
     <section className="premium-selection">
       <div className="container">
         <header>
           <h1>Pirkti Premium!</h1>
-          <p>Mėgaukitės geriausia patirtimi su mūsų aukščiausios kokybės planu!</p>
+          <p>
+            Mėgaukitės geriausia patirtimi su mūsų aukščiausios kokybės planu!
+          </p>
         </header>
 
-          <div className="plans">
-            <div className="plan-card">
-              <h2>{premium ? 'Nemokamas Planas' : (<>Dabartinis<br />Planas</>)}</h2>
-              <p className="price">Nemokamas</p>
-              <ul className="benefits-list-x">
-                {free.map((benefit, index) => (
-                  <li key={index}>{benefit}</li>
-                ))}
-              </ul>
-              {premium ? 
-              <Button extra='bright btn' onClick={handlePremiumClick} >Grįžti prie nemokamo</Button>
-              :
-              <Button extra='disabled btn'>Dabartinis</Button>
-              }
-            </div>
-            <div className="plan-card">
-              <h2>{premium ? (<>Dabartinis<br />Planas</>) : (<>Premium<br />Planas</>)}</h2>
-              <p className="price">4.99€/mėn</p>
-              <ul className="benefits-list">
-                {benefits.map((benefit, index) => (
-                  <li key={index}>{benefit}</li>
-                ))}
-              </ul>
-              {premium ? 
-              <Button extra='disabled btn'>Dabartinis</Button>
-              :
-              <Button extra='bright btn' onClick={handlePremiumClick} >Tapti nariu</Button>
-              }
-            </div>
+        <div className="plans">
+          <div className="plan-card">
+            <h2>
+              {premium ? (
+                "Nemokamas Planas"
+              ) : (
+                <>
+                  Dabartinis
+                  <br />
+                  Planas
+                </>
+              )}
+            </h2>
+            <p className="price">Nemokamas</p>
+            <ul className="benefits-list-x">
+              {free.map((benefit, index) => (
+                <li key={index}>{benefit}</li>
+              ))}
+            </ul>
+            {premium ? (
+              <Button extra="bright btn" onClick={handlePremiumClick}>
+                Grįžti prie nemokamo
+              </Button>
+            ) : (
+              <Button extra="disabled btn">Dabartinis</Button>
+            )}
           </div>
+          <div className="plan-card">
+            <h2>
+              {premium ? (
+                <>
+                  Dabartinis
+                  <br />
+                  Planas
+                </>
+              ) : (
+                <>
+                  Premium
+                  <br />
+                  Planas
+                </>
+              )}
+            </h2>
+            <p className="price">4.99€/mėn</p>
+            <ul className="benefits-list">
+              {benefits.map((benefit, index) => (
+                <li key={index}>{benefit}</li>
+              ))}
+            </ul>
+            {premium ? (
+              <Button extra="disabled btn">Dabartinis</Button>
+            ) : (
+              <Button extra="bright btn" onClick={handlePremiumClick}>
+                Tapti nariu
+              </Button>
+            )}
+          </div>
+        </div>
 
         {/* Comparison Table */}
         <div className="comparison">

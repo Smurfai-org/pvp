@@ -1,30 +1,43 @@
-import React, { useContext } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
-import AuthContext from '../../utils/AuthContext';
-import Button from '../../components/Button';
-
-const stripePromise = loadStripe(
-  "pk_test_51RO242E2ccvohllaeOkX2bD0j9y8JOSG0Ho5ZOffrkEa5OqWa9Gl6UnXijy0tPEK835d5XWTKNwNzXpxA1OXBuvb00IgvLKz4v"
-);
+import { useContext, useEffect, useState } from "react";
+import { loadStripe } from "@stripe/stripe-js";
+import AuthContext from "../../utils/AuthContext";
+import Button from "../../components/Button";
+import { useNavigate } from "react-router-dom";
 
 const SubscribePage = () => {
-    const { user } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-    const handleSubscribe = async () => {
+  const [stripePromise, setStripePromise] = useState();
+  useEffect(() => {
+    const localStripePromise = loadStripe(
+      "pk_test_51RO242E2ccvohllaeOkX2bD0j9y8JOSG0Ho5ZOffrkEa5OqWa9Gl6UnXijy0tPEK835d5XWTKNwNzXpxA1OXBuvb00IgvLKz4v"
+    );
+    setStripePromise(localStripePromise);
+  }, []);
+
+  const handleSubscribe = async () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
     const stripe = await stripePromise;
 
-    const response = await fetch('http://localhost:5000/stripe/create-checkout-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+    const response = await fetch(
+      "http://localhost:5000/stripe/create-checkout-session",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ id: user.id }),
-    });
+      }
+    );
 
     const data = await response.json();
 
     if (!data.id) {
-        alert("Klaida apmokant prenumeratą");
-        return;
+      alert("Klaida apmokant prenumeratą");
+      return;
     }
 
     const result = await stripe.redirectToCheckout({

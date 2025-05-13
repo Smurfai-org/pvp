@@ -8,7 +8,8 @@ router.get("/", async (req, res) => {
   const { id, userId } = req.query;
   const token = req.cookies.token;
   try {
-    let query = "SELECT * FROM problems WHERE deleted = 0 AND fk_USERid IS NULL";
+    let query =
+      "SELECT * FROM problems WHERE deleted = 0 AND fk_USERid IS NULL";
     let params = [];
 
     if (id) {
