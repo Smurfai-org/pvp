@@ -26,11 +26,11 @@ const ViewTC = () => {
   });
 
   if (!loggedIn) {
-    return <LoginPrompt />
+    return <LoginPrompt />;
   }
 
-  if(user.role != 'admin') {
-    navigate('/404');
+  if (user.role != "admin") {
+    navigate("/404");
     return;
   }
 
@@ -111,24 +111,24 @@ const ViewTC = () => {
       const updatedTestCase = editedTestCases[testCaseId];
 
       const formattedInput = JSON.stringify(updatedTestCase.input);
-
+      
       const response = await fetch(
         `http://localhost:5000/test_cases/${testCaseId}`,
         {
           method: "PUT",
-          headers: { 
-            "Content-Type": "application/json", 
-            "Authorization": `Bearer ${cookies.get("token")}`,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${cookies.get("token")}`,
           },
           body: JSON.stringify({
             ...updatedTestCase,
             input: formattedInput,
             output: updatedTestCase.expected_output,
+            visibility: updatedTestCase.visibility || 0,
           }),
           credentials: "include",
         }
       );
-
       const data = await response.json();
 
       if (!response.ok) {
@@ -157,9 +157,9 @@ const ViewTC = () => {
         `http://localhost:5000/test_cases/${testCaseId}`,
         {
           method: "DELETE",
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${cookies.get("token")}`
+            Authorization: `Bearer ${cookies.get("token")}`,
           },
           credentials: "include",
         }
@@ -245,10 +245,10 @@ const ViewTC = () => {
 
       const response = await fetch("http://localhost:5000/test_cases/", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${cookies.get("token")}`,
-         },
+          Authorization: `Bearer ${cookies.get("token")}`,
+        },
         body: JSON.stringify({
           ...newTestCase,
           problemId: id,
@@ -508,6 +508,24 @@ const ViewTC = () => {
                               handleOutputChange(tc.id, e.target.value)
                             }
                           />
+                          <div className="visibility-toggle">
+                            <label>
+                              <input
+                                type="checkbox"
+                                checked={!!editedTestCases[tc.id].visibility}
+                                onChange={(e) =>
+                                  setEditedTestCases((prev) => ({
+                                    ...prev,
+                                    [tc.id]: {
+                                      ...prev[tc.id],
+                                      visibility: e.target.checked ? 1 : 0,
+                                    },
+                                  }))
+                                }
+                              />
+                              Viešas testas (matomas vartotojui)
+                            </label>
+                          </div>
                         </div>
                       </>
                     ) : (
