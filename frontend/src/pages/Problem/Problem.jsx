@@ -418,10 +418,9 @@ const Problem = () => {
         {
           sender: "user",
           text: message,
-          timestamp: new Date().toISOString(),
+          timestamp: new Date(new Date().setSeconds(0, 0)).toISOString(),
         },
       ]);
-
       socket.emit("message", {
         message,
         problemContext: {
@@ -684,7 +683,23 @@ const Problem = () => {
       setShowGiveUpModal(false);
     }
   };
-
+  const handleDeleteMessages = async (timestamp) => {
+    console.log("Deleting message with ID:", timestamp);
+    socket.emit("deleteMessages", { timestamp, userId: user.id}, (response) => {
+      if (response.success) {
+        console.log("Updated history after deletion:", response.updatedHistory);
+        const parsedHistory = response.updatedHistory.map((msg) => ({
+          sender: msg.role === "user" ? "user" : "ai",
+          text: msg.content,
+          timestamp: msg.timestamp,
+        }));
+        setChatMessages(parsedHistory); 
+      } else {
+        console.error("Error deleting messages:", response.message || "Unknown error");
+        setChatError(response.message || "Failed to delete messages");
+      }
+    });
+  };
   const ConfirmGiveUpModal = ({ onClose, onConfirm, isLoading }) => {
     return (
       <div className="modal-overlay">
@@ -800,7 +815,16 @@ const Problem = () => {
       console.log("Socket disconnected:", socketClient.id);
       setIsConnected(false);
     });
-
+    socketClient.on("messagesDeleted", (data) => {
+      if (data.success) {
+        const parsedHistory = data.updatedHistory.map((msg) => ({
+          sender: msg.role === "user" ? "user" : "ai",
+          text: msg.content,
+          timestamp: msg.timestamp,
+        }));
+        setChatMessages(parsedHistory);
+      }
+    });
     setSocket(socketClient);
 
     return () => {
@@ -1022,7 +1046,10 @@ const Problem = () => {
               ) : (
                 <div className="problem-ai-window">
                   <div className="problem-ai-help-text-window">
-                    <ChatTranscript messages={chatMessages} />
+                    <ChatTranscript
+                      messages={chatMessages}
+                      handleDeleteMessages={handleDeleteMessages}
+                    />
                     {chatError && (
                       <div className="chat-error-message">{chatError}</div>
                     )}
@@ -1130,7 +1157,6 @@ const ChatInput = ({
 }) => {
   const [message, setMessage] = useState("");
   const textareaRef = useRef(null);
-
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -1195,7 +1221,7 @@ const ChatInput = ({
   );
 };
 
-const ChatTranscript = ({ messages = [] }) => {
+const ChatTranscript = ({ messages = [], handleDeleteMessages }) => {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -1217,11 +1243,29 @@ const ChatTranscript = ({ messages = [] }) => {
             key={index}
             className={`chat-message ${msg.sender === "user" ? "user" : "ai"}`}
           >
-            {msg.sender === "user" ? (
-              msg.text
-            ) : (
-              <ReactMarkdown>{msg.text}</ReactMarkdown>
-            )}
+            <div className="chat-message-content">
+              {msg.sender === "user" ? (
+                <>
+                  {msg.text}
+                  <button
+                    className="chat-delete-button"
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Ar tikrai norite ištrinti šią žinutę ir visas po jos?"
+                        )
+                      ) {
+                        handleDeleteMessages(msg.timestamp);
+                      }
+                    }}
+                  >
+                    🗑️
+                  </button>
+                </>
+              ) : (
+                <ReactMarkdown>{msg.text}</ReactMarkdown>
+              )}
+            </div>
           </div>
         ))
       )}
