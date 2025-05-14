@@ -41,43 +41,32 @@ export const getProblemGenerationResponse = async (message) => {
 
 export async function processUserMessageProblemGeneration(userId, message) {
   try {
-    const [[problemCount]] = await pool.execute(
-      "SELECT COUNT(*) as count FROM problems WHERE fk_USERid = ?",
-      [userId]
-    );
-
-  if (problemCount.count >= 1) {
-    return {
-      success: false,
-      message: "Nemokamas planas leidžia generuoti tik vieną užduotį.",
-    };
-  }
-  const response = await getProblemGenerationResponse(message);
-  if (response.success) {
-    console.log(response);
-    try {
-      const problemJSON = JSON.parse(response.message);
-      const { problemId } = await saveGeneratedProblemWithDetails(
-        userId,
-        problemJSON,
-        problemJSON.hints,
-        problemJSON.test_cases
-      );
-      return {
-        success: response.success,
-        problemId: problemId,
-        message: problemJSON,
-        timestamp: response.timestamp,
-      };
-    } catch {
-      return {
-        success: response.success,
-        message: "Sugeneruoti užduoties nepavyko.",
-        timestamp: response.timestamp,
-      };
+    const response = await getProblemGenerationResponse(message);
+    if (response.success) {
+      console.log(response);
+      try {
+        const problemJSON = JSON.parse(response.message);
+        const { problemId } = await saveGeneratedProblemWithDetails(
+          userId,
+          problemJSON,
+          problemJSON.hints,
+          problemJSON.test_cases
+        );
+        return {
+          success: response.success,
+          problemId: problemId,
+          message: problemJSON,
+          timestamp: response.timestamp,
+        };
+      } catch {
+        return {
+          success: response.success,
+          message: "Sugeneruoti užduoties nepavyko.",
+          timestamp: response.timestamp,
+        };
+      }
     }
-  }
-  return response;
+    return response;
   } catch (error) {
     console.error("Klaida generuojant užduotį:", error);
     return {

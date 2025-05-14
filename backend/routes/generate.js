@@ -41,7 +41,6 @@ router.post("/hint", async (req, res) => {
         [userId]
       );
 
-
       if (hintCount.count >= 3) {
         const remainingTime = await pool.execute(
           `SELECT TIMESTAMPDIFF(SECOND, NOW(), DATE_ADD(
@@ -59,13 +58,16 @@ router.post("/hint", async (req, res) => {
           hour: "2-digit",
           minute: "2-digit",
         });
-        const msg = "Jau sunaudojote šios savaitės nemokamų užuominų kiekį. Naujas užuominas galėsite gauti " + nextHintTimeFormatted + ".";
+        const msg =
+          "Jau sunaudojote šios savaitės nemokamų užuominų kiekį. Naujas užuominas galėsite gauti " +
+          nextHintTimeFormatted +
+          ".";
 
         const noHint = {
           hint: msg,
           problemId,
           userId,
-        }
+        };
         return res.status(200).json(noHint);
       }
     }
@@ -154,7 +156,27 @@ router.post("/problem", async (req, res) => {
   }
 
   try {
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).json();
+    }
+    const decToken = jwt.verify(token, process.env.JWT_SECRET);
+    if (decToken.user.premium !== 1) {
+      console.log("bbz");
+      const [[problemCount]] = await pool.execute(
+        "SELECT COUNT(*) as count FROM problems WHERE fk_USERid = ?",
+        [userId]
+      );
+
+      if (problemCount.count >= 1) {
+        return {
+          success: false,
+          message: "Nemokamas planas leidžia generuoti tik vieną užduotį.",
+        };
+      }
+    }
     const response = await processUserMessageProblemGeneration(userId, message);
+    console.log(response);
 
     if (response.success) {
       return res.status(200).json({
