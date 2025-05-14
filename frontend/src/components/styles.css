@@ -485,6 +485,12 @@ code {
   text-overflow: ellipsis;
 }
 
+.course-card-title {
+  height: 52px;
+  display: flex;
+  align-items: center;
+}
+
 .course-card-paragraph {
   font-size: 0.75rem;
   display: -webkit-box;

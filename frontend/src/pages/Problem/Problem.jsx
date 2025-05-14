@@ -555,7 +555,7 @@ const Problem = () => {
           };
         }
 
-        const data = (await res.json()).filter(tc => tc.visibility === 1);
+        const data = (await res.json()).filter((tc) => tc.visibility === 1);
         const formatedInput = data?.map((element) => {
           return JSON.parse(element?.input || "{}");
         });

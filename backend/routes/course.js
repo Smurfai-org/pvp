@@ -113,7 +113,9 @@ router.get("/problems", async (req, res) => {
 router.post("/create", async (req, res) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Authorization header missing or invalid" });
+    return res
+      .status(401)
+      .json({ message: "Authorization header missing or invalid" });
   }
 
   const token = authHeader.split(" ")[1];
@@ -206,6 +208,11 @@ router.post("/delete", async (req, res) => {
       [id]
     );
 
+    await pool.execute(
+      "UPDATE problems SET deleted = 1 WHERE fk_COURSEid = ?",
+      [id]
+    );
+
     if (result.affectedRows === 0) {
       return res.status(500).json({ message: "Nepavyko ištrinti kurso" });
     } else {
@@ -235,6 +242,11 @@ router.post("/restore", async (req, res) => {
   try {
     const [result] = await pool.execute(
       "UPDATE courses SET deleted = 0 WHERE id = ?",
+      [id]
+    );
+
+    await pool.execute(
+      "UPDATE problems SET deleted = 0 WHERE fk_COURSEid = ?",
       [id]
     );
 
