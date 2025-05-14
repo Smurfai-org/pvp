@@ -14,6 +14,7 @@ function Button({
   iconOnTheRight = false,
   width,
   height,
+  visibility,
 }) {
   return (
     <button
@@ -27,6 +28,7 @@ function Button({
       style={{
         ...(width && { width }),
         ...(height && { height }),
+        ...(visibility && { visibility }),
       }}
     >
       {loading ? (

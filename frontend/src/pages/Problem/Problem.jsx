@@ -76,6 +76,7 @@ const Problem = () => {
   const [isGeneratingHint, setIsGeneratingHint] = useState(false);
   const [isGeneratingChatAnswer, setIsGeneratingChatAnswer] = useState(false);
   const [isSolvedByAI, setIsSolvedByAI] = useState(false);
+  const [isUndoingAISolution, setIsUndoingAISolution] = useState(false);
 
   // SĄRAŠAS testavimo atveju. Vieno jų tipas pvz toks:
   // {id: 1, input: {cpp: 'const int num1 = 5;\nconst int num2 = 10;', python: 'num1 = 5\nnum2 = 10'}, expected_output: '15', fk_PROBLEMid: 18}
@@ -271,7 +272,7 @@ const Problem = () => {
       return;
     }
     if (isSolvedByAI) {
-      showErrorMessage("Užduotis jau išspręsta AI");
+      showErrorMessage("Užduotis jau išspręsta DI");
       return;
     }
     setIsEvaluating(true);
@@ -373,7 +374,7 @@ const Problem = () => {
       return;
     }
     if (isSolvedByAI) {
-      showErrorMessage("Užduotis jau išspręsta AI");
+      showErrorMessage("Užduotis jau išspręsta DI");
       return;
     }
     try {
@@ -417,7 +418,7 @@ const Problem = () => {
     }
 
     if (!socket || !isConnected) {
-      showErrorMessage("Nepavyko prisijungti prie AI asistento");
+      showErrorMessage("Nepavyko prisijungti prie DI asistento");
       return;
     }
 
@@ -457,7 +458,7 @@ const Problem = () => {
       });
     } catch (error) {
       console.error("Error using AI chat:", error);
-      showErrorMessage("Klaida bendraujant su AI asistentu");
+      showErrorMessage("Klaida bendraujant su DI asistentu");
       setIsGeneratingChatAnswer(false);
     }
   };
@@ -654,7 +655,7 @@ const Problem = () => {
       return;
     }
     if (isSolvedByAI) {
-      showErrorMessage("Užduotis jau išspręsta AI");
+      showErrorMessage("Užduotis jau išspręsta DI");
       return;
     } else {
       setShowGiveUpModal(true);
@@ -702,6 +703,40 @@ const Problem = () => {
       setShowGiveUpModal(false);
     }
   };
+  const handleUndoAISolution = async () => {
+    if (!loggedIn) {
+      showErrorMessage("Prašome prisijungti");
+      return;
+    }
+    try {
+      setIsUndoingAISolution(true);
+      const response = await fetch(
+        `http://localhost:5000/progress/${user?.id}/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP klaida: ${response.status}`);
+      }
+      showSuccessMessage("DI sprendimas panaikintas");
+      setInputCode({});
+      setPassScore(null);
+      setIsSolvedByAI(false);
+    } catch (error) {
+      console.error("Klaida panaikinant DI sprendimą:", error);
+      showErrorMessage("Klaida panaikinant DI sprendimą");
+    } finally {
+      setIsUndoingAISolution(false);
+      window.location.reload();
+    }
+  };
+
   const handleDeleteMessages = async (timestamp) => {
     console.log("Deleting message with ID:", timestamp);
     socket.emit(
@@ -735,9 +770,9 @@ const Problem = () => {
         <div className="modal-content">
           <h2>Pasiduoti užduočiai</h2>
           <p>
-            AI sugeneruos jums pilną sprendimą, tačiau Jums rekomenduojama
-            savarankiškai pasimokinti iš AI sugeneruoto kodo. Užduotis bus
-            įvertinta 0 taškų ir pažymėta kaip &quot;Išspręsta AI&quot;.
+            DI sugeneruos jums pilną sprendimą, tačiau Jums rekomenduojama
+            savarankiškai pasimokyti iš DI sugeneruoto kodo. Užduotis bus
+            įvertinta 0 taškų ir pažymėta kaip &quot;Išspręsta DI&quot;.
           </p>
           <p style={{ fontWeight: "bold", marginTop: "15px" }}>
             Ar tikrai norite pasiduoti?
@@ -929,6 +964,12 @@ const Problem = () => {
                   Išspręsta <strong>{passScore}%</strong>
                 </div>
               )}
+
+              {isLoaded && isSolvedByAI && (
+                <div>
+                  <strong>Išspręsta DI</strong>
+                </div>
+              )}
             </div>
 
             <div className="problem-info-screen">
@@ -979,7 +1020,7 @@ const Problem = () => {
                       strokeWidth="2"
                     />
                   </svg>
-                  AI pagalba
+                  DI pagalba
                 </div>
               </div>
               {!showAiWindow ? (
@@ -1097,6 +1138,9 @@ const Problem = () => {
                       onGiveUp={handleGiveUpClick}
                       isGeneratingHint={isGeneratingHint}
                       isGeneratingChatAnswer={isGeneratingChatAnswer}
+                      isSolvedByAI={isSolvedByAI}
+                      isUndoingAISolution={isUndoingAISolution}
+                      onUndoAISolution={handleUndoAISolution}
                     />
                   </div>
                 </div>
@@ -1188,6 +1232,9 @@ const ChatInput = ({
   onGiveUp,
   isGeneratingHint,
   isGeneratingChatAnswer,
+  onUndoAISolution,
+  isUndoingAISolution,
+  isSolvedByAI,
 }) => {
   const [message, setMessage] = useState("");
   const textareaRef = useRef(null);
@@ -1255,6 +1302,14 @@ const ChatInput = ({
           >
             Pasiduoti
           </Button>
+          <Button
+          extra="small bright"
+          onClick={() => onUndoAISolution?.()}
+          loading={isUndoingAISolution}
+          visibility ={isSolvedByAI ? "visible" : "hidden"}
+          >
+            Panaikinti DI sprendimą
+          </Button>
         </div>
         <VoiceToText setMessage={setMessage} className="chat-voice-input" />
       </div>
@@ -1276,7 +1331,7 @@ const ChatTranscript = ({ messages = [], handleDeleteMessages }) => {
     <div className="chat-transcript">
       {messages.length === 0 ? (
         <div className="chat-empty-state">
-          <p>Klauskite AI asistento...</p>
+          <p>Klauskite DI asistento...</p>
         </div>
       ) : (
         messages?.map((msg, index) => (

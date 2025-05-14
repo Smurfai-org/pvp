@@ -138,4 +138,30 @@ router.put("/:userId/:problemId", async (req, res) => {
   }
 });
 
+router.delete("/:userId/:problemId", async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).json();
+  }
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (decoded.user.id != req.params.userId) {
+    console.log(decoded.user.id, req.params.userId);
+    return res.status(403).json();
+  }
+  try {
+    const [result] = await pool.execute(
+      "DELETE FROM progress WHERE fk_USERid = ? AND fk_PROBLEMid = ?",
+      [req.params.userId, req.params.problemId]
+    );
+    if (result.affectedRows > 0) {
+      res.status(200).json({ message: "Sprendimas ištrintas" });
+    } else {
+      res.status(404).json({ message: "Sprendimas nerastas" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Serverio klaida" });
+  }
+});
+
 export default router;
