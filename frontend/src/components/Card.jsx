@@ -14,8 +14,8 @@ const Card = ({
     <div className="course-card" onClick={onClick}>
       <img src={courseDefaultImage} alt="Course" />
       <div className="course-info">
-        <p>{title}</p>
-        <p className="course-card-paragraph">{paragraph}</p>
+        <div className="course-card-title">{title}</div>
+        <div className="course-card-paragraph">{paragraph}</div>
       </div>
 
       {showActions && (

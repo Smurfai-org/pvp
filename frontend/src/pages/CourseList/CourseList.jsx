@@ -36,7 +36,9 @@ const CourseList = () => {
         const response = await fetch("http://localhost:5000/course/");
         if (!response.ok) throw new Error(response.status);
         const data = await response.json();
-        const activeCourses = data.filter((course) => course.deleted !== 1);
+        const activeCourses = data
+          .filter((course) => course.deleted !== 1)
+          .sort((a, b) => a.name.localeCompare(b.name));
         setCourses(activeCourses);
         return activeCourses;
       } catch (error) {
@@ -129,11 +131,10 @@ const CourseList = () => {
   }, [courses, startIndex, yourCoursesIndex, coursesPerRow]);
 
   const updateVisibleCourses = () => {
-    const midIndex = Math.ceil(courses.length / 2);
     const topRowItems = courses.slice(startIndex, startIndex + coursesPerRow);
     const bottomRowItems = courses.slice(
-      midIndex + startIndex,
-      midIndex + startIndex + coursesPerRow
+      coursesPerRow + startIndex,
+      coursesPerRow + startIndex + coursesPerRow
     );
     setTopRowCourses(topRowItems);
     setBottomRowCourses(bottomRowItems);
@@ -201,8 +202,9 @@ const CourseList = () => {
     }
     setIsGeneratingProblem(true);
     try {
-      const checkProblems = await fetch (
-        `http://localhost:5000/problem/generated`, {
+      const checkProblems = await fetch(
+        `http://localhost:5000/problem/generated`,
+        {
           headers: {
             "Content-Type": "application/json",
           },
@@ -215,7 +217,9 @@ const CourseList = () => {
       }
       const problems = await checkProblems.json();
       if (user.premium !== 1 && problems.length >= 1) {
-        showHintMessage("Nemokamas planas leidžia generuoti tik vieną užduotį.");
+        showHintMessage(
+          "Nemokamas planas leidžia generuoti tik vieną užduotį."
+        );
         setIsGeneratingProblem(false);
         return;
       }
@@ -396,10 +400,15 @@ const GenerateProblemWindow = ({ handleSend, isGeneratingProblem, user }) => {
             greitai ir paprastai gauti personalizuotą užduotį, pritaikytą jūsų
             poreikiams.
           </p>
-          <p style={{ textAlign: "justify", visibility: user?.premium === 0 ? "visible" : "hidden" }}>
+          <p
+            style={{
+              textAlign: "justify",
+              visibility: user?.premium === 0 ? "visible" : "hidden",
+            }}
+          >
             Atkreipkite dėmesį, kad nemokamo plano vartotojams leidžiama
-            generuoti tik vieną užduotį. Jei norite daugiau galimybių, apsvarstykite
-            galimybę atnaujinti savo planą.
+            generuoti tik vieną užduotį. Jei norite daugiau galimybių,
+            apsvarstykite galimybę atnaujinti savo planą.
           </p>
           <textarea
             ref={textareaRef}

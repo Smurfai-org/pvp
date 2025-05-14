@@ -74,7 +74,7 @@ router.post("/hint", async (req, res) => {
 
     if (!progress) {
       const noHint = {
-        hint: "Pirmiausia pabandykite parašyti kažkiek savo kodo, tada paspauskite mygtuką 'Tikrinti'.",
+        hint: "Pirmiausia pabandykite parašyti kažkiek savo kodo, tada paspauskite mygtuką 'Įvertinti'.",
         problemId,
         userId,
       };

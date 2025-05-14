@@ -141,17 +141,6 @@ export const problemCodeFullCpp = (
 ) => {
   const outputType = determineOutputType(test_case?.expected_output || "");
 
-  const functionParams = test_case_variables
-    ?.map((m) =>
-      m?.type && m?.name
-        ? `${m.type} ${m.special_type === "pointer" ? "*" : ""}${m.name}${
-            m.special_type === "array" ? "[]" : ""
-          }`
-        : ""
-    )
-    .filter(Boolean)
-    .join(", ");
-
   const functionArgs = test_case_variables
     ?.map((m) => (m?.name ? m.name : ""))
     .filter(Boolean)
@@ -164,7 +153,7 @@ export const problemCodeFullCpp = (
 #include <iostream>
 using namespace std;
 
-${outputType} Sprendimas(${functionParams});
+${userCode}
 
 int main() {
   ${inputCode}
@@ -197,8 +186,6 @@ int main() {
   
   return 0;
 }
-
-${userCode}
 `;
   return code;
 };
