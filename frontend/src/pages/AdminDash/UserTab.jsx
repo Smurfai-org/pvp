@@ -7,6 +7,8 @@ import EditUserModal from './UserEditModal';
 import cookies from "js-cookie";
 import './AdminDash.css';
 
+const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
+
 function UserTab() {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,7 +24,7 @@ function UserTab() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/user/', {
+      const response = await fetch(`${serverUrl}/user/`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -48,7 +50,7 @@ function UserTab() {
   const handleDeleteUser = async (id) => {
     if (window.confirm('Ar tikrai norite ištrinti šį vartotoją?')) {
       try {
-        const response = await fetch(`http://localhost:5000/user/${id}`, {
+        const response = await fetch(`${serverUrl}/user/${id}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -70,7 +72,7 @@ function UserTab() {
 
   const handleSaveEdit = async (updatedUser) => {
     try {
-      const response = await fetch(`http://localhost:5000/user/${updatedUser.id}`, {
+      const response = await fetch(`${serverUrl}/user/${updatedUser.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -9,6 +9,8 @@ import { MessageContext } from "../../utils/MessageProvider";
 import "../Register/Register.css";
 import AuthContext from "../../utils/AuthContext";
 
+const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
+
 function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -57,7 +59,7 @@ function Login() {
 
   const handleLogin = async (username, password) => {
     try {
-      const response = await fetch("http://localhost:5000/auth/login", {
+      const response = await fetch(`${serverUrl}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -85,7 +87,7 @@ function Login() {
 
   const googleLoginButton = useGoogleLogin({
     onSuccess: async (gresponse) => {
-      const response = await fetch("http://localhost:5000/loginGoogle", {
+      const response = await fetch(`${serverUrl}/loginGoogle`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ gresponse }),

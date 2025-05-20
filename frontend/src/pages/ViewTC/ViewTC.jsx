@@ -8,6 +8,8 @@ import AuthContext from "../../utils/AuthContext";
 import cookies from "js-cookie";
 import LoginPrompt from "../../components/LoginPrompt";
 
+const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
+
 const ViewTC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -41,7 +43,7 @@ const ViewTC = () => {
 
   const fetchProblemDetails = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/problem?id=${id}`);
+      const response = await fetch(`${serverUrl}/problem?id=${id}`);
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }
@@ -56,7 +58,7 @@ const ViewTC = () => {
   const fetchTestCases = async () => {
     try {
       setIsLoaded(false);
-      const response = await fetch(`http://localhost:5000/test_cases?id=${id}`);
+      const response = await fetch(`${serverUrl}/test_cases?id=${id}`);
 
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
@@ -113,7 +115,7 @@ const ViewTC = () => {
       const formattedInput = JSON.stringify(updatedTestCase.input);
       
       const response = await fetch(
-        `http://localhost:5000/test_cases/${testCaseId}`,
+        `${serverUrl}/test_cases/${testCaseId}`,
         {
           method: "PUT",
           headers: {
@@ -154,7 +156,7 @@ const ViewTC = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/test_cases/${testCaseId}`,
+        `${serverUrl}/test_cases/${testCaseId}`,
         {
           method: "DELETE",
           headers: {
@@ -243,7 +245,7 @@ const ViewTC = () => {
     try {
       const formattedInput = JSON.stringify(newTestCase.input);
 
-      const response = await fetch("http://localhost:5000/test_cases/", {
+      const response = await fetch(`${serverUrl}/test_cases/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -8,6 +8,7 @@ import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import LoginPrompt from "../../components/LoginPrompt";
 import cookies from "js-cookie";
 import UserProgressChart from "./UserProgressChart";
+const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
 
 export const formatDate = (dateString, shorten = false) => {
   if (!dateString) return "N/A";
@@ -39,7 +40,7 @@ function ViewProfile() {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/user/${user.id}`, {
+        const response = await fetch(`${serverUrl}/user/${user.id}`, {
           credentials: "include",
         });
 
@@ -89,7 +90,7 @@ function ViewProfile() {
     e.preventDefault();
 
     try {
-      const response = await fetch(`http://localhost:5000/user/${user.id}`, {
+      const response = await fetch(`${serverUrl}/user/${user.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -133,7 +134,7 @@ function ViewProfile() {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/user/${user.id}`, {
+      const response = await fetch(`${serverUrl}/user/${user.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

@@ -8,6 +8,8 @@ import AuthContext from "../../utils/AuthContext";
 import cookies from "js-cookie";
 import LoginPrompt from "../../components/LoginPrompt";
 
+const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
+
 const ViewHints = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -37,7 +39,7 @@ const ViewHints = () => {
 
   const fetchProblemDetails = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/problem?id=${id}`);
+      const response = await fetch(`${serverUrl}/problem?id=${id}`);
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }
@@ -52,7 +54,7 @@ const ViewHints = () => {
   const fetchHints = async () => {
     try {
       setIsLoaded(false);
-      const response = await fetch(`http://localhost:5000/hint?id=${id}`, {
+      const response = await fetch(`${serverUrl}/hint?id=${id}`, {
           method: "GET",
           headers: { 
             "Content-Type": "application/json",
@@ -102,7 +104,7 @@ const ViewHints = () => {
     try {
       const updatedHint = editedHints[hintId];
 
-      const response = await fetch(`http://localhost:5000/hint/${hintId}`, {
+      const response = await fetch(`${serverUrl}/hint/${hintId}`, {
         method: "PUT",
         headers: { 
           "Content-Type": "application/json",
@@ -139,7 +141,7 @@ const ViewHints = () => {
     if (!window.confirm("Ar tikrai norite ištrinti šią užuominą?")) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/hint/${hintId}`, {
+      const response = await fetch(`${serverUrl}/hint/${hintId}`, {
         method: "DELETE",
         headers: { 
           "Content-Type": "application/json",
@@ -191,7 +193,7 @@ const ViewHints = () => {
       return;
     }
     try {
-      const response = await fetch("http://localhost:5000/hint/", {
+      const response = await fetch(`${serverUrl}/hint/`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

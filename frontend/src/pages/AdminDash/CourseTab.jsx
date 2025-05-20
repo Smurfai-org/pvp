@@ -11,6 +11,8 @@ import { SearchBar } from "../../components/SearchBar";
 import Dropdown from "../../components/Dropdown";
 import ToggleSwitch from "../../components/Toggle";
 
+const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
+
 function CourseTab() {
     const [isLoaded, setIsLoaded] = useState(false);
     const [courses, setCourses] = useState([]);
@@ -23,7 +25,7 @@ function CourseTab() {
   
     const fetchData = async () => {
         try {
-            const req = await fetch(`http://localhost:5000/course/`, {
+            const req = await fetch(`${serverUrl}/course/`, {
                 method: "GET",
                 headers: { "Content-Type": "application/json" },
             });
@@ -48,7 +50,7 @@ function CourseTab() {
     const handleDelete = async (id) => {
         if (!window.confirm("Ar tikrai norite ištrinti šį kursą?")) return;
         try {
-            const response = await fetch(`http://localhost:5000/course/delete?id=${id}`, {
+            const response = await fetch(`${serverUrl}/course/delete?id=${id}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -68,7 +70,7 @@ function CourseTab() {
     const handleRecover = async (id) => {
         if (!window.confirm("Ar tikrai norite atkurti šį kursą?")) return;
         try {
-            const response = await fetch(`http://localhost:5000/course/restore?`, {
+            const response = await fetch(`${serverUrl}/course/restore?`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

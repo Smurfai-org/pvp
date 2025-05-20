@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
+const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
 
 const AuthContext = createContext({
   loggedIn: false,
@@ -9,7 +10,7 @@ const AuthContext = createContext({
 
 const getData = async () => {
   try {
-    const response = await fetch('http://localhost:5000/auth/validate', {
+    const response = await fetch(`${serverUrl}/auth/validate`, {
       method: 'GET',
       credentials: 'include', 
     });
@@ -50,7 +51,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const logout = async () => {
-    await fetch('http://localhost:5000/auth/logout', {
+    await fetch(`${serverUrl}/auth/logout`, {
       method: 'POST',
       credentials: 'include',
     });

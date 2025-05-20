@@ -2,6 +2,8 @@ import React, { useEffect, useContext } from 'react';
 import AuthContext from '../../utils/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
+const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
+
 const SubscribeSuccessPage = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -9,7 +11,7 @@ const SubscribeSuccessPage = () => {
     useEffect(() => {
     const refreshUser = async () => {
         try {
-        const res = await fetch("http://localhost:5000/auth/refresh", {
+        const res = await fetch(`${serverUrl}/auth/refresh`, {
             method: "GET",
             credentials: "include",
         });

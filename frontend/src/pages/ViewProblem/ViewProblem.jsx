@@ -30,6 +30,8 @@ const ProblemDetails = () => {
   const { showSuccessMessage, showErrorMessage } = useContext(MessageContext);
   const { user, loggedIn } = useContext(AuthContext);
 
+  const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
+
   if(!loggedIn) {
     return <LoginPrompt />
   }
@@ -42,7 +44,7 @@ const ProblemDetails = () => {
   useEffect(() => {
     const fetchProblem = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/problem?id=${id}`);
+        const response = await fetch(`${serverUrl}/problem?id=${id}`);
         if (!response.ok) {
           throw new Error(`Error: ${response.status}`);
         }
@@ -63,7 +65,7 @@ const ProblemDetails = () => {
     console.log("Sending data:", editedProblem);
 
     try {
-      const response = await fetch("http://localhost:5000/problem/update", {
+      const response = await fetch(`${serverUrl}/problem/update`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -93,7 +95,7 @@ const ProblemDetails = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/problem/delete?id=${id}`,
+        `${serverUrl}/problem/delete?id=${id}`,
         {
           method: "POST",
           headers: { 
@@ -122,7 +124,7 @@ const ProblemDetails = () => {
     if (!window.confirm("Ar tikrai norite atkurti šią problemą?")) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/problem/restore?`, {
+      const response = await fetch(`${serverUrl}/problem/restore?`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

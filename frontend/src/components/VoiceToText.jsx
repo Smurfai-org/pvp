@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
 import Mic from "../assets/mic-logo.svg";
 
+const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
+
 const VoiceToText = ({ setMessage, className }) => {
   const [recording, setRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
@@ -31,7 +33,7 @@ const VoiceToText = ({ setMessage, className }) => {
         formData.append("audio", audioBlob, "audio.webm");
 
         try {
-          const response = await fetch("http://localhost:5000/transcribe", {
+          const response = await fetch(`${serverUrl}/transcribe`, {
             method: "POST",
             body: formData,
           });

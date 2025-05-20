@@ -2,6 +2,7 @@ import { LineChart } from "@mui/x-charts/LineChart";
 import { useContext, useEffect, useState } from "react";
 import AuthContext from "../../utils/AuthContext";
 import { formatDate } from "./ViewProfile";
+const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
 
 export default function UserProgressChart({
   accountCreationDate,
@@ -23,7 +24,7 @@ export default function UserProgressChart({
       if (!user?.id) return;
 
       const response = await fetch(
-        `http://localhost:5000/progress/u=${user.id}`
+        `${serverUrl}/progress/u=${user.id}`
       );
       if (!response.ok) throw new Error(response.status);
 

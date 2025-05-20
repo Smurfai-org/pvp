@@ -4,6 +4,8 @@ import AuthContext from "../../utils/AuthContext";
 import Button from "../../components/Button";
 import { useNavigate } from "react-router-dom";
 
+const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
+
 const SubscribePage = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -24,7 +26,7 @@ const SubscribePage = () => {
     const stripe = await stripePromise;
 
     const response = await fetch(
-      "http://localhost:5000/stripe/create-checkout-session",
+      `${serverUrl}/stripe/create-checkout-session`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

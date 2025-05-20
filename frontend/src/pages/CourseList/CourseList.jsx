@@ -11,6 +11,7 @@ import { MessageContext } from "../../utils/MessageProvider";
 import addProblemIcon from "../../assets/add-problem-icon.svg";
 
 const tokenCookie = cookies.get("token");
+const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
 
 const CourseList = () => {
   const [isLoaded, setIsLoaded] = useState({
@@ -33,7 +34,7 @@ const CourseList = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await fetch("http://localhost:5000/course/");
+        const response = await fetch(`${serverUrl}/course/`);
         if (!response.ok) throw new Error(response.status);
         const data = await response.json();
         const activeCourses = data
@@ -52,7 +53,7 @@ const CourseList = () => {
       if (!loggedIn) return;
       try {
         const response = await fetch(
-          `http://localhost:5000/enrolled/${user?.id}/`
+          `${serverUrl}/enrolled/${user?.id}/`
         );
         if (!response.ok) throw new Error(response.status);
         const data = await response.json();
@@ -75,8 +76,8 @@ const CourseList = () => {
       try {
         const userId = user?.id;
         const url = userId
-          ? `http://localhost:5000/problem?userId=${userId}`
-          : `http://localhost:5000/problem`;
+          ? `${serverUrl}/problem?userId=${userId}`
+          : `${serverUrl}/problem`;
 
         const response = await fetch(url);
 
@@ -203,7 +204,7 @@ const CourseList = () => {
     setIsGeneratingProblem(true);
     try {
       const checkProblems = await fetch(
-        `http://localhost:5000/problem/generated`,
+        `${serverUrl}/problem/generated`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -223,7 +224,7 @@ const CourseList = () => {
         setIsGeneratingProblem(false);
         return;
       }
-      const response = await fetch("http://localhost:5000/generate/problem", {
+      const response = await fetch(`${serverUrl}/generate/problem`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

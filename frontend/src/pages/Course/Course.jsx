@@ -8,6 +8,8 @@ import AuthContext from "../../utils/AuthContext";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import chevronIcon from "../../assets/Chevron-icon.png";
 
+const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
+
 const Course = () => {
   const { id } = useParams();
   const { loggedIn, user } = useContext(AuthContext);
@@ -32,8 +34,8 @@ const Course = () => {
       try {
         const userId = user?.id;
         const url = userId
-          ? `http://localhost:5000/course/?id=${id}&userId=${userId}`
-          : `http://localhost:5000/course/?id=${id}`;
+          ? `${serverUrl}/course/?id=${id}&userId=${userId}`
+          : `${serverUrl}/course/?id=${id}`;
 
         const res = await fetch(url);
 
@@ -55,8 +57,8 @@ const Course = () => {
       try {
         const userId = user?.id;
         const url = userId
-          ? `http://localhost:5000/course/problems?id=${id}&userId=${userId}`
-          : `http://localhost:5000/course/problems?id=${id}`;
+          ? `${serverUrl}/course/problems?id=${id}&userId=${userId}`
+          : `${serverUrl}/course/problems?id=${id}`;
 
         const res = await fetch(url);
         if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
