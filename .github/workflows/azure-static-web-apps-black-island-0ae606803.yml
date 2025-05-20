@@ -36,7 +36,7 @@ jobs:
           
       - name: Copy Azure config to dist
         run: 
-          pwd
+          |
           cp frontend/staticwebapp.config.json frontend/dist/
 
       - name: Install OIDC Client from Core Package
