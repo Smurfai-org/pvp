@@ -11,6 +11,7 @@ on:
 
 jobs:
   build_and_deploy_job:
+  
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
@@ -22,6 +23,10 @@ jobs:
         with:
           submodules: true
           lfs: false
+          
+      - name: Copy Azure config to dist
+        run: cp frontend/staticwebapp.config.json frontend/dist/
+
       - name: Install OIDC Client from Core Package
         run: npm install @actions/core@1.6.0 @actions/http-client
       - name: Get Id Token
