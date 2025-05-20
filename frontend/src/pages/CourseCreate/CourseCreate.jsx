@@ -9,6 +9,8 @@ import cookies from "js-cookie";
 import AuthContext from "../../utils/AuthContext";
 import LoginPrompt from "../../components/LoginPrompt";
 
+const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
+
 function CourseCreate() {
   const navigate = useNavigate();
   const [courseTitle, setCourseTitle] = useState("");
@@ -37,7 +39,7 @@ function CourseCreate() {
     };
 
     try {
-      const req = await fetch("http://localhost:5000/course/create", {
+      const req = await fetch(`${serverUrl}/course/create`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

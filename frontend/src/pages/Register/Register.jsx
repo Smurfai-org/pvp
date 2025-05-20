@@ -8,6 +8,8 @@ import googleIcon from "../../assets/google_icon.svg";
 import { MessageContext } from "../../utils/MessageProvider";
 import "./Register.css";
 
+const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
+
 function Register() {
   const navigate = useNavigate();
 
@@ -59,7 +61,7 @@ function Register() {
 
   const handleRegister = async (email, username, password) => {
     try {
-      const response = await fetch("http://localhost:5000/auth/register", {
+      const response = await fetch(`${serverUrl}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, username, password }),
@@ -88,7 +90,7 @@ function Register() {
   const googleLoginButton = useGoogleLogin({
     onSuccess: async (gresponse) => {
       try {
-        const response = await fetch("http://localhost:5000/loginGoogle", {
+        const response = await fetch(`${serverUrl}/loginGoogle`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ gresponse }),

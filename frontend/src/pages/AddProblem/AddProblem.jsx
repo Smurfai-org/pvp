@@ -9,6 +9,8 @@ import { MessageContext } from '../../utils/MessageProvider';
 import AuthContext from '../../utils/AuthContext';
 import LoginPrompt from '../../components/LoginPrompt';
 
+const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
+
 function AddProblem() {
   const { showErrorMessage, showSuccessMessage } = useContext(MessageContext);
   const param = useParams();
@@ -80,7 +82,7 @@ function AddProblem() {
 
   const handlePost = async () => {
     try {
-      const response = await fetch('http://localhost:5000/problem/create', {
+      const response = await fetch(`${serverUrl}/problem/create`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json', 
@@ -101,7 +103,7 @@ function AddProblem() {
       // post hints
       const validHints = hints.filter(h => h.trim());
       for (let hintText of validHints) {
-        const hintRes = await fetch("http://localhost:5000/hint/", {
+        const hintRes = await fetch(`${serverUrl}/hint/`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -124,7 +126,7 @@ function AddProblem() {
       // Post test cases
       const validTestCases = testCases.filter(tc => tc.input.cpp.trim() || tc.input.python.trim() && tc.output.trim());
       for (let testCase of validTestCases) {
-        const tcRes = await fetch('http://localhost:5000/test_cases/', {
+        const tcRes = await fetch(`${serverUrl}/test_cases/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

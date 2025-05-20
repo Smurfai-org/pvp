@@ -29,6 +29,7 @@ import hintIconMinimal from "../../assets/hint-icon-minimal.svg";
 import surrenderIcon from "../../assets/surrender-icon.svg";
 
 const tokenCookie = cookies.get("token");
+const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
 
 const languages = [
   { label: "C++", value: "cpp" },
@@ -287,7 +288,7 @@ const Problem = () => {
       selectedLanguageValue === "cpp" ? inputCode?.cpp : inputCode?.python;
     console.log({ code: sourceCode, userId: user?.id, probId: id });
     try {
-      const res = await fetch("http://localhost:5000/problem/solve", {
+      const res = await fetch(`${serverUrl}/problem/solve`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -315,7 +316,7 @@ const Problem = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/enrolled/${user?.id}/${courseInfo?.id}`
+        `${serverUrl}/enrolled/${user?.id}/${courseInfo?.id}`
       );
       if (!response.ok) throw new Error(response.status);
       const data = await response.json();
@@ -329,7 +330,7 @@ const Problem = () => {
             : data[0]?.completed_problems ?? 0;
 
         await fetch(
-          `http://localhost:5000/enrolled/${user?.id}/${courseInfo?.id}`,
+          `${serverUrl}/enrolled/${user?.id}/${courseInfo?.id}`,
           {
             method: "PUT",
             headers: {
@@ -348,7 +349,7 @@ const Problem = () => {
       }
     } catch {
       try {
-        await fetch(`http://localhost:5000/enrolled`, {
+        await fetch(`${serverUrl}/enrolled`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -379,7 +380,7 @@ const Problem = () => {
     }
     try {
       setIsGeneratingHint(true);
-      const response = await fetch("http://localhost:5000/generate/hint", {
+      const response = await fetch(`${serverUrl}/generate/hint`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -469,7 +470,7 @@ const Problem = () => {
       setPassScore(null);
 
       try {
-        const baseProblemFetchUrl = `http://localhost:5000/problem?id=${id}`;
+        const baseProblemFetchUrl = `${serverUrl}/problem?id=${id}`;
         const fullProblemFetchUrl =
           loggedIn && user?.id
             ? `${baseProblemFetchUrl}&userId=${user.id}`
@@ -482,7 +483,7 @@ const Problem = () => {
             credentials: "include",
           }),
           loggedIn
-            ? fetch(`http://localhost:5000/progress/${user?.id}/${id}`, {
+            ? fetch(`${serverUrl}/progress/${user?.id}/${id}`, {
                 method: "GET",
                 headers: { "Content-Type": "application/json" },
               })
@@ -543,7 +544,7 @@ const Problem = () => {
       });
 
       try {
-        const res = await fetch(`http://localhost:5000/test_cases?id=${id}`, {
+        const res = await fetch(`${serverUrl}/test_cases?id=${id}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -591,7 +592,7 @@ const Problem = () => {
     const fetchHints = async () => {
       setHints([]);
       try {
-        const response = await fetch(`http://localhost:5000/hint?id=${id}`, {
+        const response = await fetch(`${serverUrl}/hint?id=${id}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
@@ -654,19 +655,23 @@ const Problem = () => {
       setShowLoginPrompt(true);
       return;
     }
+    if (user?.premium === 0) {
+      showErrorMessage("Ši funkcija prieinama tik premium vartotojams");
+      return;
+    }
     if (isSolvedByAI) {
       showErrorMessage("Užduotis jau išspręsta DI");
       return;
     } else {
-      setShowGiveUpModal(true);
-    }
+        setShowGiveUpModal(true);
+      }
   };
 
   const handleConfirmGiveUp = async () => {
     try {
       setIsGeneratingSolution(true);
 
-      const response = await fetch("http://localhost:5000/generate/solution", {
+      const response = await fetch(`${serverUrl}/generate/solution`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -711,7 +716,7 @@ const Problem = () => {
     try {
       setIsUndoingAISolution(true);
       const response = await fetch(
-        `http://localhost:5000/progress/${user?.id}/${id}`,
+        `${serverUrl}/progress/${user?.id}/${id}`,
         {
           method: "DELETE",
           headers: {
@@ -796,7 +801,7 @@ const Problem = () => {
       setCourseInfo(null);
       try {
         const res = await fetch(
-          `http://localhost:5000/course/?id=${problem?.fk_COURSEid}`
+          `${serverUrl}/course/?id=${problem?.fk_COURSEid}`
         );
         if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
 
@@ -822,6 +827,11 @@ const Problem = () => {
   useEffect(() => {
     if (!loggedIn) return;
 
+    if (user?.premium === 0) {
+      setNotPremium(true);
+      setChatError("Ši funkcija prieinama tik premium vartotojams.");
+    }
+
     const socketClient = io("http://localhost:5000", {
       transports: ["websocket"],
       autoConnect: true,
@@ -838,7 +848,7 @@ const Problem = () => {
       if (data.success) {
         console.log("Socket authenticated:", data.user);
       } else if (!data.success) {
-        if (data.code === ERROR_NOT_PREMIUM) {
+        if (data.code === ERROR_NOT_PREMIUM || user?.premium === 0) {
           setNotPremium(true);
           setChatError(data.message);
         } else {
@@ -1297,7 +1307,6 @@ const ChatInput = ({
           <Button
             extra="small bright"
             onClick={() => onGiveUp?.()}
-            disabled={notPremium}
             iconSrc={surrenderIcon}
           >
             Pasiduoti

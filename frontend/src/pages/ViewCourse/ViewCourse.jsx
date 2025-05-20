@@ -14,6 +14,8 @@ import LoginPrompt from "../../components/LoginPrompt";
 import ReactMarkdown from "react-markdown";
 import { difficulty_dictionary } from "../../constants";
 
+const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
+
 function ViewCourse() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -42,7 +44,7 @@ function ViewCourse() {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/course/?id=${id}`);
+        const res = await fetch(`${serverUrl}/course/?id=${id}`);
         if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
 
         const data = await res.json();
@@ -63,7 +65,7 @@ function ViewCourse() {
     const fetchProblems = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/course/problems?id=${id}`
+          `${serverUrl}/course/problems?id=${id}`
         );
 
         if (!res.ok) {
@@ -108,7 +110,7 @@ function ViewCourse() {
     }
 
     try {
-      const res = await fetch(`http://localhost:5000/course/update`, {
+      const res = await fetch(`${serverUrl}/course/update`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json", 
