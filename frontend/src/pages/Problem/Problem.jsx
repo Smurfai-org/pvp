@@ -19,7 +19,6 @@ import {
 import { MessageContext } from "../../utils/MessageProvider";
 import AnimatedLoadingText from "../../components/AnimatedLoadingText";
 import LoginPrompt from "../../components/LoginPrompt";
-import io from "socket.io-client";
 import ReactMarkdown from "react-markdown";
 import VoiceToText from "../../components/VoiceToText";
 import playIcon from "../../assets/play-icon.svg";
@@ -27,6 +26,7 @@ import evaluateIcon from "../../assets/evaluate-icon.svg";
 import chevronIcon from "../../assets/Chevron-icon.png";
 import hintIconMinimal from "../../assets/hint-icon-minimal.svg";
 import surrenderIcon from "../../assets/surrender-icon.svg";
+import Joyride, { STATUS } from "react-joyride";
 
 const tokenCookie = cookies.get("token");
 const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
@@ -63,9 +63,7 @@ const Problem = () => {
     languages[0]?.value
   );
 
-  const [socket, setSocket] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
-  const [isConnected, setIsConnected] = useState(false);
   const [chatError, setChatError] = useState(null);
   const [notPremium, setNotPremium] = useState(false);
 
@@ -106,6 +104,76 @@ const Problem = () => {
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   const [hints, setHints] = useState([]);
+  const [countOfSolutions, setCountOfSolutions] = useState(0);
+
+  const steps = [
+    {
+      target: "body",
+      placement: "center",
+      content: (
+        <div>
+          <h2>Labas!</h2>
+          <p>Štai greitas turas kaip naudotis LearnCode.</p>
+          <p>Spauskite „Kitas“, jog pradėtumėte.</p>
+        </div>
+      ),
+      disableBeacon: true,
+    },
+    {
+      target: ".problem-info-navigation-bar",
+      content: "Čia galite perjungti tarp užduoties aprašymo ir DI pagalbos.",
+      disableBeacon: true,
+    },
+    {
+      target: ".problem-related-courses",
+      content: "Ši dalis rodo, kuriam kursui priklauso ši užduotis.",
+      disableBeacon: true,
+    },
+    {
+      target: ".test-cases-list",
+      content:
+        "Tai yra testavimo atvejai, kuriuos galite naudoti savo kodui patikrinti.",
+      disableBeacon: true,
+      placement: "right",
+    },
+    {
+      target: ".code-editor-area",
+      content: "Čia galite rašyti ir redaguoti savo kodą.",
+      disableBeacon: true,
+      placement: "left",
+    },
+    {
+      target: ".output-window",
+      content: "Čia matysite savo kodo rezultatus.",
+      disableBeacon: true,
+    },
+    {
+      target: ".problem-page-right button:nth-child(1)",
+      content: "Paspauskite čia, kad paleistumėte savo kodą.",
+      disableBeacon: true,
+    },
+    {
+      target: ".problem-page-right button:nth-child(2)",
+      content: "Paspauskite čia, kad įvertintumėte savo sprendimą.",
+      disableBeacon: true,
+    },
+    {
+      target: ".problem-page-right .dropdown",
+      content: "Pasirinkite programavimo kalbą, kuria norite dirbti.",
+      disableBeacon: true,
+    },
+    {
+      target: ".problem-ai-window",
+      content: "Čia galite gauti pagalbą iš DI sprendimo lango.",
+      placement: "right",
+      disableBeacon: true,
+      spotlightClicks: true,
+    },
+  ];
+  const [stepIndex, setStepIndex] = useState(0);
+  const [run, setRun] = useState(null);
+  const [paused, setPaused] = useState(false);
+  const [seen, setSeen] = useState(null);
 
   const onDropdownSelect = (selectedLabel) => {
     const selectedLang = languages.find((lang) => lang.label === selectedLabel);
@@ -329,21 +397,18 @@ const Problem = () => {
             ? Number((data[0]?.completed_problems ?? 0) - 1)
             : data[0]?.completed_problems ?? 0;
 
-        await fetch(
-          `${serverUrl}/enrolled/${user?.id}/${courseInfo?.id}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${tokenCookie}`,
-            },
-            body: JSON.stringify({
-              completed_problems: completed_problems,
-              language: selectedLanguageValue,
-            }),
-            credentials: "include",
-          }
-        );
+        await fetch(`${serverUrl}/enrolled/${user?.id}/${courseInfo?.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${tokenCookie}`,
+          },
+          body: JSON.stringify({
+            completed_problems: completed_problems,
+            language: selectedLanguageValue,
+          }),
+          credentials: "include",
+        });
       } catch {
         console.error("Nepavyko pakeisti kurso progreso");
       }
@@ -417,52 +482,106 @@ const Problem = () => {
       setShowLoginPrompt(true);
       return;
     }
+    if (!message.trim()) return;
 
-    if (!socket || !isConnected) {
-      showErrorMessage("Nepavyko prisijungti prie DI asistento");
-      return;
-    }
-
-    if (!message.trim()) {
-      return;
-    }
-
+    setIsGeneratingChatAnswer(true);
+    setChatMessages((prevMessages) => [
+      ...prevMessages,
+      {
+        sender: "user",
+        text: message,
+        timestamp: new Date(new Date().setSeconds(0, 0)).toISOString(),
+      },
+    ]);
     try {
-      setIsGeneratingChatAnswer(true);
-      setChatMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          sender: "user",
-          text: message,
-          timestamp: new Date(new Date().setSeconds(0, 0)).toISOString(),
-        },
-      ]);
-      socket.emit("message", {
-        message,
-        problemContext: {
-          problemId: id,
-          problemName: problem?.name,
-          problemDescription: problem?.description,
-          difficulty: problem?.difficulty,
-          language: selectedLanguageValue,
-          code: inputCode[selectedLanguageValue],
-          testCases:
-            testCases.length > 0
-              ? testCases
-                  .map((tc) => ({
-                    input: tc.input[selectedLanguageValue],
-                    expected_output: tc.expected_output,
-                  }))
-                  .slice(0, 2)
-              : [],
-        },
+      const res = await fetch(`${serverUrl}/chat/message`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          userId: user.id,
+          message,
+          convoHist: chatMessages.map((msg) => ({
+            role: msg.sender === "user" ? "user" : "assistant",
+            content: msg.text,
+          })),
+          problemContext: {
+            problemId: id,
+            problemName: problem?.name,
+            problemDescription: problem?.description,
+            difficulty: problem?.difficulty,
+            language: selectedLanguageValue,
+            code: inputCode[selectedLanguageValue],
+            testCases:
+              testCases.length > 0
+                ? testCases
+                    .map((tc) => ({
+                      input: tc.input[selectedLanguageValue],
+                      expected_output: tc.expected_output,
+                    }))
+                    .slice(0, 2)
+                : [],
+          },
+        }),
       });
-    } catch (error) {
-      console.error("Error using AI chat:", error);
-      showErrorMessage("Klaida bendraujant su DI asistentu");
-      setIsGeneratingChatAnswer(false);
+      const data = await res.json();
+      if (data.success) {
+        setChatMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            sender: "ai",
+            text: data.message,
+            timestamp: data.timestamp,
+          },
+        ]);
+      } else {
+        setChatError(data.details || "Klaida bendraujant su DI asistentu");
+      }
+    } catch {
+      setChatError("Klaida bendraujant su DI asistentu");
     }
+    setIsGeneratingChatAnswer(false);
   };
+  useEffect(() => {
+    if (!loggedIn) return;
+
+    async function checkPremium() {
+      try {
+        const res = await fetch(`${serverUrl}/chat/authenticate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: tokenCookie }),
+        });
+        const data = await res.json();
+        if (!data.success) {
+          setNotPremium(true);
+          setChatError(data.message);
+        }
+      } catch {
+        setChatError("Nepavyko autentifikuoti pokalbio.");
+      }
+    }
+    checkPremium();
+  }, [loggedIn, tokenCookie]);
+
+  useEffect(() => {
+    async function fetchChatHistory() {
+      try {
+        const res = await fetch(`${serverUrl}/chat/history/${user.id}`);
+        const history = await res.json();
+        setChatMessages(
+          history.map((msg) => ({
+            sender: msg.role === "user" ? "user" : "ai",
+            text: msg.content,
+            timestamp: msg.timestamp,
+          }))
+        );
+      } catch {
+        setChatError("Nepavyko gauti pokalbio istorijos.");
+      }
+    }
+    fetchChatHistory();
+  }, [loggedIn, user?.id]);
 
   useEffect(() => {
     const fetchProblem = async (automaticallyGeneratedInputCode) => {
@@ -493,6 +612,11 @@ const Problem = () => {
         if (!problemRes.ok) throw new Error(`HTTP error: ${problemRes.status}`);
         const problemData = await problemRes.json();
 
+        if (!problemData || !problemData[0]) {
+          setIsLoaded(true);
+          return;
+        }
+
         const parsedStartingCode = JSON.parse(
           problemData[0]?.starting_code || "{}"
         );
@@ -521,6 +645,7 @@ const Problem = () => {
               ? parsedUserCode?.python
               : automaticallyGeneratedInputCode?.python,
           });
+          setIsLoaded(true);
           return;
         }
 
@@ -528,8 +653,10 @@ const Problem = () => {
           cpp: automaticallyGeneratedInputCode?.cpp,
           python: automaticallyGeneratedInputCode?.python,
         });
+        setIsLoaded(true);
       } catch (error) {
         console.error(error.message);
+        setIsLoaded(true);
       }
     };
 
@@ -595,7 +722,6 @@ const Problem = () => {
         const response = await fetch(`${serverUrl}/hint?id=${id}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
-          credentials: "include",
         });
 
         if (!response.ok) {
@@ -650,6 +776,43 @@ const Problem = () => {
     setIsOutputWindowMaximised(false);
   }, [id, courseProblemsOrder]);
 
+  useEffect(() => {
+    if (!problem) return;
+    const fetchCourse = async () => {
+      setCourseInfo(null);
+      try {
+        const res = await fetch(
+          `${serverUrl}/course/?id=${problem?.fk_COURSEid}`
+        );
+        if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+
+        const data = await res.json();
+        if (data.length > 0) {
+          setCourseInfo(data[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching course:", error);
+      }
+    };
+    const fetchProgress = async () => {
+      setCountOfSolutions(0);
+      try {
+        const res = await fetch(
+          `${serverUrl}/progress/countOfCompleted/p=${problem?.id}`
+        );
+        if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+
+        const data = await res.json();
+        setCountOfSolutions(data?.count);
+      } catch (error) {
+        console.error("Error fetching count of solutions:", error);
+      }
+    };
+
+    fetchCourse();
+    fetchProgress();
+  }, [problem]);
+
   const handleGiveUpClick = () => {
     if (!loggedIn) {
       setShowLoginPrompt(true);
@@ -663,8 +826,8 @@ const Problem = () => {
       showErrorMessage("Užduotis jau išspręsta DI");
       return;
     } else {
-        setShowGiveUpModal(true);
-      }
+      setShowGiveUpModal(true);
+    }
   };
 
   const handleConfirmGiveUp = async () => {
@@ -714,17 +877,17 @@ const Problem = () => {
       return;
     }
     try {
+      if (!window.confirm("Ar tikrai norite panaikinti DI sprendimą?")) {
+        return;
+      }
       setIsUndoingAISolution(true);
-      const response = await fetch(
-        `${serverUrl}/progress/${user?.id}/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
+      const response = await fetch(`${serverUrl}/progress/${user?.id}/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP klaida: ${response.status}`);
@@ -743,31 +906,27 @@ const Problem = () => {
   };
 
   const handleDeleteMessages = async (timestamp) => {
-    console.log("Deleting message with ID:", timestamp);
-    socket.emit(
-      "deleteMessages",
-      { timestamp, userId: user.id },
-      (response) => {
-        if (response.success) {
-          console.log(
-            "Updated history after deletion:",
-            response.updatedHistory
-          );
-          const parsedHistory = response.updatedHistory.map((msg) => ({
+    try {
+      const res = await fetch(`${serverUrl}/chat/deleteMessages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id, timestamp }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setChatMessages(
+          data.updatedHistory.map((msg) => ({
             sender: msg.role === "user" ? "user" : "ai",
             text: msg.content,
             timestamp: msg.timestamp,
-          }));
-          setChatMessages(parsedHistory);
-        } else {
-          console.error(
-            "Error deleting messages:",
-            response.message || "Unknown error"
-          );
-          setChatError(response.message || "Failed to delete messages");
-        }
+          }))
+        );
+      } else {
+        setChatError(data.message || "Nepavyko ištrinti žinučių");
       }
-    );
+    } catch {
+      setChatError("Klaida tryniant žinutes");
+    }
   };
   const ConfirmGiveUpModal = ({ onClose, onConfirm, isLoading }) => {
     return (
@@ -795,121 +954,146 @@ const Problem = () => {
     );
   };
 
-  useEffect(() => {
-    if (!problem) return;
-    const fetchCourse = async () => {
-      setCourseInfo(null);
-      try {
-        const res = await fetch(
-          `${serverUrl}/course/?id=${problem?.fk_COURSEid}`
-        );
-        if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+  const handleJoyrideCallback = async (data) => {
+    const { index, status, type, action } = data;
 
-        const data = await res.json();
-        if (data.length > 0) {
-          setCourseInfo(data[0]);
+    if (type === "step:after") {
+      if (action === "next") {
+        const nextIndex = index + 1;
+
+        if (nextIndex === steps.length - 1) {
+          setPaused(true);
+          handleAiHelpButtonClick();
+        } else {
+          setStepIndex(nextIndex);
         }
-      } catch (error) {
-        console.error("Error fetching course:", error);
+      } else if (action === "prev") {
+        setStepIndex(index - 1);
       }
-    };
+    }
 
-    const loadData = async () => {
-      if (problem?.generated !== 1) {
-        await fetchCourse();
+    if (status === STATUS.SKIPPED || status === STATUS.FINISHED) {
+      try {
+        await fetch(`${serverUrl}/user/seenTutorial`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ id: user.id }),
+        });
+      } catch (err) {
+        console.error("Klaida siunčiant seenTutorial:", err);
       }
-      setIsLoaded(true);
-    };
 
-    loadData();
-  }, [problem]);
+      setTimeout(() => {
+        setRun(false);
+        setStepIndex(0);
+      }, 0);
+
+      handleProblemInfoButtonClick();
+    }
+  };
+
+  useEffect(() => {
+    if (!paused) return;
+
+    const interval = setInterval(() => {
+      const el = document.querySelector(".problem-ai-window");
+      if (el) {
+        clearInterval(interval);
+        setPaused(false);
+        setStepIndex(steps.length - 1);
+        setRun(true);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [paused]);
 
   useEffect(() => {
     if (!loggedIn) return;
+    const fetchSeen = async () => {
+      try {
+        const response = await fetch(
+          `${serverUrl}/user/seenTutorial?id=${user.id}`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
 
-    if (user?.premium === 0) {
-      setNotPremium(true);
-      setChatError("Ši funkcija prieinama tik premium vartotojams.");
-    }
-
-    const socketClient = io("http://localhost:5000", {
-      transports: ["websocket"],
-      autoConnect: true,
-    });
-
-    socketClient.on("connect", () => {
-      console.log("Prisijungta prie socket:", socketClient.id);
-      setIsConnected(true);
-
-      socketClient.emit("authenticate", tokenCookie);
-    });
-
-    socketClient.on("authenticated", (data) => {
-      if (data.success) {
-        console.log("Socket authenticated:", data.user);
-      } else if (!data.success) {
-        if (data.code === ERROR_NOT_PREMIUM || user?.premium === 0) {
-          setNotPremium(true);
-          setChatError(data.message);
+        if (response.ok) {
+          const data = await response.json();
+          setSeen(data.seen_tutorial);
         } else {
-          console.error(data.message || "Klaida autentifikuojant socket");
-          setChatError(data.message || "Klaida autentifikuojant socket");
+          console.error("Failed to fetch seen status", response.status);
         }
-      }
-    });
-
-    socketClient.on("history", (history) => {
-      const parsedHistory = history.map((msg) => ({
-        sender: msg.role === "user" ? "user" : "ai",
-        text: msg.content,
-        timestamp: msg.timestamp,
-      }));
-      setChatMessages(parsedHistory);
-      setIsGeneratingChatAnswer(false);
-    });
-
-    socketClient.on("response", (data) => {
-      setChatMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          sender: "ai",
-          text: data.message,
-          timestamp: data.timestamp,
-        },
-      ]);
-      setIsGeneratingChatAnswer(false);
-    });
-
-    socketClient.on("error", (error) => {
-      setChatError(error.message || "Klaida socket'e");
-      showErrorMessage(error.message || "Klaida socket'e");
-    });
-
-    socketClient.on("disconnect", () => {
-      console.log("Socket disconnected:", socketClient.id);
-      setIsConnected(false);
-    });
-    socketClient.on("messagesDeleted", (data) => {
-      if (data.success) {
-        const parsedHistory = data.updatedHistory.map((msg) => ({
-          sender: msg.role === "user" ? "user" : "ai",
-          text: msg.content,
-          timestamp: msg.timestamp,
-        }));
-        setChatMessages(parsedHistory);
-      }
-    });
-    setSocket(socketClient);
-
-    return () => {
-      if (socketClient) {
-        socketClient.disconnect();
+      } catch (err) {
+        console.error("Error fetching seen status:", err);
       }
     };
-  }, [loggedIn, tokenCookie]);
+
+    fetchSeen();
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (seen === null || seen === undefined) return;
+
+    console.log(seen);
+
+    if (!seen) {
+      setRun(true);
+    } else {
+      setRun(false);
+    }
+  }, [seen]);
 
   return (
     <div className="relative">
+      {seen !== null && (
+        <Joyride
+          steps={steps}
+          run={run}
+          stepIndex={stepIndex}
+          continuous={true}
+          showSkipButton={true}
+          showProgress={false}
+          disableOverlayClose={true}
+          disableCloseOnEsc={true}
+          hideCloseButton={true}
+          scrollToFirstStep={true}
+          spotlightClicks={true}
+          locale={{
+            back: "Atgal",
+            close: "Uždaryti",
+            last: "Baigti",
+            next:
+              stepIndex < steps.length - 1
+                ? `Kitas (${stepIndex + 1} iš ${steps.length})`
+                : "Baigti",
+            skip: "Praleisti",
+          }}
+          styles={{
+            options: {
+              primaryColor: "var(--bright)",
+              textColor: "var(--text)",
+              backgroundColor: "var(--light)",
+            },
+            buttonNext: {
+              backgroundColor: "var(--dark)",
+              color: "var(--light)",
+            },
+            buttonBack: {
+              color: "var(--text)",
+            },
+            buttonSkip: {
+              color: "var(--text)",
+            },
+          }}
+          callback={handleJoyrideCallback}
+        />
+      )}
       {showGiveUpModal && (
         <ConfirmGiveUpModal
           onClose={() => setShowGiveUpModal(false)}
@@ -1038,12 +1222,21 @@ const Problem = () => {
                   <h2>{isLoaded ? problem?.name : <AnimatedLoadingText />}</h2>
                   {isLoaded && (
                     <div className="problem-related-courses">
-                      <Hyperlink href={`/courses/${courseInfo?.id}`}>
-                        {courseInfo?.name}
-                      </Hyperlink>
+                      {courseInfo ? (
+                        <Hyperlink href={`/courses/${courseInfo?.id}`}>
+                          {courseInfo?.name}
+                        </Hyperlink>
+                      ) : (
+                        <span>Nepriklauso kursui</span>
+                      )}
+                      <div className="problem-info-divider">|</div>
                       <strong className={problem?.difficulty}>
                         {difficulty_dictionary[problem?.difficulty]}
                       </strong>
+                      <div className="problem-info-divider">|</div>
+                      <span>
+                        Įveikė <strong>{countOfSolutions}</strong>
+                      </span>
                     </div>
                   )}
 
@@ -1312,10 +1505,10 @@ const ChatInput = ({
             Pasiduoti
           </Button>
           <Button
-          extra="small bright"
-          onClick={() => onUndoAISolution?.()}
-          loading={isUndoingAISolution}
-          visibility ={isSolvedByAI ? "visible" : "hidden"}
+            extra="small bright"
+            onClick={() => onUndoAISolution?.()}
+            loading={isUndoingAISolution}
+            visibility={isSolvedByAI ? "visible" : "hidden"}
           >
             Panaikinti DI sprendimą
           </Button>

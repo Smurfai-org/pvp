@@ -35,7 +35,7 @@ const PremiumSelection = () => {
     <section className="premium-selection">
       <div className="container">
         <header>
-          <h1>Pirkti Premium!</h1>
+          <h1>Pirkite Premium!</h1>
           <p>
             Mėgaukitės geriausia patirtimi su mūsų aukščiausios kokybės planu!
           </p>
@@ -102,7 +102,7 @@ const PremiumSelection = () => {
 
         {/* Comparison Table */}
         <div className="comparison">
-          <h2>Nemokamas vs Premium Planas</h2>
+          <h2>Planų palyginimas</h2>
           <table className="comparison-table">
             <thead>
               <tr>

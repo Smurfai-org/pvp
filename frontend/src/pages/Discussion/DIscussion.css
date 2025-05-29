@@ -1,0 +1,219 @@
+.main-block {
+  margin-top: 30px;
+  margin-left: 10%;
+  margin-right: 10%;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  height: 90vh;
+  padding: 20px;
+}
+
+.main-block .main-title {
+  margin: 0 0 20px 0;
+  font-size: 24px;
+  color: #333;
+  font-weight: 600;
+  text-align: center;
+}
+
+.main-block .wrapper {
+  margin-top: 10px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.main-block .post-card {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid #e0e0e0;
+  margin: 6px 0;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+  align-items: flex-start;
+}
+
+.main-block .post-card:hover {
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+}
+
+.main-block .post-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 60px;
+  color: #6a737c;
+  font-size: 10px;
+  gap: 4px;
+  margin-right: 4px;
+}
+
+.main-block .stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.main-block .stat-number {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.main-block .stat-label {
+  font-size: 9px;
+}
+
+.main-block .post-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: calc(100% - 80px); 
+  overflow: hidden; 
+}
+
+.main-block .discussion-post-title {
+  color: #8db8a5;
+  font-size: 13px;
+  margin: 0 0 4px 0;
+  font-weight: 400;
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+}
+
+.main-block .discussion-post-title:hover {
+  color: #8dd8a5;
+}
+
+.main-block .post-excerpt {
+  color: #3b4045;
+  font-size: 11px;
+  margin: 0 0 6px 0;
+  line-height: 1.2;
+  overflow: hidden; 
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}
+
+.main-block .post-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.main-block .post-author {
+  display: flex;
+  gap: 4px;
+  font-size: 10px;
+  align-items: center;
+}
+
+.main-block .post-time {
+  padding-top: 0;
+  color: #6a737c;
+}
+
+.main-block .author-name {
+  padding-top: 0;
+  color: #8db8a5;
+}
+
+.main-block .create-button {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  background-color: #8db8a5;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 24px;
+  line-height: 0;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.main-block .create-button::after {
+  content: attr(title);
+  position: absolute;
+  background-color: #1a1a1a;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 16px;
+  white-space: nowrap;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-right: 12px;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.main-block .create-button:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(-5px);
+}
+
+.main-block .create-button:hover {
+  background-color: #7da892;
+  box-shadow: 0 0 10px rgba(141, 184, 165, 0.5);
+}
+
+.main-block .pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: auto;
+  padding: 10px;
+  gap: 5px;
+}
+
+.main-block .pagination button {
+  padding: 5px 10px;
+  border: 1px solid #ddd;
+  background-color: white;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.main-block .pagination button:hover:not(:disabled) {
+  background-color: #8dd8a5;
+}
+
+.main-block .pagination button:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.main-block .pagination button.active {
+  background-color: #8db8a5;
+  color: white;
+  border-color: #8db8a5;
+}
+
+.main-block .pagination .disabled-page {
+  color: #ccc;
+  cursor: not-allowed;
+  background-color: #f9f9f9;
+  border-color: #eee;
+}
+
+.main-block .author-profile-pic {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 8px;
+  object-fit: cover;
+}

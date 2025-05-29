@@ -19,6 +19,10 @@ const OutputSection = forwardRef(
       try {
         const { run: result } = await executeCode(language, sourceCode);
         result.stderr ? setIsError(true) : setIsError(false);
+        if (result.signal === "SIGKILL") {
+          setIsError(true);
+          return "Atrodo, kad Jūsų kodas vykdomas be pabaigos. Patikrinkite, ar ciklas turi teisingą sąlygą sustabdymui.";
+        }
         return result.output;
       } catch (err) {
         console.error("Execution error:", err);

@@ -52,9 +52,7 @@ const CourseList = () => {
     const fetchStartedCourses = async (coursesLocal) => {
       if (!loggedIn) return;
       try {
-        const response = await fetch(
-          `${serverUrl}/enrolled/${user?.id}/`
-        );
+        const response = await fetch(`${serverUrl}/enrolled/${user?.id}/`);
         if (!response.ok) throw new Error(response.status);
         const data = await response.json();
         const startedCourses = data
@@ -203,15 +201,12 @@ const CourseList = () => {
     }
     setIsGeneratingProblem(true);
     try {
-      const checkProblems = await fetch(
-        `${serverUrl}/problem/generated`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
+      const checkProblems = await fetch(`${serverUrl}/problem/generated`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
 
       if (!checkProblems.ok) {
         throw new Error(`HTTP error: ${checkProblems.status}`);
@@ -347,7 +342,7 @@ const CourseList = () => {
         />
       </div>
       <div className="page-wrapper">
-        <h2>Užduotys</h2>
+        <h2>Visos užduotys</h2>
         {isLoaded.problems ? (
           <div className="problems-container">
             {problems.map((problem, index, array) => (

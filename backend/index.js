@@ -5,9 +5,6 @@ import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import { createServer } from "http";
-import { Server } from "socket.io";
-import { setupSocketIO } from "./utils/chatService.js";
 import stripeWebhook from "./routes/stripeWebHook.js";
 
 dotenv.config();
@@ -18,26 +15,37 @@ app.use(
   express.raw({ type: "application/json" }),
   stripeWebhook
 );
-const server = createServer(app);
-const io = new Server(server, {
-  cors: {
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-});
 const port = 5000;
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    methods: "GET,POST,PUT,DELETE",
+    origin: true,
+    methods: "GET,POST,PUT,DELETE,OPTIONS",
     credentials: true,
   })
 );
+
+app.use((req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self' 'unsafe-inline' data: blob: *"
+  );
+  next();
+});
 app.use(express.json());
 app.use(cookieParser());
 
-setupSocketIO(io);
+app.use(
+  (req, res, next) => (
+    console.log(
+      `[${new Date().toTimeString().slice(0, 5)}] ${req.method} ${
+        req.originalUrl
+      } Body:`,
+      req.body
+    ),
+    next()
+  )
+);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -65,7 +73,7 @@ async function loadRoutes() {
 }
 
 loadRoutes().then(() => {
-  server.listen(port, () => {
-    console.log(`Server listening on port ${port} with Socket.io`);
+  app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
   });
 });

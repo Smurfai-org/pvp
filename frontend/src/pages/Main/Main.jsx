@@ -3,6 +3,8 @@ import SideImage from "../../assets/Smurfai-landing-page-image.png";
 import Button from "../../components/Button";
 import { useNavigate } from "react-router-dom";
 import Alert from "../../components/Alert";
+import { useContext } from "react";
+import AuthContext from "../../utils/AuthContext";
 
 const specialSpaces = (num) => {
   let spacesArray = [];
@@ -14,6 +16,15 @@ const specialSpaces = (num) => {
 
 const Main = () => {
   const navigate = useNavigate();
+  const { loggedIn } = useContext(AuthContext);
+
+  const onMainButtonClick = () => {
+    if (loggedIn) {
+      navigate("/courses");
+      return;
+    }
+    navigate("/register");
+  };
 
   return (
     <div className="full-container-page">
@@ -35,8 +46,8 @@ const Main = () => {
             </h1>
           </div>
           <div className="button-container">
-            <Button extra="button-style" onClick={() => navigate("/register")}>
-              Sukurti paskyrą {">"}
+            <Button extra="button-style" onClick={onMainButtonClick}>
+              {loggedIn ? "Žiūrėti kursus >" : "Sukurti paskyrą >"}
             </Button>
           </div>
         </div>
@@ -47,10 +58,10 @@ const Main = () => {
           <div className="column">
             <h2>Apie projektą</h2>
             <p>
-            LearnCode yra edukacinis projektas, skirtas mokyklų
-              abiturientams ir ne tik, kurie nori gilintis į programavimą. Mūsų
-              tikslas – suteikti galimybę mokytis ir tobulėti, pasirinkus vieną
-              iš dviejų populiariausių programavimo kalbų – C++ arba Python.
+              LearnCode yra edukacinis projektas, skirtas mokyklų abiturientams
+              ir ne tik, kurie nori gilintis į programavimą. Mūsų tikslas –
+              suteikti galimybę mokytis ir tobulėti, pasirinkus vieną iš dviejų
+              populiariausių programavimo kalbų – C++ arba Python.
             </p>
             <p>
               Šis projektas išsiskiria tuo, kad jame įdiegtas dirbtinis

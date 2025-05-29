@@ -8,6 +8,8 @@ import googleIcon from "../assets/google_icon.svg";
 import Hyperlink from "./Hyperlink";
 import "../pages/Register/Register.css";
 
+const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
+
 const LoginPrompt = ({ onClose }) => {
   const { loggedIn, login } = useContext(AuthContext);
   const [isOpen, setIsOpen] = useState(!loggedIn);
@@ -52,7 +54,7 @@ const LoginPrompt = ({ onClose }) => {
 
   const handleLogin = async (username, password) => {
     try {
-      const response = await fetch("http://localhost:5000/auth/login", {
+      const response = await fetch(`${serverUrl}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -79,7 +81,7 @@ const LoginPrompt = ({ onClose }) => {
 
   const googleLoginButton = useGoogleLogin({
     onSuccess: async (gresponse) => {
-      const response = await fetch("http://localhost:5000/loginGoogle", {
+      const response = await fetch(`${serverUrl}/loginGoogle`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ gresponse }),

@@ -7,17 +7,22 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   const { id } = req.query;
   const token = req.cookies.token;
-  if (!token) {
-    return res.status(401).json();
-  }
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  try {
-    let query = "SELECT * FROM hints WHERE deleted = 0";
-    let params = [];
+  let query = "SELECT * FROM hints WHERE deleted = 0";
+  let params = [];
 
-    if (id) {
-      query += " AND fk_PROBLEMid = ? AND (fk_USERid IS NULL OR fk_USERid = ?)";
-      params.push(id, decoded.user.id);
+  try {
+    if (!token) {
+      if (id) {
+        query += " AND fk_PROBLEMid = ? AND fk_USERid IS NULL";
+        params.push(id);
+      }
+    } else {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      if (id) {
+        query +=
+          " AND fk_PROBLEMid = ? AND (fk_USERid IS NULL OR fk_USERid = ?)";
+        params.push(id, decoded.user.id);
+      }
     }
 
     const [result] = await pool.execute(query, params);

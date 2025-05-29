@@ -348,3 +348,9 @@
 .chat-delete-button:hover {
   transform: scale(1.2);
 }
+
+.problem-info-divider {
+  margin: 0 0.5rem;
+  color: var(--light);
+  font-size: 0.8rem;
+}

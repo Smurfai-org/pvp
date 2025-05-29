@@ -30,7 +30,9 @@ import PremiumSelection from "./pages/PremiumPage/PremiumPage";
 import PremiumArea from "./pages/PremiumPage/PremiumArea";
 import SubscribePage from "./pages/PremiumPage/SubscribePage";
 import SubscribeSuccessPage from "./pages/PremiumPage/SubscribeSuccess";
-
+import CreatePost from "./pages/Discussion/CreatePost";
+import Discussion from "./pages/Discussion/Discussion";
+import ViewPost from "./pages/Discussion/ViewPost";
 function AppRoutes() {
   const location = useLocation();
   const hideNavbarRoutes = ["/problems/:id"];
@@ -68,6 +70,9 @@ function AppRoutes() {
                 path="/generate_problem/:id"
                 element={<GenerateProblem />}
               />
+              <Route path="/discussion" element={<Discussion/>}/>
+              <Route path="/discussion/create" element={<CreatePost/>}/>
+              <Route path="/discussion/view/:id" element={<ViewPost/>}/>
               <Route path="/courses/:id" element={<Course />} />
               <Route path="/profile" element={<ViewProfile />} />
               <Route path="/*" element={<NotFound />} />

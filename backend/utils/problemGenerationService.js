@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { saveGeneratedProblemWithDetails } from "./chatService.js";
+import { saveGeneratedProblemWithDetails } from "../routes/chat.js";
 import pool from "./db.js";
 
 const client = new OpenAI({

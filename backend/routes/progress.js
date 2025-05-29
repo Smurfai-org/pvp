@@ -35,9 +35,24 @@ router.get("/p=:problemId", async (req, res) => {
       "SELECT * FROM progress WHERE fk_PROBLEMid = ?",
       [problemId]
     );
-    if (rows.length === 0) {
+    if (rows.length !== 0) {
       res.status(200).json(rows);
     }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Serverio klaida" });
+  }
+});
+
+router.get("/countOfCompleted/p=:problemId", async (req, res) => {
+  const problemId = req.params.problemId;
+  try {
+    const [rows] = await pool.execute(
+      "SELECT COUNT(*) AS count FROM progress WHERE fk_PROBLEMid = ? AND status = 'finished'",
+      [problemId]
+    );
+
+    res.status(200).json({ count: rows[0].count });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Serverio klaida" });

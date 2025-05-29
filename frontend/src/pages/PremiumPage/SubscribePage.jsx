@@ -57,9 +57,10 @@ const SubscribePage = () => {
       <p>Atrakinkite visas funkcijas ir mėgaukitės geresne patirtimi.</p>
 
       <ul>
+        <li>🔒 Pokalbis su DI asistentu</li>
+        <li>🔒 Neribotos užuominos</li>
+        <li>🔒 Neribotos DI kuriamos užduotys</li>
         <li>🔒 Užduočių sprendimas su DI</li>
-        <li>🔒 Išplėstinė analizė</li>
-        <li>🔒 Be reklamų</li>
       </ul>
 
       <Button onClick={handleSubscribe}>Prenumeruoti už 4.99€/mėn</Button>

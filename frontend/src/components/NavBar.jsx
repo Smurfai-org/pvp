@@ -1,5 +1,5 @@
 import Hyperlink from "./Hyperlink";
-import { SearchBar } from "./SearchBar";
+// import { SearchBar } from "./SearchBar";
 import HyperlinkDropdown from "./HyperlinkDropdown";
 import { useContext, useEffect, useState } from "react";
 import AuthContext from "../utils/AuthContext";
@@ -40,11 +40,11 @@ const Navbar = () => {
         <img src={logoHorizontal} alt="Logo" className="navbar-icon" />
       </Hyperlink>
 
-      <div className="nav-search">
+      {/* <div className="nav-search">
         <div className="w-full max-w-md">
           <SearchBar />
         </div>
-      </div>
+      </div> */}
 
       <div className="nav-links">
         <Hyperlink href="/premium" className="premium-link">

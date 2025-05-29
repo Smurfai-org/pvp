@@ -5,6 +5,51 @@ import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
+router.get("/seenTutorial", async (req, res) => {
+    console.log('ASDASDASDSADASDASDASDASDASD /seenTutorial called');
+  const { id } = req.query;
+
+  if (!id) {
+    return res.status(401).json();
+  }
+
+  try {
+    const [result] = await pool.execute('SELECT seen_tutorial FROM users WHERE id = ?', [id]);
+
+    if (!result || result.length === 0) {
+      return res.status(204).json();
+    }
+
+    return res.status(200).json(result[0]);
+  } catch (error) {
+    return res.status(500).json({ message: 'Serverio klaida' });
+  }
+});
+
+router.post('/seenTutorial', async (req, res) => {
+  const { id } = req.body;
+
+  if (!id) {
+    return res.status(400).json({ message: 'Trūksta naudotojo ID' });
+  }
+
+  try {
+    const [result] = await pool.execute(
+      'UPDATE users SET seen_tutorial = ? WHERE id = ?',
+      [true, id]
+    );
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Vartotojas nerastas' });
+    }
+
+    return res.status(200).json({ message: 'Tutorial matytas pažymėtas sėkmingai' });
+  } catch (error) {
+    console.error('DB klaida:', error);
+    return res.status(500).json({ message: 'Serverio klaida' });
+  }
+});
+
 // visi
 router.get("/", async (req, res) => {
   try {
@@ -29,7 +74,7 @@ router.get("/:id", async (req, res) => {
       [req.params.id]
     );
     if (result.length === 0) {
-      return res.status(404).json({ message: "Vartotojas nerastas" });
+      return res.status(404).json({ message: "vartotojas nerastas" });
     }
     res.status(200).json(result[0]);
   } catch (error) {
@@ -168,6 +213,11 @@ router.put("/:id", async (req, res) => {
   }
 });
 
+router.get('/test', (req, res) => {
+  console.log('GET /user/test hit');
+  res.send('Test OK');
+});
+
 router.delete("/:id", async (req, res) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -193,5 +243,6 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ message: "Serverio klaida" });
   }
 });
+
 
 export default router;
