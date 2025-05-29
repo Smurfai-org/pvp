@@ -5,16 +5,9 @@ import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import stripeWebhook from "./routes/stripeWebHook.js";
-
 dotenv.config();
 
 const app = express();
-app.use(
-  "/stripe/webhook",
-  express.raw({ type: "application/json" }),
-  stripeWebhook
-);
 const port = 5000;
 
 app.use(

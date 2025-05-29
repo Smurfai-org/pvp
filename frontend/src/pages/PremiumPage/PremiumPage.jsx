@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import "./PremiumPage.css";
 import AuthContext from "../../utils/AuthContext";
 import Button from "../../components/Button";
@@ -8,6 +8,8 @@ const PremiumSelection = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const premium = user?.premium;
+
+  const [billingPeriod, setBillingPeriod] = useState("monthly"); // "monthly" or "yearly"
 
   const free = [
     "Jokio pokalbio su DI asistentu",
@@ -24,11 +26,8 @@ const PremiumSelection = () => {
   ];
 
   const handlePremiumClick = () => {
-    if (premium) {
-      navigate("/premium-area");
-    } else {
-      navigate("/subscribe");
-    }
+    // You can pass the selected plan type if needed
+    navigate("/subscribe", { state: { billingPeriod } });
   };
 
   return (
@@ -41,18 +40,27 @@ const PremiumSelection = () => {
           </p>
         </header>
 
+        {/* Toggle Between Monthly and Yearly */}
+        <div className="billing-toggle">
+          <Button
+            extra={billingPeriod === "monthly" ? "bright btn" : "btn"}
+            onClick={() => setBillingPeriod("monthly")}
+          >
+            Mėnesinis
+          </Button>
+          <Button
+            extra={billingPeriod === "yearly" ? "bright btn" : "btn"}
+            onClick={() => setBillingPeriod("yearly")}
+          >
+            Metinis <span style={{ fontSize: "0.8em" }}>(2 mėn. nemokamai!)</span>
+          </Button>
+        </div>
+
         <div className="plans">
+          {/* Free Plan */}
           <div className="plan-card">
             <h2>
-              {premium ? (
-                "Nemokamas Planas"
-              ) : (
-                <>
-                  Dabartinis
-                  <br />
-                  Planas
-                </>
-              )}
+              {premium ? "Nemokamas Planas" : <>Dabartinis<br />Planas</>}
             </h2>
             <p className="price">Nemokamas</p>
             <ul className="benefits-list-x">
@@ -68,23 +76,15 @@ const PremiumSelection = () => {
               <Button extra="disabled btn">Dabartinis</Button>
             )}
           </div>
+
+          {/* Premium Plan */}
           <div className="plan-card">
             <h2>
-              {premium ? (
-                <>
-                  Dabartinis
-                  <br />
-                  Planas
-                </>
-              ) : (
-                <>
-                  Premium
-                  <br />
-                  Planas
-                </>
-              )}
+              {premium ? <>Dabartinis<br />Planas</> : <>Premium<br />Planas</>}
             </h2>
-            <p className="price">4.99€/mėn</p>
+            <p className="price">
+              {billingPeriod === "monthly" ? "4.99€/mėn" : "49.99€/metus"}
+            </p>
             <ul className="benefits-list">
               {benefits.map((benefit, index) => (
                 <li key={index}>{benefit}</li>
