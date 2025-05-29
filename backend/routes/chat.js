@@ -2,6 +2,7 @@ import OpenAI from "openai";
 import jwt from "jsonwebtoken";
 import pool from "../utils/db.js";
 import express from "express";
+
 export const chatRouter = express.Router();
 
 export const ERROR_NOT_PREMIUM = 111;
@@ -103,15 +104,22 @@ export const getResponse = async (
   }
 };
 
+function addHoursToISOString(isoString, hoursToAdd = 3) {
+  const date = new Date(isoString);
+  date.setHours(date.getHours() + hoursToAdd);
+  return date.toISOString();
+}
+
 export async function getUserChatHistory(userId) {
   const [rows] = await pool.execute(
     "SELECT * FROM chat_messages WHERE fk_USERid = ? ORDER BY TIMESTAMP ASC LIMIT 20",
     [userId]
   );
+  
   return rows.map((row) => ({
     role: row.role,
     content: row.content,
-    timestamp: row.timestamp,
+    timestamp: addHoursToISOString(row.timestamp, 3),
   }));
 }
 
@@ -237,11 +245,15 @@ chatRouter.post("/deleteMessages", async (req, res) => {
   if (!userId || !timestamp) {
     return res.status(400).json({ success: false, message: "Missing userId or timestamp" });
   }
+
+  const sqlTimestamp = timestamp;
+  console.log(sqlTimestamp);
   try {
-    const deletionResult = await deleteMessagesFromId(userId, timestamp);
+    const deletionResult = await deleteMessagesFromId(userId, sqlTimestamp);
     if (deletionResult === 0) {
       return res.json({ success: false, message: "No messages deleted" });
     }
+    console.log(deletionResult);
     const updatedHistory = await getUserChatHistory(userId);
     res.json({ success: true, updatedHistory });
   } catch (error) {
