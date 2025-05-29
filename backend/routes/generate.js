@@ -15,6 +15,10 @@ router.post("/hint", async (req, res) => {
     return res.status(401).json();
   }
   const { userId, problemId, language } = req.body;
+      if (problemId == 161) {
+      const noHint = "Pirmą užduotį išspręskite patys :)";
+      return res.status(200).json({ hint: noHint, problemId, userId });
+    }
 
   try {
     const [[problem]] = await pool.execute(
@@ -100,19 +104,19 @@ router.post("/hint", async (req, res) => {
     };
 
     const response = await client.responses.create({
-      model: process.env.OPENAI_MODEL,
+      model: "gpt-4o-2024-08-06",
       input: [
         {
           role: "system",
           content:
-            "Tu esi AI asistentas, padedantis mokiniams spręsti programavimo užduotis Python ir C++ kalbomis. Analizuok mokinio parašytą kodą ir pagal pateiktą užduotį sukurk naudingą patarimą.",
+            'Tu esi AI asistentas, padedantis mokiniams spręsti programavimo užduotis Python ir C++ kalbomis. Analizuok mokinio parašytą kodą ir pagal pateiktą užduotį sukurk naudingą patarimą arba pasiūlymą. Pasiūlymas turi būti vienas trumpas sakinys.\n\n Patarimą grąžink šiuo formatu: \n\n {\"hint\": \"patarimo sakinys čia\", \"problemId\": užduoties ID čia (skaičius), \"userId\": \"vartotojo ID čia(skaičius)\"}',
         },
         {
           role: "user",
           content: JSON.stringify(userInput),
         },
       ],
-      temperature: 1.5,
+      temperature: 1.0,
     });
 
     const aiHint = response.output_text;

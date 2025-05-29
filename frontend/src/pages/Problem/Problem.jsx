@@ -834,6 +834,10 @@ const Problem = () => {
       showErrorMessage("Ši funkcija prieinama tik premium vartotojams");
       return;
     }
+    if (id == 161) {
+      showHintMessage("Pirmą užduotį išspręskite patys :)");
+      return;
+    }
     if (isSolvedByAI) {
       showErrorMessage("Užduotis jau išspręsta DI");
       return;
@@ -1545,7 +1549,7 @@ const ChatTranscript = ({ messages = [], handleDeleteMessages }) => {
     <div className="chat-transcript">
       {messages.length === 0 ? (
         <div className="chat-empty-state">
-          <p>Klauskite DI asistento...</p>
+          <p>DI asistento patarimai gali būti klaidingi.</p>
         </div>
       ) : (
         messages?.map((msg, index) => (
