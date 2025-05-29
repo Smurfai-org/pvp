@@ -151,6 +151,7 @@ export const problemCodeFullCpp = (
 
   const code = `
 #include <iostream>
+#include <cmath>
 using namespace std;
 
 ${userCode}
@@ -205,6 +206,7 @@ export const problemCodeFullPython = (
     .join(", ");
 
   const codeWithTestCases = `
+import math
 ${inputCode}
 
 ${userCode}
@@ -230,6 +232,7 @@ else:
 `;
 
   const codeWithNoTestCases = `
+import math
 ${userCode}
 
 Sprendimas()

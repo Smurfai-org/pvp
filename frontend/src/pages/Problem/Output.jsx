@@ -21,7 +21,7 @@ const OutputSection = forwardRef(
         result.stderr ? setIsError(true) : setIsError(false);
         if (result.signal === "SIGKILL") {
           setIsError(true);
-          return "Atrodo, kad Jūsų kodas vykdomas be pabaigos. Patikrinkite, ar ciklas turi teisingą sąlygą sustabdymui.";
+          return "Kompiuteris nutraukė kodo veikimą. Patikrinkite, ar ciklai turi teisingas sąlygas sustabdymui ir ar nėra klaidų.";
         }
         return result.output;
       } catch (err) {
