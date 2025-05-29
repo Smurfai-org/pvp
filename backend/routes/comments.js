@@ -5,6 +5,7 @@ import {
   deleteComment,
   updateComment
 } from "../services/comments.js";
+import { getCommentCountByPostId } from "../services/comments.js"
 import { validateToken } from "./auth.js";
 
 const router = express.Router();
@@ -69,5 +70,14 @@ router.delete("/:commentId", async (req, res) => {
     res.status(403).json({ message: err.message });
   }
 });
-
+router.get("/:id/count", async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const count = await getCommentCountByPostId(postId);
+    res.json({ count });
+  } catch (err) {
+    console.error("Error counting comments:", err);
+    res.status(500).json({ message: "Error counting comments" });
+  }
+});
 export default router;

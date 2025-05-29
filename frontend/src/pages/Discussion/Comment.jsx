@@ -36,8 +36,8 @@ function Comment({ comment, currentUserId, onDelete, onUpdate, onAddComment }) {
     if (timestamp._seconds) {
       return new Intl.DateTimeFormat("lt-LT", {
         dateStyle: "medium",
-        timeStyle: "short",
-      }).format(new Date(timestamp._seconds * 1000));
+        timeStyle: "medium",
+      }).format(new Date(timestamp._seconds * 1000 + timestamp._nanoseconds/1000000));
     }
     
     return 'Nežinoma data';

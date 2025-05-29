@@ -10,6 +10,7 @@ export async function createPost({ title, content, author }) {
       username: author.username,
     },
     createdAt: new Date(),
+    viewCount: 0,
   });
 }
 export async function updatePost(postId, { title, content }, userId) {
@@ -27,7 +28,7 @@ export async function updatePost(postId, { title, content }, userId) {
 export async function deletePost(postId, userId) {
   const docRef = firestore.collection("forumPosts").doc(postId);
   const doc = await docRef.get();
-  if (!doc.exists) throw new Error("Post not found");
+  if (!doc.exists) throw new Error("Nerastą jokių žinučių");
 
   const post = doc.data();
   if (String(post.author.id) !== String(userId)) throw new Error("Unauthorized");
@@ -39,11 +40,10 @@ export async function getPosts() {
   const snapshot = await firestore.collection("forumPosts").orderBy("createdAt", "desc").get();
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
-export async function getPostById(postId) {
-  const doc = await firestore.collection("forumPosts").doc(postId).get();
+export async function getPostById(id) {
+  const doc = await firestore.collection("forumPosts").doc(id).get();
   if (!doc.exists) {
-    throw new Error("Post not found");
+    throw new Error('Post not found');
   }
   return { id: doc.id, ...doc.data() };
 }
-

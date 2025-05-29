@@ -48,3 +48,11 @@ export async function getCommentsForPost(postId) {
 
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
+export async function getCommentCountByPostId(postId) {
+  const snapshot = await firestore
+    .collection("comments")
+    .where("postId", "==", postId)
+    .get();
+
+  return snapshot.size;
+}

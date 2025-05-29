@@ -162,7 +162,7 @@ function PostDetail() {
               {post.createdAt?._seconds
                 ? new Intl.DateTimeFormat("lt-LT", {
                     dateStyle: "medium",
-                    timeStyle: "short",
+                    timeStyle: "medium",
                   }).format(new Date(post.createdAt._seconds * 1000))
                 : "Unknown date"}
             </span>

@@ -2,6 +2,7 @@ import express from "express";
 import { createPost, getPosts, getPostById, updatePost } from "../services/forumService.js";
 import { validateToken } from "./auth.js";
 import { firestore } from "../firebaseAdmin.js"; // Import firestore for DELETE route
+import { FieldValue } from "firebase-admin/firestore";
 
 const router = express.Router();
 
@@ -33,26 +34,17 @@ router.get("/posts", async (req, res) => {
 
 router.get("/posts/:id", async (req, res) => {
   try {
-    const post = await getPostById(req.params.id);
+    const postId = req.params.id;
+    const postRef = firestore.collection("forumPosts").doc(postId);
+    
+    await postRef.update({
+      viewCount: FieldValue.increment(1)
+    });
+    const post = await getPostById(postId);
     res.status(200).json(post);
   } catch (err) {
     console.error(err);
     res.status(404).json({ message: "Post not found" });
-  }
-});
-
-router.put("/posts/:id", async (req, res) => {
-  try {
-    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
-    const validation = await validateToken(token);
-    if (!validation.valid) return res.status(401).json({ message: "Unauthorized" });
-
-    const userId = String(validation.data.user.id);
-    await updatePost(req.params.id, req.body, userId);
-    res.sendStatus(200);
-  } catch (err) {
-    console.error(err);
-    res.status(403).json({ message: err.message });
   }
 });
 
