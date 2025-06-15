@@ -33,25 +33,43 @@ export const getTestCaseVariables = (test_case) => {
     // The last token is the variable name (including array brackets or pointer)
     let name = tokens.pop();
 
-    // Determine special type
+    // Determine special type and dimensions
     let special_type = "normal";
+    let dimensions = [];
+    
     if (name.includes("[")) {
-      special_type = "array";
+      // Extract all dimensions
+      const bracketMatches = name.match(/\[([^\]]*)\]/g) || [];
+      
+      if (bracketMatches.length === 1) {
+        special_type = "array";
+      } else if (bracketMatches.length > 1) {
+        special_type = "multi_array";
+        // Store the dimensions (empty or with sizes)
+        dimensions = bracketMatches.map(dim => dim.replace(/[[\]]/g, "").trim());
+      }
     } else if (name.includes("*")) {
-      special_type = "pointer";
+      // Count asterisks to determine pointer depth
+      const asterisks = name.match(/\*+/)[0];
+      if (asterisks.length > 1) {
+        special_type = "multi_pointer";
+        dimensions = [asterisks.length]; // Count of asterisks represents dimensions
+      } else {
+        special_type = "pointer";
+      }
     }
 
     // Remove array brackets and pointer asterisks from the name
     name = name
-      .replace(/\[.*\]/g, "")
+      .replace(/\[.*?\]/g, "") // Remove all array brackets
       .replace(/\*/g, "")
       .trim();
 
     // Remaining tokens form the full type
     const type = tokens.join(" ").trim();
 
-    // Add special_type to the result
-    results.push({ type, name, special_type });
+    // Add special_type and dimensions to the result
+    results.push({ type, name, special_type, dimensions });
   };
 
   for (const rawLine of lines) {
@@ -103,8 +121,17 @@ export const getStartingCodeFromVariables = (
 
         if (m.special_type === "array") {
           nameSuffix = "[]";
+        } else if (m.special_type === "multi_array") {
+          // For multi-dimensional arrays: first dimension can be omitted
+          // Example: char board[][3] for a 2D char array
+          nameSuffix = "[]" + (m.dimensions || []).slice(1).map(dim => 
+            dim ? `[${dim}]` : "[]"
+          ).join("");
         } else if (m.special_type === "pointer") {
           typePrefix = typePrefix + "*";
+        } else if (m.special_type === "multi_pointer") {
+          // For multi-level pointers like char**
+          typePrefix = typePrefix + "*".repeat(m.dimensions?.[0] || 2);
         } else if (m.special_type === "const_pointer") {
           typePrefix = "const " + typePrefix + "*";
         }
@@ -123,6 +150,7 @@ export const getStartingCodeFromVariables = (
     return { cpp: cppCode, python: pythonCode };
   }
 
+  // Default code when no variables provided
   const cppCode = `void Sprendimas() {
   cout << "Hello world!";
 }`;
@@ -141,6 +169,35 @@ export const problemCodeFullCpp = (
 ) => {
   const outputType = determineOutputType(test_case?.expected_output || "");
 
+  // Create a list of parameters for the function declaration
+  const functionParams = test_case_variables
+    ?.map((m) => {
+      if (!m?.type || !m?.name) return "";
+
+      let typePrefix = m.type;
+      let nameSuffix = "";
+
+      if (m.special_type === "array") {
+        nameSuffix = "[]";
+      } else if (m.special_type === "multi_array") {
+        // For multi-dimensional arrays
+        nameSuffix = "[]" + (m.dimensions || []).slice(1).map(dim => 
+          dim ? `[${dim}]` : "[]"
+        ).join("");
+      } else if (m.special_type === "pointer") {
+        typePrefix = typePrefix + "*";
+      } else if (m.special_type === "multi_pointer") {
+        typePrefix = typePrefix + "*".repeat(m.dimensions?.[0] || 2);
+      } else if (m.special_type === "const_pointer") {
+        typePrefix = "const " + typePrefix + "*";
+      }
+
+      return `${typePrefix} ${m.name}${nameSuffix}`.trim();
+    })
+    .filter(Boolean)
+    .join(", ");
+
+  // Simple comma-separated list of argument names for the function call
   const functionArgs = test_case_variables
     ?.map((m) => (m?.name ? m.name : ""))
     .filter(Boolean)
@@ -152,7 +209,11 @@ export const problemCodeFullCpp = (
   const code = `
 #include <iostream>
 #include <cmath>
+#include <string>
 using namespace std;
+
+// Function prototype
+${outputType} Sprendimas(${functionParams});
 
 ${userCode}
 
